@@ -2,7 +2,8 @@
  * Asset ledger (Part 10.6). Every rendered image must have an entry here.
  * All current images are the manufacturer's own 2014 website files: rights basis
  * "first-party-legacy-unconfirmed" until Pankao confirms ownership and reuse. They render
- * only in the private preview, at or below native size, and never in a production build
+ * only in the preview (the small close-ups enlarged 2.5x by Lanczos with a light sharpen, owner
+ * 20 Nov 2026), and never in a production build
  * (MED-01). Files are produced into media-source/ by `npm run media` (git-ignored).
  */
 import type { Asset, Localized } from './types.ts';
@@ -60,7 +61,7 @@ export const assets: Asset[] = [
     crop: 'Elliptical clip to the oval only; the brown page ground is outside the mark.',
   }),
   legacy({
-    id: 'legacy.hero.pack', from: 'mr_noodles_package.jpg', file: 'legacy/hero-pack.jpg', w: 190, h: 258,
+    id: 'legacy.hero.pack', from: 'mr_noodles_package.jpg', file: 'legacy/hero-pack.jpg', w: 418, h: 568,
     subject: 'The blue Mr. Noodles dried rice-vermicelli pack (crop from the 2014 two-pack photograph).',
     alt: {
       th: 'ถุงเส้นหมี่อบแห้งมิสเตอร์นู้ดเดิ้ล ถุงใสแถบสีน้ำเงิน',
@@ -68,7 +69,7 @@ export const assets: Asset[] = [
       vi: 'Túi bún gạo khô Mr. Noodles trong suốt, sọc xanh dương',
     },
     rasterText: 'Pack print: Mr.NOODLES, BEST QUALITY, 米粉, เส้นหมี่อบแห้ง, RICE VERMICELLI',
-    crop: 'x 25–215, y 5–263 of the 460×380 original: the blue pack only; excludes the generic food strip.',
+    crop: 'x 25–215, y 5–263 of the 460×380 original: the blue pack only; excludes the generic food strip. Enlarged 2.2× (Lanczos, light sharpen).',
   }),
   legacy({
     id: 'legacy.mrnoodles.pack', from: 'mr_noodles_package.jpg', file: 'legacy/mrnoodles-packs.jpg', w: 460, h: 262,
@@ -82,7 +83,7 @@ export const assets: Asset[] = [
     crop: 'Top 262 px of the 460×380 original; the lower strip of generic food photographs is excluded.',
   }),
   legacy({
-    id: 'legacy.mrnoodles.tile.dish', from: 'product_noodle_dish.jpg', file: 'legacy/dish-thin-noodles.jpg', w: 186, h: 210,
+    id: 'legacy.mrnoodles.tile.dish', from: 'product_noodle_dish.jpg', file: 'legacy/dish-thin-noodles.jpg', w: 465, h: 525,
     subject: 'Stir-fried thin rice noodles with shiitake, carrot and greens (styled dish; origin not stated).',
     alt: { th: 'เส้นเล็กผัดกับเห็ดหอม แครอท และผักใบเขียว', en: 'Thin rice noodles stir-fried with shiitake, carrot and greens', vi: 'Sợi gạo nhỏ xào nấm hương, cà rốt và rau xanh' },
   }),
@@ -95,15 +96,16 @@ export const assets: Asset[] = [
     ] as const
   ).flatMap(([key, stem, dryAlt, dishAlt]) => [
     legacy({
-      id: `legacy.tile.${key}`, from: `${stem}.jpg`, file: `legacy/${key}-dry.jpg`, w: 186, h: 210,
+      id: `legacy.tile.${key}`, from: `${stem}.jpg`, file: `legacy/${key}-dry.jpg`, w: 465, h: 525,
       subject: `Close-up of the dry ${stem.replace('_', ' ')} product (2014 product page).`,
       alt: dryAlt,
+      crop: 'The 186×210 original enlarged 2.5× (Lanczos, light sharpen); nothing generated.',
     }),
     legacy({
-      id: `legacy.tile.${key}.dish`, from: `${stem}_bg.jpg`, file: `legacy/${key}-dish.jpg`, w: 186, h: 210,
-      subject: `Prepared dish for ${stem.replace('_', ' ')} (2014 page background; soft original, shown reduced).`,
+      id: `legacy.tile.${key}.dish`, from: `${stem}_bg.jpg`, file: `legacy/${key}-dish.jpg`, w: 460, h: 400,
+      subject: `Prepared dish for ${stem.replace('_', ' ')} (2014 page background, used whole at its own size).`,
       alt: dishAlt,
-      crop: 'Centre 354×400 of the 460×400 background, reduced to 186×210 (a reduction, not an enlargement).',
+      crop: 'The whole 460×400 background at its own size (reduced to 186×210 until 20 Nov 2026).',
     }),
   ]),
   legacy({

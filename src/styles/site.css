@@ -66,6 +66,9 @@
   --radius-photo: 14px;
   /* how far a section's edge melts into the ground; always less than its padding */
   --fade: clamp(40px, 6vw, 96px);
+  /* owner, 20 Nov 2026: "make the gradients on the background less abrupt": long, eased fades */
+  --fade-soft: min(clamp(110px, 16vw, 240px), 32%);
+  --fade-deep: clamp(72px, 10vw, 150px);
   --header-h: 64px;
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -150,21 +153,24 @@ h3, .h3 { font-size: var(--step-2); line-height: 1.2; letter-spacing: -0.006em; 
 .section--tight { padding-block: clamp(40px, 5vw, 72px); }
 .section--pause { padding-block: clamp(72px, 12vw, 168px); }
 .band { /* translucent, edges fading into the flowing ground (owner, 19 Nov 2026: "gradients that fade into each other") */
-  background-image: linear-gradient(180deg, rgba(241, 231, 213, 0) 0%, rgba(241, 231, 213, 0.78) var(--fade), rgba(236, 223, 198, 0.78) calc(100% - var(--fade)), rgba(236, 223, 198, 0) 100%);
+  background-image: linear-gradient(180deg, rgba(241, 231, 213, 0) calc(var(--fade-soft) * 0), rgba(241, 231, 213, 0.022) calc(var(--fade-soft) * 0.1), rgba(241, 231, 213, 0.081) calc(var(--fade-soft) * 0.2), rgba(241, 231, 213, 0.168) calc(var(--fade-soft) * 0.3), rgba(241, 231, 213, 0.275) calc(var(--fade-soft) * 0.4), rgba(241, 231, 213, 0.39) calc(var(--fade-soft) * 0.5), rgba(241, 231, 213, 0.505) calc(var(--fade-soft) * 0.6), rgba(241, 231, 213, 0.612) calc(var(--fade-soft) * 0.7), rgba(241, 231, 213, 0.699) calc(var(--fade-soft) * 0.8), rgba(241, 231, 213, 0.758) calc(var(--fade-soft) * 0.9), rgba(241, 231, 213, 0.78) calc(var(--fade-soft) * 1), rgba(236, 223, 198, 0.78) calc(100% - var(--fade-soft) * 1), rgba(236, 223, 198, 0.758) calc(100% - var(--fade-soft) * 0.9), rgba(236, 223, 198, 0.699) calc(100% - var(--fade-soft) * 0.8), rgba(236, 223, 198, 0.612) calc(100% - var(--fade-soft) * 0.7), rgba(236, 223, 198, 0.505) calc(100% - var(--fade-soft) * 0.6), rgba(236, 223, 198, 0.39) calc(100% - var(--fade-soft) * 0.5), rgba(236, 223, 198, 0.275) calc(100% - var(--fade-soft) * 0.4), rgba(236, 223, 198, 0.168) calc(100% - var(--fade-soft) * 0.3), rgba(236, 223, 198, 0.081) calc(100% - var(--fade-soft) * 0.2), rgba(236, 223, 198, 0.022) calc(100% - var(--fade-soft) * 0.1), rgba(236, 223, 198, 0) calc(100% - var(--fade-soft) * 0));
 }
 .on-deep {
   background-color: var(--deep); background-image: var(--deep-ground); color: var(--on-deep);
-  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 var(--fade), #000 calc(100% - var(--fade)), transparent 100%);
-  mask-image: linear-gradient(180deg, transparent 0, #000 var(--fade), #000 calc(100% - var(--fade)), transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) calc(var(--fade-deep) * 0), rgba(0, 0, 0, 0.028) calc(var(--fade-deep) * 0.1), rgba(0, 0, 0, 0.104) calc(var(--fade-deep) * 0.2), rgba(0, 0, 0, 0.216) calc(var(--fade-deep) * 0.3), rgba(0, 0, 0, 0.352) calc(var(--fade-deep) * 0.4), rgba(0, 0, 0, 0.5) calc(var(--fade-deep) * 0.5), rgba(0, 0, 0, 0.648) calc(var(--fade-deep) * 0.6), rgba(0, 0, 0, 0.784) calc(var(--fade-deep) * 0.7), rgba(0, 0, 0, 0.896) calc(var(--fade-deep) * 0.8), rgba(0, 0, 0, 0.972) calc(var(--fade-deep) * 0.9), rgba(0, 0, 0, 1) calc(var(--fade-deep) * 1), rgba(0, 0, 0, 1) calc(100% - var(--fade-deep) * 1), rgba(0, 0, 0, 0.972) calc(100% - var(--fade-deep) * 0.9), rgba(0, 0, 0, 0.896) calc(100% - var(--fade-deep) * 0.8), rgba(0, 0, 0, 0.784) calc(100% - var(--fade-deep) * 0.7), rgba(0, 0, 0, 0.648) calc(100% - var(--fade-deep) * 0.6), rgba(0, 0, 0, 0.5) calc(100% - var(--fade-deep) * 0.5), rgba(0, 0, 0, 0.352) calc(100% - var(--fade-deep) * 0.4), rgba(0, 0, 0, 0.216) calc(100% - var(--fade-deep) * 0.3), rgba(0, 0, 0, 0.104) calc(100% - var(--fade-deep) * 0.2), rgba(0, 0, 0, 0.028) calc(100% - var(--fade-deep) * 0.1), rgba(0, 0, 0, 0) calc(100% - var(--fade-deep) * 0));
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) calc(var(--fade-deep) * 0), rgba(0, 0, 0, 0.028) calc(var(--fade-deep) * 0.1), rgba(0, 0, 0, 0.104) calc(var(--fade-deep) * 0.2), rgba(0, 0, 0, 0.216) calc(var(--fade-deep) * 0.3), rgba(0, 0, 0, 0.352) calc(var(--fade-deep) * 0.4), rgba(0, 0, 0, 0.5) calc(var(--fade-deep) * 0.5), rgba(0, 0, 0, 0.648) calc(var(--fade-deep) * 0.6), rgba(0, 0, 0, 0.784) calc(var(--fade-deep) * 0.7), rgba(0, 0, 0, 0.896) calc(var(--fade-deep) * 0.8), rgba(0, 0, 0, 0.972) calc(var(--fade-deep) * 0.9), rgba(0, 0, 0, 1) calc(var(--fade-deep) * 1), rgba(0, 0, 0, 1) calc(100% - var(--fade-deep) * 1), rgba(0, 0, 0, 0.972) calc(100% - var(--fade-deep) * 0.9), rgba(0, 0, 0, 0.896) calc(100% - var(--fade-deep) * 0.8), rgba(0, 0, 0, 0.784) calc(100% - var(--fade-deep) * 0.7), rgba(0, 0, 0, 0.648) calc(100% - var(--fade-deep) * 0.6), rgba(0, 0, 0, 0.5) calc(100% - var(--fade-deep) * 0.5), rgba(0, 0, 0, 0.352) calc(100% - var(--fade-deep) * 0.4), rgba(0, 0, 0, 0.216) calc(100% - var(--fade-deep) * 0.3), rgba(0, 0, 0, 0.104) calc(100% - var(--fade-deep) * 0.2), rgba(0, 0, 0, 0.028) calc(100% - var(--fade-deep) * 0.1), rgba(0, 0, 0, 0) calc(100% - var(--fade-deep) * 0));
 }
+.section.on-deep { padding-block: clamp(96px, 12vw, 180px); } /* the fade stays inside the padding, clear of the words */
 
 /* ---------- the flowing ground: soft lights behind every page that drift with the scroll ---------- */
 .aura { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
   background: linear-gradient(180deg, #fbf7ef 0%, #f6eedf 55%, #f1e6d2 100%); }
 .aura i { position: absolute; display: block; width: 90vmax; height: 90vmax; border-radius: 50%;
-  background: radial-gradient(closest-side, var(--c) 0%, rgba(255, 253, 248, 0) 100%); will-change: transform; }
+  background: radial-gradient(closest-side, var(--c) 0%, rgba(255, 253, 248, 0) 100%);
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--c) 100%, transparent) 0%, color-mix(in srgb, var(--c) 92%, transparent) 12%, color-mix(in srgb, var(--c) 75%, transparent) 26%, color-mix(in srgb, var(--c) 52%, transparent) 42%, color-mix(in srgb, var(--c) 30%, transparent) 58%, color-mix(in srgb, var(--c) 13%, transparent) 74%, color-mix(in srgb, var(--c) 4%, transparent) 88%, color-mix(in srgb, var(--c) 0%, transparent) 100%);
+  will-change: transform; }
 .aura .a1 { --c: rgba(255, 253, 248, 0.95); left: -38vmax; top: -44vmax; }
-.aura .a2 { --c: rgba(221, 186, 116, 0.34); right: -46vmax; top: -6vmax; }
+.aura .a2 { --c: rgba(221, 186, 116, 0.3); right: -46vmax; top: -6vmax; }
 .aura .a3 { --c: rgba(196, 154, 74, 0.2); left: -30vmax; top: 34vh; }
 .aura .a4 { --c: rgba(166, 128, 97, 0.18); right: -36vmax; top: 70vh; }
 @media print { .aura { display: none; } }
@@ -666,30 +672,29 @@ h2.product-sub, .product-sub { font: 700 var(--step--1)/1.4 var(--font-body); le
   display: grid; place-items: center; position: fixed; inset: 0; z-index: 200; cursor: pointer;
   background-color: var(--cream); background-image: var(--ground);
   transition: opacity 460ms var(--ease-out), visibility 0s linear 460ms;
-  animation: loader-failsafe 0s linear 3.6s forwards;
+  animation: loader-failsafe 0s linear 5.4s forwards;
 }
 .loading.loaded .loader { opacity: 0; visibility: hidden; }
 @keyframes loader-failsafe { to { opacity: 0; visibility: hidden; } }
 .loader__inner { display: grid; justify-items: center; gap: 14px; transform: translateY(-4vh); }
 .loader__mark { width: min(380px, 76vw); height: auto; overflow: visible; filter: drop-shadow(0 10px 24px rgba(131, 93, 28, 0.25)); }
-.loader .mk-oval { stroke-dasharray: 100; stroke-dashoffset: 100; fill-opacity: 0; animation: mk-draw 900ms var(--ease-in-out) 100ms forwards, mk-fill 600ms var(--ease-out) 600ms forwards; }
-.loader .mk-ring { stroke-dasharray: 100; stroke-dashoffset: 100; animation: mk-draw 760ms var(--ease-in-out) 340ms forwards; }
-.loader .mk-stem { stroke-dasharray: 100; stroke-dashoffset: 100; animation: mk-draw 620ms var(--ease-out) 420ms forwards; }
-.loader .mk-grain { opacity: 0; animation: mk-grain 420ms var(--ease-out) forwards; }
-.loader .mk-g0 { animation-delay: 480ms; } .loader .mk-g1 { animation-delay: 540ms; } .loader .mk-g2 { animation-delay: 600ms; }
-.loader .mk-g3 { animation-delay: 660ms; } .loader .mk-g4 { animation-delay: 720ms; } .loader .mk-g5 { animation-delay: 780ms; } .loader .mk-g6 { animation-delay: 860ms; }
+.loader .mk-oval { stroke-dasharray: 100; stroke-dashoffset: 100; fill-opacity: 0; animation: mk-draw 1400ms var(--ease-in-out) 150ms forwards, mk-fill 900ms var(--ease-out) 1050ms forwards; }
+.loader .mk-ring { stroke-dasharray: 100; stroke-dashoffset: 100; animation: mk-draw 1200ms var(--ease-in-out) 600ms forwards; }
+.loader .mk-stem { stroke-dasharray: 100; stroke-dashoffset: 100; animation: mk-draw 1000ms var(--ease-out) 750ms forwards; }
+.loader .mk-grain { opacity: 0; animation: mk-grain 650ms var(--ease-out) forwards; }
+.loader .mk-g0 { animation-delay: 850ms; } .loader .mk-g1 { animation-delay: 950ms; } .loader .mk-g2 { animation-delay: 1050ms; } .loader .mk-g3 { animation-delay: 1150ms; } .loader .mk-g4 { animation-delay: 1250ms; } .loader .mk-g5 { animation-delay: 1350ms; } .loader .mk-g6 { animation-delay: 1500ms; }
 .loader .mk-m { stroke: #835d1c; stroke-width: 0.5; stroke-dasharray: 100; stroke-dashoffset: 100; fill-opacity: 0;
-  animation: mk-draw 760ms var(--ease-in-out) 520ms forwards, mk-fill 520ms var(--ease-out) 1060ms forwards; }
-.loader .mk-m.mk-i1 { animation-delay: 640ms, 1160ms; }
-.loader .mk-l { opacity: 0; translate: 0 2.4px; animation: mk-rise 440ms var(--ease-out) forwards; }
-.loader .mk-top .mk-i0 { animation-delay: 840ms; } .loader .mk-top .mk-i1 { animation-delay: 880ms; } .loader .mk-top .mk-i2 { animation-delay: 920ms; } .loader .mk-top .mk-i3 { animation-delay: 960ms; } .loader .mk-top .mk-i4 { animation-delay: 1000ms; } .loader .mk-top .mk-i5 { animation-delay: 1040ms; } .loader .mk-top .mk-i6 { animation-delay: 1080ms; } .loader .mk-top .mk-i7 { animation-delay: 1120ms; } .loader .mk-top .mk-i8 { animation-delay: 1160ms; } .loader .mk-top .mk-i9 { animation-delay: 1200ms; } .loader .mk-top .mk-i10 { animation-delay: 1240ms; } .loader .mk-top .mk-i11 { animation-delay: 1280ms; }
-.loader .mk-bottom .mk-i0 { animation-delay: 940ms; } .loader .mk-bottom .mk-i1 { animation-delay: 974ms; } .loader .mk-bottom .mk-i2 { animation-delay: 1008ms; } .loader .mk-bottom .mk-i3 { animation-delay: 1042ms; } .loader .mk-bottom .mk-i4 { animation-delay: 1076ms; } .loader .mk-bottom .mk-i5 { animation-delay: 1110ms; } .loader .mk-bottom .mk-i6 { animation-delay: 1144ms; } .loader .mk-bottom .mk-i7 { animation-delay: 1178ms; } .loader .mk-bottom .mk-i8 { animation-delay: 1212ms; } .loader .mk-bottom .mk-i9 { animation-delay: 1246ms; } .loader .mk-bottom .mk-i10 { animation-delay: 1280ms; } .loader .mk-bottom .mk-i11 { animation-delay: 1314ms; } .loader .mk-bottom .mk-i12 { animation-delay: 1348ms; } .loader .mk-bottom .mk-i13 { animation-delay: 1382ms; }
+  animation: mk-draw 1200ms var(--ease-in-out) 1000ms forwards, mk-fill 800ms var(--ease-out) 1850ms forwards; }
+.loader .mk-m.mk-i1 { animation-delay: 1200ms, 2000ms; }
+.loader .mk-l { opacity: 0; translate: 0 2.4px; animation: mk-rise 700ms var(--ease-out) forwards; }
+.loader .mk-top .mk-i0 { animation-delay: 1500ms; } .loader .mk-top .mk-i1 { animation-delay: 1575ms; } .loader .mk-top .mk-i2 { animation-delay: 1650ms; } .loader .mk-top .mk-i3 { animation-delay: 1725ms; } .loader .mk-top .mk-i4 { animation-delay: 1800ms; } .loader .mk-top .mk-i5 { animation-delay: 1875ms; } .loader .mk-top .mk-i6 { animation-delay: 1950ms; } .loader .mk-top .mk-i7 { animation-delay: 2025ms; } .loader .mk-top .mk-i8 { animation-delay: 2100ms; } .loader .mk-top .mk-i9 { animation-delay: 2175ms; } .loader .mk-top .mk-i10 { animation-delay: 2250ms; } .loader .mk-top .mk-i11 { animation-delay: 2325ms; }
+.loader .mk-bottom .mk-i0 { animation-delay: 1700ms; } .loader .mk-bottom .mk-i1 { animation-delay: 1762ms; } .loader .mk-bottom .mk-i2 { animation-delay: 1824ms; } .loader .mk-bottom .mk-i3 { animation-delay: 1886ms; } .loader .mk-bottom .mk-i4 { animation-delay: 1948ms; } .loader .mk-bottom .mk-i5 { animation-delay: 2010ms; } .loader .mk-bottom .mk-i6 { animation-delay: 2072ms; } .loader .mk-bottom .mk-i7 { animation-delay: 2134ms; } .loader .mk-bottom .mk-i8 { animation-delay: 2196ms; } .loader .mk-bottom .mk-i9 { animation-delay: 2258ms; } .loader .mk-bottom .mk-i10 { animation-delay: 2320ms; } .loader .mk-bottom .mk-i11 { animation-delay: 2382ms; } .loader .mk-bottom .mk-i12 { animation-delay: 2444ms; } .loader .mk-bottom .mk-i13 { animation-delay: 2506ms; }
 .loader__threads { display: flex; gap: 7px; height: 64px; }
-.loader__threads i { width: 2px; height: 100%; border-radius: 2px; background: linear-gradient(180deg, var(--gold) 0%, rgba(196, 154, 74, 0) 100%); transform-origin: top; transform: scaleY(0); animation: thread 560ms var(--ease-out) forwards; }
-.loader__threads i:nth-child(1), .loader__threads i:nth-child(7) { animation-delay: 1200ms; }
-.loader__threads i:nth-child(2), .loader__threads i:nth-child(6) { animation-delay: 1250ms; }
-.loader__threads i:nth-child(3), .loader__threads i:nth-child(5) { animation-delay: 1300ms; }
-.loader__threads i:nth-child(4) { animation-delay: 1350ms; }
+.loader__threads i { width: 2px; height: 100%; border-radius: 2px; background: linear-gradient(180deg, var(--gold) 0%, rgba(196, 154, 74, 0) 100%); transform-origin: top; transform: scaleY(0); animation: thread 800ms var(--ease-out) forwards; }
+.loader__threads i:nth-child(1), .loader__threads i:nth-child(7) { animation-delay: 2700ms; }
+.loader__threads i:nth-child(2), .loader__threads i:nth-child(6) { animation-delay: 2780ms; }
+.loader__threads i:nth-child(3), .loader__threads i:nth-child(5) { animation-delay: 2860ms; }
+.loader__threads i:nth-child(4) { animation-delay: 2940ms; }
 @keyframes mk-draw { to { stroke-dashoffset: 0; } }
 @keyframes mk-fill { to { fill-opacity: 1; } }
 @keyframes mk-grain { to { opacity: 1; } }
@@ -753,8 +758,8 @@ h2.product-sub, .product-sub { font: 700 var(--step--1)/1.4 var(--font-body); le
 @media (min-width: 900px) { .review-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
 /* ---------- footer ---------- */
-.site-footer { background-color: var(--deep); background-image: var(--deep-ground); color: #e9dfcc; padding-block: calc(var(--fade) + 40px) 24px; margin-top: 0; font-size: var(--step--1);
-  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 var(--fade)); mask-image: linear-gradient(180deg, transparent 0, #000 var(--fade)); }
+.site-footer { background-color: var(--deep); background-image: var(--deep-ground); color: #e9dfcc; padding-block: calc(var(--fade-deep) + 40px) 24px; margin-top: 0; font-size: var(--step--1);
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) calc(var(--fade-deep) * 0), rgba(0, 0, 0, 0.028) calc(var(--fade-deep) * 0.1), rgba(0, 0, 0, 0.104) calc(var(--fade-deep) * 0.2), rgba(0, 0, 0, 0.216) calc(var(--fade-deep) * 0.3), rgba(0, 0, 0, 0.352) calc(var(--fade-deep) * 0.4), rgba(0, 0, 0, 0.5) calc(var(--fade-deep) * 0.5), rgba(0, 0, 0, 0.648) calc(var(--fade-deep) * 0.6), rgba(0, 0, 0, 0.784) calc(var(--fade-deep) * 0.7), rgba(0, 0, 0, 0.896) calc(var(--fade-deep) * 0.8), rgba(0, 0, 0, 0.972) calc(var(--fade-deep) * 0.9), rgba(0, 0, 0, 1) calc(var(--fade-deep) * 1)); mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) calc(var(--fade-deep) * 0), rgba(0, 0, 0, 0.028) calc(var(--fade-deep) * 0.1), rgba(0, 0, 0, 0.104) calc(var(--fade-deep) * 0.2), rgba(0, 0, 0, 0.216) calc(var(--fade-deep) * 0.3), rgba(0, 0, 0, 0.352) calc(var(--fade-deep) * 0.4), rgba(0, 0, 0, 0.5) calc(var(--fade-deep) * 0.5), rgba(0, 0, 0, 0.648) calc(var(--fade-deep) * 0.6), rgba(0, 0, 0, 0.784) calc(var(--fade-deep) * 0.7), rgba(0, 0, 0, 0.896) calc(var(--fade-deep) * 0.8), rgba(0, 0, 0, 0.972) calc(var(--fade-deep) * 0.9), rgba(0, 0, 0, 1) calc(var(--fade-deep) * 1)); }
 .site-footer a { color: #f4ecdb; }
 .site-footer .grid { row-gap: 32px; }
 .site-footer h2 { font-family: var(--font-body); font-size: var(--step--2); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #cbbfa6; margin-bottom: 12px; }

@@ -12,7 +12,7 @@
     del: function (k, s) { try { (s ? sessionStorage : localStorage).removeItem(k); } catch (e) {} },
   };
 
-  /* ---------- loader (owner's request): ends ~1.85 s after navigation, or at once on a click or key ---------- */
+  /* ---------- loader (owner's request): ends ~3.7 s after navigation (slowed on the owner's word, 20 Nov 2026), or at once on a click or key ---------- */
   if (d.classList.contains('loading')) {
     var ldr = $('[data-loader]');
     var ended = false;
@@ -24,7 +24,7 @@
       setTimeout(function () { d.classList.remove('loading', 'loaded'); }, 480);
       setTimeout(function () { d.classList.remove('reveal'); }, 1500);
     };
-    setTimeout(endLoader, Math.max(0, 2100 - performance.now()));
+    setTimeout(endLoader, Math.max(0, 3700 - performance.now()));
     if (ldr) ldr.addEventListener('click', endLoader);
     window.addEventListener('keydown', endLoader, { once: true });
   }

@@ -306,13 +306,13 @@ await check('chromium: map loads only after "Show map"; address copy works (AC-C
   await ctx.close();
 });
 
-await check('chromium: loader plays on a fresh tab, ends by ~2.8 s (the logo forms), skips within the session and on click (owner request)', async () => {
+await check('chromium: loader plays on a fresh tab, ends by ~4.6 s (the logo forms slowly), skips within the session and on click (owner request)', async () => {
   const ctx = await C.newContext(ctxOpts({ withLoader: true }));
   const page = await ctx.newPage();
   await page.goto(`${BASE}/en/`, { waitUntil: 'commit' });
   await page.waitForSelector('div.loader', { state: 'visible', timeout: 3000 });
   const t0 = Date.now();
-  await page.waitForFunction(() => !document.documentElement.classList.contains('loading'), null, { timeout: 4000 });
+  await page.waitForFunction(() => !document.documentElement.classList.contains('loading'), null, { timeout: 6000 });
   const took = Date.now() - t0;
   const h1 = await page.locator('h1').isVisible();
   await page.goto(`${BASE}/th/`);
@@ -325,7 +325,7 @@ await check('chromium: loader plays on a fresh tab, ends by ~2.8 s (the logo for
   await p2.mouse.click(400, 300);
   await p2.waitForFunction(() => !document.documentElement.classList.contains('loading'), null, { timeout: 1500 });
   await ctx2.close();
-  assert(took <= 2800, `loader gone in ${took} ms`);
+  assert(took <= 4600, `loader gone in ${took} ms`);
   assert(h1, 'page underneath is rendered');
   assert(!again, 'second page in the same tab: no loader');
   return `cleared ${took} ms after it appeared; click skips`;

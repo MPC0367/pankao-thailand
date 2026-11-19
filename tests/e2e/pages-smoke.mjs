@@ -51,7 +51,7 @@ for (const [engine, type] of [['webkit', webkit], ['chromium', chromium]]) {
     const page = await ctx.newPage();
     await page.goto(`${SITE}/`, { waitUntil: 'commit' });
     await page.waitForURL(/\/pankao-thailand\/(th|en|vi)\/$/, { timeout: 8000 });
-    await page.waitForFunction(() => !document.documentElement.classList.contains('loading'), null, { timeout: 5000 });
+    await page.waitForFunction(() => !document.documentElement.classList.contains('loading'), null, { timeout: 7000 });
     await page.waitForSelector('[data-glass] .lg-glass', { timeout: 8000 });
     const url = page.url();
     await ctx.close();
