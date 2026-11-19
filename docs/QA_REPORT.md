@@ -1,5 +1,24 @@
 # QA, performance and accessibility report — 19 Nov 2026
 
+## Re-run after the presentation changes (19 Nov 2026, evening) — current
+
+Sample values, cream/gold palette with gradients, Glisse glass header, loader, recoloured mark (owner's direction; docs/ART_DIRECTION.md).
+
+| Check | Result |
+|---|---|
+| Typecheck, unit tests | 26/26 (adds: samples shown and tagged in preview, absent from production, never "Current"; guard rejects sample markup in production) |
+| Builds + guards | preview 42 pages; production rehearsal 27 pages with no sample, mark or preview markup; release gate BLOCKED (22) |
+| Crawl | preview 43 pages, 51 links, 34 images, 30 redirects; production 28 pages, 36 links, 30 redirects — all pass |
+| Browser suite (WebKit + Chromium) | 35/35, incl. loader (appears on a fresh tab, gone ≈ 2.25 s, skipped in-session and on click, none under reduced motion), Glisse header (WebKit frosted, Chromium refracting, no-JS frosted fallback), axe 0 critical/serious on the new palette, overflow 320–1920, 123 screenshots |
+| Performance (same throttled profile) | LCP 0.99–1.11 s (was 0.70–0.80; loader and Latin font preload), CLS 0, blocking ≈ 45 ms, 223–270 KB uncompressed incl. the Glisse island (57 KB raw / 19 KB gzip, loaded at idle) and its 27 KB stylesheet; JS 82 KB raw; 0 third-party requests (Glisse's refraction maps are in-page `data:` images) |
+| Contrast | All new token pairs ≥ 4.5:1 for text (gold accents 5.3:1, cream on roasted brown 9.6:1), ≥ 3:1 for controls |
+
+Design-review findings fixed the same evening: six one-sided accent bars (a recognisable template tell) replaced by tonal strands, a short gold rule and tinted hairline panels; `background: <colour> <gradients>` (invalid CSS that silently dropped four backgrounds) split into `background-color` + `background-image`.
+
+The sections below are the first verification of the afternoon build and remain valid except where the table above supersedes them.
+
+---
+
 Status: **VERIFIED LOCALLY** (this Mac, local server mirroring Cloudflare Pages `_redirects`/`_headers`). Not staged, not live. Raw output: `qa-output/` (check.log, e2e.log/e2e.json, crawl-*.json, perf.json).
 
 ## B. Verification (brief §16.1 B)

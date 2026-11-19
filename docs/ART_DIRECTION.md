@@ -1,36 +1,38 @@
-# Art direction — "Grain to Thread"
+# Art direction — "Grain to Thread" (revised 19 Nov 2026 evening, owner's direction)
 
-One page, as the brief asks (§5.2). Written after studying the company's own material, before any styling.
+## What the brand study found (unchanged)
 
-## What the brand study found
+- **The name means the work.** ปั้นข้าว: ปั้น is to shape, ข้าว is rice; the 2014 Thai site played on it (วิธีปั้นข้าว). The line: *ปั้นข้าวให้เป็นเส้น* / *Rice, shaped into noodles*.
+- **The mark**: a white oval, a blue serif "PK", green rice ears, red arched lettering (the pre-2017 company name). Only an 88 px GIF exists.
+- **The product itself**: dried rice strands in ivory, straw and gold; clear film packs.
 
-- **The name means the work.** ปั้นข้าว: ปั้น is to shape or mould, ข้าว is rice. The 2014 Thai site played on it in its own navigation (ตำนานปั้นข้าว, วิธีปั้นข้าว, ที่ปั้นข้าว). The site's line comes from this: *ปั้นข้าวให้เป็นเส้น* / *Rice, shaped into noodles*.
-- **The mark** (88 px GIF, the only copy): a white oval, a blue serif "PK", green rice ears either side, red lettering (the pre-2017 company name). Sampled: PK blue ≈ #001a8c, ear green ≈ #005000.
-- **The packs**: clear film bags with vertical stripes, **blue for rice vermicelli, green for rice stick**. The Mr. Noodles page on the 2014 site already used these colours as tabs. The dried strand itself is a pale straw (≈ #b0a888).
-- **The 2014 site ground**: dark chocolate (#382010).
-- **The category**: competitors use red/gold ornament, rice-terrace postcards and generic sans. Pankao's own material has none of that.
+## The owner's direction (19 Nov 2026), which wins over the brief where they differ
 
-## Direction
+> "make the background more gradient and the colors feel more natural, u do not need to stick to the colors of the logo. Utilize colors that fit with the theme of rice, premium noodles such as white, cream, gold, brown. Make the top bar have expo-glass-effect use the liquid glass repo … Make a loading animation and maybe recolor their logo to make it feel more premium."
 
-| | Decision | Source |
+| | Decision |
+|---|---|
+| Palette | White `#fffdf8`, cream `#f8f2e6` / `#f1e7d5` / `#e7d9bf`, natural gold `#c49a4a` (decoration) and `#835d1c` (text accents, 5.3:1), espresso ink `#2a1c10`, roasted-brown action `#5b3a1f` with cream text (9.6:1), dark-roast chapters `#2b1c11` with cream and gold text. No blue or green. |
+| Gradients | Daylight on rice paper: the page ground is warm white at the top left fading to cream, with a soft gold glow at the right and bottom; bands run cream to wheat; dark chapters and the footer carry a gold glow over roasted brown; the hero panel has a warm light behind the pack. |
+| Format code | Tonal instead of pack stripes: pale gold (vermicelli), wheat (rice stick), cream (Guay Jub), brown (brown rice). Strand widths unchanged. |
+| Header | A floating bar of liquid glass: **Glisse** (npm `glisse@0.5.0`, the studio's liquid-glass library) running on Preact's React-compatible core (19 KB gzip, loaded after first paint). Chromium bends the page behind it; Safari, iPhone browsers and LINE get Glisse's frosted glass (the library refracts only in Chromium). A CSS frosted bar shows first, without JavaScript, and under reduced transparency or more contrast (solid cream). `expo-glass-effect` is the Expo package for native iOS apps; on a website Glisse is the equivalent. |
+| Mark | Their PK oval redrawn as vector and recoloured: cream oval, double gold ring, natural-gold rice ears, espresso PK in Trirong. The arched old company name is left out (it is now another company's legal name). Preview only until approved (D21). |
+| Loader | On the first open in a browser tab: the oval draws itself, rice grains appear one by one, PK and the wordmark rise, seven gold threads fall (grain to thread), then it lifts at ≈ 1.85 s and the hero's grain window opens. A click or key skips it; not on internal page changes, back/forward or reduced motion; never without JavaScript; a CSS failsafe hides it at 3.2 s if scripts fail. |
+
+## Kept from the first direction
+
+Trirong (Cadson Demak) for display in Thai, Latin and Vietnamese; system sans for body; Thai headings break only between phrases; hairlines and quiet space; specimens of the 2014 photographs at native size; motion families M1–M10 plus the loader; the strand plates as honest image fallbacks.
+
+## Brief rules the owner's direction overrides (recorded, one-word ways back)
+
+| Brief rule | Now | Way back |
 |---|---|---|
-| Character | Calm, exact, manufacturing-literate; proud without self-congratulation | Brief §9.1 |
-| Central idea | A grain becomes a strand. Strand width is the product code; the hero is one grain among strands | The name; the products |
-| Palette | Rice paper `#f7f2e7` ground · husk `#c2b18a` strands (decoration only) · earth ink `#2a1b0e` text (from the 2014 chocolate ground) · leaf `#2c6e21` and deep leaf `#13351a` chapters (pack/ear green) · **PK blue `#1a2d8a` for the primary action only** (the monogram) · stripe blue/green only as the format code | Mark, packs, 2014 site |
-| Format code | Each product card's left edge carries its pack stripe; the card's strand field uses its relative width: hair (vermicelli), flat (rice stick, brown rice), sheet (Guay Jub). No dimensions are implied. | Packs; legacy product text |
-| Typography | Display: Trirong (Cadson Demak) — one family that sets Thai, Latin and Vietnamese with the same voice, so no locale gets a fallback face. Body: system sans (Thai stack first on Thai pages). Thai headings break only between phrases. No uppercase or tracking on Thai. Body 17 px. | Thai-first brief; no brand typeface exists |
-| Photography | Real only. The 2014 images are small (102–460 px) and shown at native size as specimens on the strand field; never enlarged. Production shows typeset strand plates until the company supplies rights-cleared originals (shot list in `docs/generated/CONTENT_REQUESTS.md`). | Media truth rules |
-| Motion | M1–M10 only (brief §8.1). Signature: on a first visit the hero grain stretches into a strand and opens onto the pack photo while it loads (≤ 1.1 s, text readable throughout, skipped on return, reduced motion and no-JS). Process page: a thread fills as you read. | Brief §5.8–5.9 |
-| Material | Hairlines, flat grounds, modest 4 px corners, shadows only on the floating specimen photos and the drawer | Brief §5.7 |
-
-## Deliberately not used
-
-Black-and-gold, glass/blur (apple-design's translucent bars give way to the brief's ban), gradients, blobs, Thai temple or flag motifs, flags as language controls (text TH · EN · VI), rice-terrace postcard heroes (the 2014 hero), icon grids, three-card feature rows, logo walls, year counters, world maps, stock factory scenes, custom cursor, parallax, scroll hijacking. The red of the old lettering and the Mr. Noodles ribbon is not used: it belongs to the former company name and the consumer mascot, not to the manufacturer.
+| No gradient unless from a real material/light transition | Gradients of daylight on rice and roast — kept to that rationale | Remove `--ground`, `--band`, `--deep-ground` |
+| No glassmorphism | Glass header (Glisse) | Delete `data-glass` slot + the island |
+| No metallic gold | Natural, matte gold (no foil, no shine) | Tokens in `:root` |
+| Opening ≤ 1.2 s, no artificial delay | Loader ≈ 1.85 s on a tab's first open; text and links are already rendered beneath it | `PANKAO_LOADER=off` |
+| Do not redesign the logo | Recoloured vector mark in the preview | `MARK_APPROVED` stays false; production shows the wordmark |
 
 ## Logo-removal test
 
-Remove the PK mark and the site still belongs to this company: the headline is its name translated into an action; the hero is its own blue pack inside a grain on dried strands; the product code is the blue/green of its own bags; the palette is its oval, its packs and its old site's ground. A random noodle factory could not reuse it without reusing Pankao's packs.
-
-## Skills and precedence
-
-Brand study → brief → apple-design (motion, type handling, accessibility) → studio principles. Where apple-design suggests translucent materials, the brief's ban on glassmorphism wins for this brand.
+Remove the mark and the site is still this company's: its name made into the headline, its own pack in a rice-grain window, strand-width product code, and colours taken from the rice and roasted noodles themselves.

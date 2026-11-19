@@ -4,6 +4,10 @@
 
 A new website for the rice-noodle factory in Sai Noi, Nonthaburi (บริษัท สหปั้นข้าว จำกัด), built from scratch in Thai, English and Vietnamese. It is finished and tested **on O2's computer only**: nothing is online, nothing was sent to anyone, and the company has not yet confirmed any of the facts it shows. The preview marks every unconfirmed fact; the "production" version of the same site already removes them automatically, which is why it currently shows almost nothing about products. Twenty decisions from the company stand between this and publication; they are listed below in plain words.
 
+## Dressed for the client meeting (19 Nov 2026, evening)
+
+On the owner's word the preview now reads as a finished site: **sample values** fill every gap (typical specifications per product, four sample certificate cards, a documents list with Request buttons, a history timeline, OEM terms at a glance, opening hours), each with a small gold **Sample** tag and a one-line note; the palette is **white, cream, natural gold and roasted brown** with soft daylight gradients; the header is **liquid glass** (Glisse); a **loading animation** draws the recoloured **PK mark** on the first open of a tab. When showing it, the Sample tags tell Pankao exactly which values they must supply or correct. `PANKAO_SAMPLE_TAGS=off` hides the tags, `PANKAO_SAMPLES=off` returns to the honest "not yet published" view; production never shows samples.
+
 ## What a visitor gets (preview)
 
 - **Home**: "Rice, shaped into noodles in Nonthaburi" — the company name (ปั้นข้าว, to shape rice) turned into its headline; the real Mr. Noodles pack in a rice-grain window; the four noodle formats; own brand vs production under your brand; a 2024 government record describing the factory as an OEM producer; five process steps; two ways to start a conversation.
@@ -59,6 +63,8 @@ A different company — a 2024 restaurant business in [removed], Bangkok, regist
 16. **D16** Who reviews the Thai, English and Vietnamese text?
 17. **D18** When ready, may this replace pankaothai.com, and who controls that domain?
 18. **D19** Privacy wording reviewed under Thai PDPA.
+19. **D21** Do you approve the recoloured PK mark (cream, gold, espresso) for the website, or should we use your original artwork?
+20. **D22** Please replace each value marked "Sample" with your real one (labels, certificates, documents, dates, OEM terms, hours).
 
 (D17 social accounts and D20 shop/careers/news are settled by default: none.) The full register with consequences and options: `docs/generated/OWNER_DECISIONS.md`. What to send: `docs/generated/CONTENT_REQUESTS.md`.
 

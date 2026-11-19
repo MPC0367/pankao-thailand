@@ -20,7 +20,9 @@ export type EvidenceStatus =
   | 'marketplace-secondary'
   | 'research-lead'
   | 'conflicted'
-  | 'unverified';
+  | 'unverified'
+  /** O2 default value for the presentation preview; never owner-approvable, never in production. */
+  | 'sample';
 
 /** Report labels the brief requires (Part 1.3). */
 export type ReportLabel =
@@ -122,6 +124,8 @@ export type CopyEntry = {
   facts?: string[];
 };
 
+export type Tone = 'gold' | 'wheat' | 'cream' | 'brown';
+
 export type ProductFormat = 'vermicelli' | 'rice-stick' | 'flake' | 'brown-rice' | 'brand';
 
 export type AssetRights =
@@ -168,7 +172,7 @@ export type Certificate = {
   number: string;
   issuedOn: string;
   expiresOn: string;
-  status: 'current' | 'expired' | 'superseded' | 'pending' | 'private';
+  status: 'current' | 'expired' | 'superseded' | 'pending' | 'private' | 'sample';
   verificationUrl?: string;
   documentId?: string;
   markAssetId?: string;
@@ -191,7 +195,7 @@ export type DocumentRecord = {
   reviewOrExpiry?: string;
   productIds: string[];
   ownerApproved: boolean;
-  status: 'current' | 'superseded' | 'private';
+  status: 'current' | 'superseded' | 'private' | 'sample';
 };
 
 /** A claim is stored at company OR SKU level and never inherited between them. */
@@ -215,7 +219,8 @@ export type Product = {
   format: ProductFormat;
   /** Relative strand width for the visual code only; never shown as a dimension. */
   strand: 'hair' | 'fine' | 'flat' | 'sheet' | 'mixed';
-  stripe: 'blue' | 'green' | 'husk' | 'brown';
+  /** Tonal code for the format (natural rice colours), used on cards and filters. */
+  tone: Tone;
   name: Fact<string>;
   altNames: Localized<string[]>;
   brand: Fact<string> | null;

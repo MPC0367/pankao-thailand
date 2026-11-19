@@ -26,6 +26,7 @@ export function validateContent(): string[] {
     }
     if (isLocalized(f.value)) for (const l of LOCALES) need((f.value as Record<string, unknown>)[l] !== undefined && (f.value as Record<string, unknown>)[l] !== '', `fact ${id}: missing ${l} value`);
     need(!(f.ownerApproved && !f.ownerApprovalRef), `fact ${id}: owner-approved without an approval reference`);
+    need(!(f.status === 'sample' && f.ownerApproved), `fact ${id}: a sample value can never be owner-approved`);
   }
 
   // Copy: every key complete in every locale (LOC-01/02); fact dependencies exist.
@@ -94,14 +95,14 @@ export function guardOutput(file: string, text: string, g: GuardContext): string
   for (const reg of regs) if (reg !== MANUFACTURER_REGISTRATION) out.push(`${file}: unknown 13-digit registration ${reg}`);
   if (g.mode === 'production') {
     if (text.includes(MANUFACTURER_REGISTRATION)) out.push(`${file}: legal registration rendered without owner approval (D02)`);
-    for (const s of ['class="fact"', 'review-note', 'preview-bar', 'data-review-toggle', 'noindex']) if (text.includes(s) && !(s === 'noindex' && (/404/.test(file) || file === 'index.html'))) out.push(`${file}: production output contains preview-only markup "${s}"`);
+    for (const s of ['class="fact"', 'review-note', 'preview-bar', 'data-review-toggle', 'noindex', 'sample-tag', 'data-status="sample"', 'SAMPLE-', 'data-sample']) if (text.includes(s) && !(s === 'noindex' && (/404/.test(file) || file === 'index.html'))) out.push(`${file}: production output contains preview-only markup "${s}"`);
     for (const m of text.matchAll(/data-asset="([^"]+)"/g)) if (!g.allowedMedia.has(m[1]!)) out.push(`${file}: renders unapproved asset ${m[1]}`);
   }
   return out;
 }
 
 export function factApprovalSummary(): { approved: number; total: number; unapproved: Fact<unknown>[] } {
-  const all = [...factRegistry.values()].filter((f) => f.visibility === 'public');
+  const all = [...factRegistry.values()].filter((f) => f.visibility === 'public' && f.status !== 'sample');
   const unapproved = all.filter((f) => !f.ownerApproved);
   return { approved: all.length - unapproved.length, total: all.length, unapproved };
 }

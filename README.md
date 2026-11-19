@@ -7,7 +7,7 @@ The new website for the Nonthaburi rice-noodle manufacturer **บริษัท
 ## Commands
 
 ```bash
-npm install            # dev tools only: typescript, playwright, axe-core
+npm install            # build/dev tools: typescript, esbuild, glisse + preact (bundled into one header island), playwright, axe-core
 npm run media          # prepare preview images from ../documents/research/legacy-site/images → media-source/ (git-ignored)
 npm run build          # private preview → dist/            (noindex, review notes, legacy images, local form test adapter)
 npm run build:production  # production rehearsal → dist-production/ (only owner-approved facts and images)
@@ -23,12 +23,24 @@ npm run check          # typecheck + test + both builds + crawl + reports
 
 Studio previews (`.claude/launch.json`): `pankao` (4530, preview) and `pankao-production` (4531). Node ≥ 24 (TypeScript runs natively; no compile step).
 
+## Client presentation preview (19 Nov 2026)
+
+The preview is dressed for showing to the company: O2 **sample values** fill every gap (specifications, certificate and document entries, a history timeline, OEM terms, hours), each with a small gold “Sample” tag; the header is **liquid glass** (Glisse on Preact); a **loading animation** plays on a tab's first open; the PK mark is **recoloured** in cream and gold. Switches for `npm run build`:
+
+```bash
+PANKAO_SAMPLES=off npm run build      # the honest view: "not yet published" instead of samples
+PANKAO_SAMPLE_TAGS=off npm run build  # samples without their tags (say so when showing it)
+PANKAO_LOADER=off npm run build       # no loading animation
+```
+
+Samples never reach a production build (status `sample`, guarded and tested). Recorded as decisions D21 (mark) and D22 (samples).
+
 ## How it is built
 
 - `src/content/` — the only place business facts live: `facts.ts` (identity, contact, OEM, process, heritage candidates), `products.ts`, `claims.ts` (claims, certificates, documents), `assets.ts` (asset ledger), `decisions.ts`, `copy-*.ts` (all text in th/en/vi side by side), `sources.ts` + `data/*.json` (source ledger and the rejected entity).
 - Every fact has a status, sources and `ownerApproved`. `src/build/context.ts` decides what may render: the **preview** shows unapproved public facts with a review marker; **production** shows only approved ones. A sentence that asserts a fact lists it (`facts: [...]`) and disappears in production until approved.
 - `src/build/` renders static HTML (no framework), fingerprints CSS/JS/fonts/images, writes `_redirects` and `_headers` for Cloudflare Pages, and runs output guards that fail the build on: rejected-entity strings, unknown registrations, internal markers, preview markup in production, unapproved images.
-- `src/client/` — 3 small scripts (≈ 25 KB, no dependencies): opening, header, drawer, filters, pack↔dish, process thread, copy address, consented map, enquiry form.
+- `src/client/` — small vanilla scripts (loader, header, drawer, filters, pack↔dish, process thread, copy address, consented map, enquiry form) plus `glass.js`, the Glisse liquid-glass island bundled by esbuild on Preact compat (19 KB gzip, loaded at idle).
 - Fonts: Trirong (Cadson Demak, OFL) self-hosted in Thai/Latin/Vietnamese subsets; body text uses system fonts.
 
 ## To approve something (after the company confirms in writing)

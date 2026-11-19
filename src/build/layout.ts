@@ -3,7 +3,8 @@ import { readFileSync } from 'node:fs';
 import { address, brandDescriptor, brandName, email, fax, location, phone } from '../content/facts.ts';
 import { formatProducts } from '../content/products.ts';
 import { LOCALES, type Locale } from '../content/types.ts';
-import { assetImg } from './media.ts';
+import { pkMark } from './mark.ts';
+import { MARK_APPROVED, SHOW_LOADER } from '../content/presentation.ts';
 import { canShow, fact, formatDate, href, loc, ROUTES, t, val, type Ctx } from './context.ts';
 import { attrs, html, join, raw, type Raw } from './html.ts';
 import type { Assets } from './assets-out.ts';
@@ -46,7 +47,8 @@ export function langSwitch(ctx: Ctx, path: string, cls = 'lang'): Raw {
 function brandBlock(ctx: Ctx, assets: Assets): Raw {
   const name = fact(ctx, brandName);
   const desc = fact(ctx, brandDescriptor);
-  const mark = assetImg(ctx, assets, 'legacy.logo', { cls: 'brand__mark', decorative: true, eager: true });
+  const mark = ctx.mode === 'preview' || MARK_APPROVED ? pkMark('hd', 'brand__mark') : raw('');
+  void assets;
   return html`<a class="brand" href="${href(ctx.locale, '')}">
     ${mark}
     <span class="brand__words">
@@ -70,12 +72,15 @@ export const PIN = raw('<svg viewBox="0 0 18 18" aria-hidden="true" focusable="f
 
 function header(ctx: Ctx, assets: Assets): Raw {
   return html`<header class="site-header" data-header>
-  <div class="wrap">
+  <div class="header-bar">
+  <div class="header-glass" data-glass aria-hidden="true"></div>
+  <div class="header-bar__inner">
     ${brandBlock(ctx, assets)}
     <nav class="nav" aria-label="${t(ctx, 'nav.label')}">${navList(ctx)}</nav>
     ${langSwitch(ctx, ctx.path)}
     <a class="btn btn--primary header-cta" href="${href(ctx.locale, ROUTES.oem)}#brief">${t(ctx, 'cta.oem')}</a>
     <button class="menu-button" type="button" aria-haspopup="dialog" aria-controls="drawer" data-menu-open>${MENU_ICON}<span>${t(ctx, 'nav.menu')}</span></button>
+  </div>
   </div>
 </header>
 <dialog class="drawer" id="drawer" aria-label="${t(ctx, 'nav.label')}" data-drawer>
@@ -89,6 +94,20 @@ function header(ctx: Ctx, assets: Assets): Raw {
     ${langSwitch(ctx, ctx.path)}
   </div>
 </dialog>`;
+}
+
+/** Loading animation: the PK mark draws itself, rice grains appear, gold threads fall (owner's request). */
+function loader(ctx: Ctx): Raw {
+  if (!SHOW_LOADER) return raw('');
+  const showMark = ctx.mode === 'preview' || MARK_APPROVED;
+  const word = fact(ctx, brandName);
+  return html`<div class="loader" aria-hidden="true" data-loader>
+  <div class="loader__inner">
+    ${showMark ? pkMark('ld', 'loader__mark') : ''}
+    ${word ? html`<p class="loader__word">${String(val(brandName, ctx.locale))}</p>` : ''}
+    <div class="loader__threads"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+</div>`;
 }
 
 function previewBar(ctx: Ctx): Raw {
@@ -167,7 +186,7 @@ export function document(ctx: Ctx, assets: Assets, meta: PageMeta, main: Raw): s
   const ld = (meta.jsonLd ?? []).map((o) => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, '\\u003c')}</script>`).join('\n');
   const ogImage = '';
   return `<!doctype html>
-<html lang="${HTML_LANG[ctx.locale]}" class="no-js" data-mode="${ctx.mode}">
+<html lang="${HTML_LANG[ctx.locale]}" class="no-js" data-mode="${ctx.mode}" data-loader-mode="${SHOW_LOADER ? 'on' : 'off'}"${assets.glassJs ? ` data-glass-src="${assets.glassJs}"` : ''}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -187,12 +206,15 @@ ${ogImage}
 <meta name="theme-color" content="#f7f2e7">
 <meta name="format-detection" content="telephone=no">
 <link rel="preload" href="/fonts/trirong-600-${fontSubset}.woff2" as="font" type="font/woff2" crossorigin>
+${fontSubset === 'latin' ? '' : '<link rel="preload" href="/fonts/trirong-600-latin.woff2" as="font" type="font/woff2" crossorigin>'}
+${assets.glisseCss ? `<link rel="stylesheet" id="glisse-styles" href="${assets.glisseCss}">` : ''}
 <link rel="stylesheet" href="${assets.css}">
 <script src="${assets.headJs}"></script>
 <script src="${assets.siteJs}" defer></script>
 ${ld}
 </head>
 <body${meta.bodyClass ? ` class="${meta.bodyClass}"` : ''}>
+${loader(ctx).html}
 <a class="skip" href="#main">${escText(t(ctx, 'skip'))}</a>
 ${previewBar(ctx).html}
 ${header(ctx, assets).html}

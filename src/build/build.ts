@@ -12,6 +12,7 @@ import { execFileSync } from 'node:child_process';
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, extname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { buildSync } from 'esbuild';
 import { assets as ledger } from '../content/assets.ts';
 import { openDecisions } from '../content/decisions.ts';
 import { products } from '../content/products.ts';
@@ -75,6 +76,18 @@ function buildAssets(outDir: string, mode: Mode): Assets {
   const site = readFileSync(join(ROOT, 'src/client/site.js'), 'utf8');
   const siteName = `assets/site.${hash(site)}.js`;
   write(outDir, siteName, site);
+  // Glisse liquid-glass island (React) + its stylesheet as a file, so the strict CSP needs no inline style.
+  const glass = buildSync({
+    entryPoints: [join(ROOT, 'src/client/glass.js')], bundle: true, minify: true, format: 'esm', write: false,
+    target: ['es2020', 'safari15'], define: { 'process.env.NODE_ENV': '"production"' }, legalComments: 'none', logLevel: 'silent',
+    // Preact's React-compatible core runs Glisse at ~19 KB gzip instead of React's ~80 KB.
+    alias: { react: 'preact/compat', 'react-dom/client': 'preact/compat/client', 'react-dom': 'preact/compat', 'react/jsx-runtime': 'preact/jsx-runtime' },
+  }).outputFiles[0]!.text;
+  const glassName = `assets/glass.${hash(glass)}.js`;
+  write(outDir, glassName, glass);
+  const glisseCss = readFileSync(join(ROOT, 'node_modules/glisse/dist/styles.css'), 'utf8');
+  const glisseName = `assets/glisse.${hash(glisseCss)}.css`;
+  write(outDir, glisseName, glisseCss);
   const root = readFileSync(join(ROOT, 'src/client/root.js'), 'utf8');
   write(outDir, `assets/root.${hash(root)}.js`, root);
 
@@ -98,7 +111,7 @@ function buildAssets(outDir: string, mode: Mode): Assets {
     if (!webpSmaller) rmSync(join(outDir, webpName));
     media.set(a.id, { src: `/${name}`, webp: webpSmaller ? `/${webpName}` : undefined, width: a.width, height: a.height });
   }
-  return { css: `/${cssName}`, headJs: `/${headName}`, siteJs: `/${siteName}`, media };
+  return { css: `/${cssName}`, headJs: `/${headName}`, siteJs: `/${siteName}`, glassJs: `/${glassName}`, glisseCss: `/${glisseName}`, media };
 }
 
 function rootPage(mode: Mode, assets: Assets, rootJs: string): string {

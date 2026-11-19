@@ -53,9 +53,9 @@ export function packDish(ctx: Ctx, assets: Assets, product: Product, label: stri
   const dry = product.media.pack ? assetImg(ctx, assets, product.media.pack, { cls: 'view-dry' }) : null;
   const dish = product.media.dish ? assetImg(ctx, assets, product.media.dish, { cls: 'view-dish' }) : null;
   const plate = strandPlate(product, dry ? '' : label);
-  if (!dry) return html`<div class="format-card__media stripe-${product.stripe}">${plate}</div>`;
+  if (!dry) return html`<div class="format-card__media tone-${product.tone}">${plate}</div>`;
   const mediaId = `media-${product.id}-${idSuffix}`;
-  return html`<div class="format-card__media stripe-${product.stripe}" id="${mediaId}" data-view="pack">
+  return html`<div class="format-card__media tone-${product.tone}" id="${mediaId}" data-view="pack">
     ${plate}${dry}${dish ?? ''}
   </div>
   ${dish ? html`<button class="view-toggle" type="button" aria-pressed="false" aria-controls="${mediaId}" data-view-toggle>${t(ctx, 'products.show.cooked')}</button>` : ''}`;

@@ -12,27 +12,28 @@
     del: function (k, s) { try { (s ? sessionStorage : localStorage).removeItem(k); } catch (e) {} },
   };
 
-  /* ---------- M5 opening: grain → strand → aperture, only while the hero image loads ---------- */
-  if (d.classList.contains('opening')) {
-    var hero = $('[data-hero-img]');
-    var done = false;
-    var finish = function () {
-      if (done) return;
-      done = true;
-      d.classList.add('opened');
-      store.set('pk-opened', '1');
-      setTimeout(function () { d.classList.remove('opening', 'opened'); }, 560);
+  /* ---------- loader (owner's request): ends ~1.85 s after navigation, or at once on a click or key ---------- */
+  if (d.classList.contains('loading')) {
+    var ldr = $('[data-loader]');
+    var ended = false;
+    var endLoader = function () {
+      if (ended) return;
+      ended = true;
+      store.set('pk-loaded', '1', true);
+      d.classList.add('loaded', 'reveal');
+      setTimeout(function () { d.classList.remove('loading', 'loaded'); }, 480);
+      setTimeout(function () { d.classList.remove('reveal'); }, 1500);
     };
-    if (!hero || (hero.complete && hero.naturalWidth)) {
-      d.classList.remove('opening');
-      store.set('pk-opened', '1');
-    } else {
-      var afterStrand = function () { setTimeout(finish, Math.max(0, 560 - performance.now())); };
-      hero.addEventListener('load', afterStrand, { once: true });
-      hero.addEventListener('error', finish, { once: true });
-      // Cap: the reveal (460 ms) must end by 1200 ms after navigation even if the image is slow; it fades in when it arrives.
-      setTimeout(finish, Math.max(0, 720 - performance.now()));
-    }
+    setTimeout(endLoader, Math.max(0, 1850 - performance.now()));
+    if (ldr) ldr.addEventListener('click', endLoader);
+    window.addEventListener('keydown', endLoader, { once: true });
+  }
+
+  /* ---------- liquid glass header (Glisse), after first paint ---------- */
+  var glassSrc = d.getAttribute('data-glass-src');
+  if (glassSrc && $('[data-glass]')) {
+    var loadGlass = function () { var sc = document.createElement('script'); sc.type = 'module'; sc.src = glassSrc; document.head.appendChild(sc); };
+    if ('requestIdleCallback' in window) requestIdleCallback(loadGlass, { timeout: 2000 }); else setTimeout(loadGlass, 800);
   }
 
   /* ---------- M3 header state ---------- */

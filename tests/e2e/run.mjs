@@ -44,6 +44,16 @@ const reset = () => fetch(`${BASE}/__mock/scenario`, { method: 'POST', body: '{}
 const setNext = (scenario, count = 1) => fetch(`${BASE}/__mock/scenario`, { method: 'POST', body: JSON.stringify({ scenario, count }) });
 
 const browsers = { webkit: await webkit.launch(), chromium: await chromium.launch() };
+// Contexts behave like a tab that has already seen the loader, unless a check asks for it ({ withLoader: true }).
+for (const b of Object.values(browsers)) {
+  const open = b.newContext.bind(b);
+  b.newContext = async (o = {}) => {
+    const { withLoader, ...rest } = o;
+    const c = await open(rest);
+    if (!withLoader) await c.addInitScript(() => { try { sessionStorage.setItem('pk-loaded', '1'); } catch {} });
+    return c;
+  };
+}
 const ctxOpts = (o = {}) => ({ viewport: { width: 1280, height: 860 }, locale: 'en-GB', ...o });
 
 async function fillOem(page, { locale = 'en' } = {}) {
@@ -294,35 +304,65 @@ await check('chromium: map loads only after "Show map"; address copy works (AC-C
   await ctx.close();
 });
 
-await check('chromium: opening plays once on a first visit, ends by 1200 ms even with a slow image, skips on return (UX-04/06, AC-UX-03)', async () => {
-  const ctx = await C.newContext(ctxOpts());
-  await ctx.addInitScript(() => {
-    new MutationObserver(() => { if (document.documentElement?.classList.contains('opened') && !window.__openedAt) window.__openedAt = performance.now(); })
-      .observe(document, { attributes: true, subtree: true, attributeFilter: ['class'] });
-  });
+await check('chromium: loader plays on a fresh tab, ends by ~2.4 s, skips within the session and on click (owner request)', async () => {
+  const ctx = await C.newContext(ctxOpts({ withLoader: true }));
   const page = await ctx.newPage();
-  await page.route(/hero-pack.*\.(webp|jpg)$/, async (r) => { await new Promise((x) => setTimeout(x, 2000)); r.continue(); });
   await page.goto(`${BASE}/en/`, { waitUntil: 'commit' });
-  await page.waitForSelector('h1');
-  const hadOpening = await page.evaluate(() => document.documentElement.classList.contains('opening'));
-  const h1Visible = await page.evaluate(() => { const r = document.querySelector('h1').getBoundingClientRect(); return r.height > 0 && getComputedStyle(document.querySelector('h1')).opacity === '1'; });
-  await page.waitForFunction(() => !document.documentElement.classList.contains('opening'), null, { timeout: 4000 });
-  const openedAt = await page.evaluate(() => window.__openedAt);
-  await page.goto(`${BASE}/en/`);
-  const again = await page.evaluate(() => document.documentElement.classList.contains('opening'));
+  await page.waitForSelector('div.loader', { state: 'visible', timeout: 3000 });
+  const t0 = Date.now();
+  await page.waitForFunction(() => !document.documentElement.classList.contains('loading'), null, { timeout: 4000 });
+  const took = Date.now() - t0;
+  const h1 = await page.locator('h1').isVisible();
+  await page.goto(`${BASE}/th/`);
+  const again = await page.evaluate(() => document.documentElement.classList.contains('loading'));
   await ctx.close();
-  assert(hadOpening, 'first visit plays');
-  assert(h1Visible, 'headline readable during the opening');
-  assert(openedAt && openedAt <= 740, `reveal starts by 720 ms so it ends by 1200 ms (started ${Math.round(openedAt)} ms)`);
-  assert(!again, 'second visit skips');
-  return `reveal started ${Math.round(openedAt)} ms after navigation with a 2 s image; ends ≈ ${Math.round(openedAt + 460)} ms`;
+  const ctx2 = await C.newContext(ctxOpts({ withLoader: true }));
+  const p2 = await ctx2.newPage();
+  await p2.goto(`${BASE}/vi/`, { waitUntil: 'commit' });
+  await p2.waitForSelector('div.loader', { state: 'visible', timeout: 3000 });
+  await p2.mouse.click(400, 300);
+  await p2.waitForFunction(() => !document.documentElement.classList.contains('loading'), null, { timeout: 1500 });
+  await ctx2.close();
+  assert(took <= 2600, `loader gone in ${took} ms`);
+  assert(h1, 'page underneath is rendered');
+  assert(!again, 'second page in the same tab: no loader');
+  return `cleared ${took} ms after it appeared; click skips`;
 });
 
-await check('chromium: reduced motion — no opening, content visible, process static (AC-UX-02)', async () => {
-  const ctx = await C.newContext(ctxOpts({ reducedMotion: 'reduce' }));
+await check('chromium + webkit: liquid glass header — Glisse mounts (refraction in Chromium), frosted fallback everywhere', async () => {
+  const notes = [];
+  for (const [engine, b] of Object.entries(browsers)) {
+    const ua = engine === 'chromium' ? { userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36' } : {};
+    const ctx = await b.newContext(ctxOpts(ua));
+    const page = await ctx.newPage();
+    await page.goto(`${BASE}/en/products/`);
+    await page.waitForSelector('[data-glass] .lg-glass', { timeout: 5000 });
+    if (engine === 'chromium') await page.waitForFunction(() => getComputedStyle(document.querySelector('[data-glass] .lg-glass')).backdropFilter.includes('url('), null, { timeout: 5000 }).catch(() => {});
+    const r = await page.evaluate(() => {
+      const lens = document.querySelector('[data-glass] .lg-glass');
+      const cs = getComputedStyle(lens);
+      return { filter: cs.backdropFilter || cs.webkitBackdropFilter || '', css: !!document.getElementById('glisse-styles') };
+    });
+    await ctx.close();
+    assert(r.css, `${engine}: Glisse stylesheet linked`);
+    assert(/blur/.test(r.filter), `${engine}: glass blur (${r.filter})`);
+    if (engine === 'chromium') assert(/url\(/.test(r.filter), `chromium refracts (${r.filter})`);
+    notes.push(`${engine}: ${r.filter.slice(0, 40)}`);
+  }
+  const ctx = await C.newContext(ctxOpts({ reducedMotion: 'reduce', javaScriptEnabled: false }));
   const page = await ctx.newPage();
   await page.goto(`${BASE}/en/`);
-  assert(!(await page.evaluate(() => document.documentElement.classList.contains('opening'))), 'no opening');
+  const fallback = await page.evaluate(() => getComputedStyle(document.querySelector('[data-glass]')).backdropFilter);
+  await ctx.close();
+  assert(/blur/.test(fallback), `no-JS frosted fallback (${fallback})`);
+  return notes.join(' · ');
+});
+
+await check('chromium: reduced motion — no loader, content visible, process static (AC-UX-02)', async () => {
+  const ctx = await C.newContext(ctxOpts({ reducedMotion: 'reduce', withLoader: true }));
+  const page = await ctx.newPage();
+  await page.goto(`${BASE}/en/`);
+  assert(!(await page.evaluate(() => document.documentElement.classList.contains('loading'))), 'no loader');
   const hidden = await page.evaluate(() => [...document.querySelectorAll('.arrive')].filter((e) => getComputedStyle(e).opacity !== '1').length);
   assert(hidden === 0, `${hidden} hidden blocks`);
   await page.goto(`${BASE}/en/process/`);

@@ -6,6 +6,8 @@ import { common } from '../content/copy-common.ts';
 import { pages } from '../content/copy-pages.ts';
 import { allCompanyFacts, brandName } from '../content/facts.ts';
 import { products } from '../content/products.ts';
+import { SHOW_SAMPLES } from '../content/presentation.ts';
+import { sampleHours, sampleOemTerms, sampleTimeline } from '../content/samples.ts';
 import type { CopyEntry, EvidenceStatus, Fact, Locale, Localized, Mode, Value } from '../content/types.ts';
 import { esc, raw, type Raw } from './html.ts';
 
@@ -22,7 +24,7 @@ export type Ctx = {
 /* ---------- fact registry ---------- */
 
 export const factRegistry = new Map<string, Fact<unknown>>();
-for (const f of allCompanyFacts) factRegistry.set(f.id, f);
+for (const f of [...allCompanyFacts, ...sampleTimeline, ...sampleOemTerms, sampleHours] as Fact<unknown>[]) factRegistry.set(f.id, f);
 for (const p of products) {
   const fs = [p.name, p.brand, p.summary, p.uses, p.brandedOrOem, ...Object.values(p.technical)];
   for (const f of fs) if (f) factRegistry.set(f.id, f as Fact<unknown>);
@@ -38,6 +40,7 @@ const STRENGTH: EvidenceStatus[] = [
   'marketplace-secondary',
   'research-lead',
   'unverified',
+  'sample',
   'conflicted',
 ];
 
@@ -61,6 +64,7 @@ export function loc<T>(v: Localized<T> | T, locale: Locale): T {
 export function canShow(f: Fact<unknown> | null | undefined, ctx: Pick<Ctx, 'mode'>): f is Fact<unknown> {
   if (!f) return false;
   if (f.visibility !== 'public' || f.status === 'conflicted') return false;
+  if (f.status === 'sample') return ctx.mode === 'preview' && SHOW_SAMPLES;
   if (ctx.mode === 'production') return f.ownerApproved === true;
   return true;
 }

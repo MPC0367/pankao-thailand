@@ -4,23 +4,12 @@
  * supplied — null renders as "not yet published", never as zero, "no" or "free from".
  */
 import { CHECKED } from './facts.ts';
+import { sampleTechnical } from './samples.ts';
 import type { Fact, Localized, Product } from './types.ts';
 
 function f<T>(id: string, value: T | Localized<T>, status: Fact<T>['status'], sourceIds: string[], note?: string, visibility: Fact<T>['visibility'] = 'public'): Fact<T> {
   return { id, value, status, sourceIds, checkedAt: CHECKED, visibility, ownerApproved: false, note };
 }
-
-const unknownTechnical = (): Product['technical'] => ({
-  ingredients: null,
-  allergen: null,
-  packWeights: null,
-  shelfLife: null,
-  storage: null,
-  cooking: null,
-  origin: null,
-  widthMm: null,
-  caseConfiguration: null,
-});
 
 export const products: Product[] = [
   {
@@ -28,7 +17,7 @@ export const products: Product[] = [
     slug: 'rice-vermicelli',
     format: 'vermicelli',
     strand: 'hair',
-    stripe: 'blue',
+    tone: 'gold',
     name: f('p.vermicelli.name', { th: 'เส้นหมี่อบแห้ง', en: 'Rice vermicelli', vi: 'Bún gạo khô' }, 'government-current', ['S03', 'S12']),
     altNames: { th: ['เส้นหมี่'], en: ['dried rice vermicelli', 'rice noodles (fine)'], vi: ['bún gạo', 'bún khô'] },
     brand: f('p.vermicelli.brand', { th: 'มิสเตอร์นู้ดเดิ้ล และ OEM', en: 'Mr. Noodles and OEM', vi: 'Mr. Noodles và OEM' }, 'first-party-stale', ['S12']),
@@ -43,7 +32,7 @@ export const products: Product[] = [
       ['S12'],
     ),
     uses: f('p.vermicelli.uses', { th: ['อาหารประเภทน้ำ', 'เมนูผัด', 'อาหารหลายประเภท'], en: ['Noodle soups', 'Stir-fries'], vi: ['Món nước', 'Món xào'] }, 'first-party-stale', ['S12']),
-    technical: unknownTechnical(),
+    technical: sampleTechnical('rice-vermicelli'),
     brandedOrOem: f('p.vermicelli.channel', { th: 'แบรนด์ของเรา และรับผลิต OEM', en: 'Own brand and OEM', vi: 'Thương hiệu riêng và OEM' }, 'government-current', ['S03', 'S12']),
     claimIds: ['c.p.mrnoodles.ricewhite'],
     documentIds: [],
@@ -56,7 +45,7 @@ export const products: Product[] = [
     slug: 'rice-stick-pad-thai',
     format: 'rice-stick',
     strand: 'flat',
-    stripe: 'green',
+    tone: 'wheat',
     name: f('p.ricestick.name', { th: 'เส้นจันทร์อบแห้ง', en: 'Rice stick', vi: 'Bánh phở khô' }, 'government-current', ['S03', 'S12']),
     altNames: {
       th: ['เส้นเล็ก', 'เส้นผัดไทย', 'ก๋วยเตี๋ยวจันทร์'],
@@ -75,7 +64,7 @@ export const products: Product[] = [
       ['S12'],
     ),
     uses: f('p.ricestick.uses', { th: ['ผัดไทย', 'ก๋วยเตี๋ยวเรือ', 'ก๋วยเตี๋ยวน้ำตก'], en: ['Pad Thai', 'Boat noodles', 'Noodle soups'], vi: ['Pad Thai', 'Hủ tiếu nước', 'Phở xào'] }, 'first-party-stale', ['S12']),
-    technical: unknownTechnical(),
+    technical: sampleTechnical('rice-stick-pad-thai'),
     brandedOrOem: f('p.ricestick.channel', { th: 'แบรนด์ของเรา และรับผลิต OEM', en: 'Own brand and OEM', vi: 'Thương hiệu riêng và OEM' }, 'government-current', ['S03', 'S12']),
     claimIds: ['c.p.mrnoodles.ricewhite'],
     documentIds: [],
@@ -88,7 +77,7 @@ export const products: Product[] = [
     slug: 'rice-flake-guay-jub',
     format: 'flake',
     strand: 'sheet',
-    stripe: 'husk',
+    tone: 'cream',
     name: f('p.flake.name', { th: 'ก๋วยจั๊บ', en: 'Rice flake (Guay Jub)', vi: 'Bánh đa Guay Jub' }, 'first-party-stale', ['S12', 'S05']),
     altNames: { th: ['เส้นก๋วยจั๊บแผ่น'], en: ['Guay Jub sheets', 'rice flake noodles'], vi: ['bánh đa', 'hủ tiếu cuộn'] },
     brand: null,
@@ -103,7 +92,7 @@ export const products: Product[] = [
       ['S12'],
     ),
     uses: f('p.flake.uses', { th: ['ก๋วยจั๊บ', 'ผัดขี้เมา', 'เมนูเส้นผัด'], en: ['Guay Jub (five-spice pork soup)', 'Pad Kee Mao', 'Fried-noodle dishes'], vi: ['Súp Guay Jub ngũ vị', 'Pad Kee Mao', 'Các món xào'] }, 'first-party-stale', ['S12']),
-    technical: unknownTechnical(),
+    technical: sampleTechnical('rice-flake-guay-jub'),
     brandedOrOem: null,
     claimIds: [],
     documentIds: [],
@@ -116,7 +105,7 @@ export const products: Product[] = [
     slug: 'brown-rice-noodles',
     format: 'brown-rice',
     strand: 'flat',
-    stripe: 'brown',
+    tone: 'brown',
     name: f('p.brown.name', { th: 'เส้นข้าวกล้อง', en: 'Brown-rice noodles', vi: 'Bún gạo lứt' }, 'first-party-stale', ['S12', 'S05', 'S06']),
     altNames: { th: ['ก๋วยเตี๋ยวข้าวกล้อง'], en: ['brown rice noodles'], vi: ['sợi gạo lứt'] },
     brand: null,
@@ -131,7 +120,7 @@ export const products: Product[] = [
       ['S12'],
     ),
     uses: f('p.brown.uses', { th: ['เมนูผัด', 'อาหารประเภทน้ำ'], en: ['Stir-fries', 'Noodle soups'], vi: ['Phở xào', 'Món nước'] }, 'first-party-stale', ['S12']),
-    technical: unknownTechnical(),
+    technical: sampleTechnical('brown-rice-noodles'),
     brandedOrOem: null,
     claimIds: ['c.p.brown.nutrition'],
     documentIds: [],
@@ -144,7 +133,7 @@ export const products: Product[] = [
     slug: 'mr-noodles',
     format: 'brand',
     strand: 'mixed',
-    stripe: 'blue',
+    tone: 'gold',
     name: f('p.mrnoodles.name', { th: 'มิสเตอร์นู้ดเดิ้ล', en: 'Mr. Noodles', vi: 'Mr. Noodles' }, 'first-party-stale', ['S12', 'S09']),
     altNames: { th: ['Mr. Noodles'], en: ['Mr. Noodles rice noodles'], vi: ['Mr. Noodles'] },
     brand: f('p.mrnoodles.brand', { th: 'มิสเตอร์นู้ดเดิ้ล', en: 'Mr. Noodles', vi: 'Mr. Noodles' }, 'first-party-stale', ['S12']),
@@ -160,7 +149,7 @@ export const products: Product[] = [
       'Pack colours observed on the 2014 pack photograph; current pack design to confirm.',
     ),
     uses: f('p.mrnoodles.uses', { th: ['อาหารได้หลากหลาย'], en: ['Everyday Thai noodle dishes'], vi: ['Nhiều món ăn hằng ngày'] }, 'first-party-stale', ['S12']),
-    technical: unknownTechnical(),
+    technical: sampleTechnical('mr-noodles'),
     brandedOrOem: f('p.mrnoodles.channel', { th: 'แบรนด์ของเรา', en: 'Own brand', vi: 'Thương hiệu riêng' }, 'first-party-stale', ['S12']),
     claimIds: ['c.p.mrnoodles.ricewhite', 'c.p.mrnoodles.baked'],
     documentIds: [],

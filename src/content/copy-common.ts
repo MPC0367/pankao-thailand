@@ -60,6 +60,15 @@ export const common: Record<string, CopyEntry> = {
   'status.research-lead': { th: 'ร่างของ O2', en: 'O2 draft', vi: 'Bản nháp O2' },
   'status.conflicted': { th: 'ข้อมูลขัดกัน', en: 'Conflict', vi: 'Mâu thuẫn' },
   'status.unverified': { th: 'รอยืนยัน', en: 'To confirm', vi: 'Chờ xác nhận' },
+  'status.sample': { th: 'ข้อมูลตัวอย่าง', en: 'Sample', vi: 'Mẫu' },
+
+  'sample.tag': { th: 'ตัวอย่าง', en: 'Sample', vi: 'Mẫu' },
+  'sample.spec': { th: 'ค่าตัวอย่างสำหรับพรีวิว รอยืนยันกับฉลากปัจจุบัน', en: 'Sample values for this preview, to be confirmed against current labels.', vi: 'Giá trị mẫu cho bản xem trước, sẽ đối chiếu với nhãn hiện hành.' },
+  'sample.certs': { th: 'ตัวอย่างการแสดงใบรับรอง ใบรับรองจริงจะแสดงเมื่อได้รับเอกสารจากบริษัท', en: 'Sample entries showing how certificates will appear once the company sends them.', vi: 'Mục mẫu cho thấy chứng nhận sẽ hiển thị thế nào khi công ty gửi tài liệu.' },
+  'sample.docs': { th: 'รายการเอกสารตัวอย่าง ขอรับเอกสารจริงได้ทางแบบฟอร์ม', en: 'Sample document list. Real documents are sent on request.', vi: 'Danh sách tài liệu mẫu. Tài liệu thật được gửi theo yêu cầu.' },
+  'sample.timeline': { th: 'ลำดับเหตุการณ์ตัวอย่าง ปีและถ้อยคำรอยืนยันจากบริษัท', en: 'Sample timeline: years and wording to be confirmed by the company.', vi: 'Dòng thời gian mẫu: năm và nội dung chờ công ty xác nhận.' },
+  'sample.oem': { th: 'เงื่อนไขตัวอย่างสำหรับพรีวิว รอยืนยันจากโรงงาน', en: 'Sample terms for this preview, to be confirmed by the factory.', vi: 'Điều kiện mẫu cho bản xem trước, chờ nhà máy xác nhận.' },
+  'loader.label': { th: 'กำลังโหลด', en: 'Loading', vi: 'Đang tải' },
 
   'image.unavailable': { th: 'ยังไม่มีภาพที่ได้รับอนุญาต', en: 'Approved photograph to come', vi: 'Ảnh được duyệt sẽ bổ sung' },
 

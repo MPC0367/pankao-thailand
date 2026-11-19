@@ -20,16 +20,18 @@ export const ratio = (a: string, b: string) => {
 };
 
 const TEXT: [string, string][] = [
-  ['ink', 'rice'], ['ink', 'rice-2'], ['ink', 'rice-3'], ['ink-2', 'rice'], ['ink-2', 'rice-2'], ['ink-2', 'rice-3'],
-  ['leaf', 'rice'], ['on-deep', 'leaf-deep'], ['on-deep-2', 'leaf-deep'], ['alert', 'rice'], ['alert', 'alert-bg'],
-  ['ink', 'ok-bg'], ['pk', 'rice'],
+  ['ink', 'cream'], ['ink', 'cream-2'], ['ink', 'cream-3'], ['ink', 'white'], ['ink-2', 'cream'], ['ink-2', 'cream-2'], ['ink-2', 'cream-3'],
+  ['gold-deep', 'cream'], ['gold-deep', 'cream-2'], ['gold-deep', 'white'], ['on-accent', 'accent'], ['on-accent', 'accent-press'],
+  ['on-deep', 'deep'], ['on-deep', 'deep-2'], ['on-deep-2', 'deep'], ['on-deep-2', 'deep-2'], ['gold-on-deep', 'deep'], ['gold-on-deep', 'deep-2'],
+  ['alert', 'cream'], ['alert', 'alert-bg'], ['ink', 'ok-bg'], ['accent', 'cream'],
 ];
 const LITERAL: [string, string][] = [
-  ['#ffffff', token('pk')], ['#ffffff', token('pk-press')], [token('leaf-deep'), token('on-deep')],
-  ['#e9dfcc', token('ink')], ['#cbbfa6', token('ink')], ['#f4ecdb', token('ink')], ['#ffffff', token('alert')],
-  [token('ink'), '#fff6df'], ['#7a5a1e', '#fff6df'], [token('rice'), token('ink')], ['#f0d79b', token('leaf-deep')],
+  ['#e9dfcc', token('deep')], ['#cbbfa6', token('deep')], ['#f4ecdb', token('deep')], ['#ffffff', token('alert')],
+  [token('ink'), '#fff6df'], ['#7a5a1e', '#fff6df'], [token('cream'), token('ink')], ['#f0d79b', token('deep')], ['#3a2414', '#f7efdf'],
+  // Header text over its glass: worst case is the glass's most transparent tint over the darkest strip it can cross (the brown footer is never under it).
+  [token('ink'), '#e7d9bf'], [token('ink-2'), '#e7d9bf'],
 ];
-const UI: [string, string][] = [['husk-deep', 'rice'], ['husk-deep', 'rice-2'], ['focus', 'rice'], ['ink', 'rice']];
+const UI: [string, string][] = [['husk-deep', 'cream'], ['husk-deep', 'white'], ['focus', 'cream'], ['ink', 'cream'], ['gold-deep', 'cream']];
 
 test('text pairs meet 4.5:1', () => {
   for (const [f, b] of TEXT) assert.ok(ratio(token(f), token(b)) >= 4.5, `${f} on ${b}: ${ratio(token(f), token(b)).toFixed(2)}`);

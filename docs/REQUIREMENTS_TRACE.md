@@ -1,5 +1,7 @@
 # Requirement and acceptance trace (brief Parts IV and V)
 
+_Updated 19 Nov 2026 evening: the owner's presentation changes (sample values, cream/gold palette with gradients, Glisse glass header, loader, recoloured mark) override the brief where noted; see docs/ART_DIRECTION.md._
+
 Labels as the brief defines them. **VERIFIED LOCALLY** = reproduced on this Mac by a recorded check (unit = `npm test`, crawl = `npm run crawl`, e2e = `npm run e2e`, perf = `npm run perf`, gate = `npm run gate`). Nothing here is staging- or live-verified. Evidence files: `qa-output/`, `../documents/screenshots/build-2026-11-19/`.
 
 ## Part IV — 86 controlled requirements
@@ -10,7 +12,7 @@ Labels as the brief defines them. **VERIFIED LOCALLY** = reproduced on this Mac 
 | GOV-02 | VERIFIED LOCALLY | `rejectedEntities` + output guard over every HTML/JSON/XML/TXT in both builds; unit AC-ID-02 |
 | GOV-03 | VERIFIED LOCALLY | No deploy, DNS or send code exists; gate exits 1; RUNBOOK needs the owner token |
 | GOV-04 | VERIFIED LOCALLY | Components render facts via `fact()`/`tx()`; copy declares `facts`; unit GOV-05 traces home.h1 |
-| GOV-05 | VERIFIED LOCALLY | Preview marks, production omits; unit + build test (no fact markup in production) |
+| GOV-05 | VERIFIED LOCALLY | Preview marks, production omits; O2 sample values (status `sample`, tagged) are preview-only and guarded out of production; unit + build test |
 | GOV-06 | VERIFIED LOCALLY | `conflicted` never renders (heritage 30/80, mobiles); conflicts listed in SOURCE_LEDGER |
 | GOV-07 | VERIFIED LOCALLY | `docs/generated/OWNER_DECISIONS.md` (consequence, default, options, evidence, release effect) |
 | GOV-08 | VERIFIED LOCALLY | This trace and `QA_REPORT.md` use the labels; nothing is called live |
@@ -57,9 +59,9 @@ Labels as the brief defines them. **VERIFIED LOCALLY** = reproduced on this Mac 
 | UX-01 | VERIFIED LOCALLY | e2e overflow at 320/360/375/390/430; screenshots |
 | UX-02 | VERIFIED LOCALLY | e2e drawer keyboard; axe; real screen readers not run |
 | UX-03 | VERIFIED LOCALLY | e2e no-JS: 5 pages × 3 locales |
-| UX-04 | VERIFIED LOCALLY | e2e: headline readable during the opening; skipped on return |
+| UX-04 | VERIFIED LOCALLY (owner override) | Owner asked for a loading animation: ≈ 1.85 s on a tab's first open, page rendered beneath, click/key skips, CSS failsafe 3.2 s; e2e loader check |
 | UX-05 | VERIFIED LOCALLY | e2e reduced motion |
-| UX-06 | VERIFIED LOCALLY | Opening ends ≤ 1.1 s from navigation, only on a first visit while the hero image loads |
+| UX-06 | VERIFIED LOCALLY (owner override) | Brief's 700–1200 ms superseded by the owner's loader (≈ 1.85 s + 0.46 s fade); only first open per tab, never under reduced motion; `PANKAO_LOADER=off` restores none |
 | UX-07 | VERIFIED LOCALLY | No fixed bottom bar; sticky header with scroll padding; forms unobstructed |
 | UX-08 | VERIFIED LOCALLY | e2e focus returns to the menu button; 3 px focus ring |
 | UX-09 | VERIFIED LOCALLY | e2e targets ≥ 44 × 44 |
@@ -119,7 +121,7 @@ Labels as the brief defines them. **VERIFIED LOCALLY** = reproduced on this Mac 
 | AC-CT-02 map consent | VERIFIED LOCALLY | e2e (no Google request before the click) |
 | AC-UX-01 keyboard drawer | VERIFIED LOCALLY | e2e both engines |
 | AC-UX-02 reduced motion | VERIFIED LOCALLY | e2e |
-| AC-UX-03 warm-cache revisit | VERIFIED LOCALLY | e2e (second visit: no opening) |
+| AC-UX-03 warm-cache revisit | VERIFIED LOCALLY | e2e (second page in the same tab: no loader) |
 | AC-UX-04 no JavaScript | VERIFIED LOCALLY | e2e |
 | AC-UX-05 zoom and language stress | VERIFIED LOCALLY | e2e 200% text, 3 locales |
 | AC-UX-06 form errors | VERIFIED LOCALLY | e2e |

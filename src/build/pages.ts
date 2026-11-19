@@ -15,10 +15,17 @@ import { esc, html, join, raw, type Raw } from './html.ts';
 import { ARROW, contactLines, document, PIN, type PageMeta } from './layout.ts';
 import { assetImg, credit, packDish, strandPlate } from './media.ts';
 import { breadcrumbs, organization, productLd } from './seo.ts';
+import { SHOW_SAMPLES, SHOW_SAMPLE_TAGS } from '../content/presentation.ts';
+import { sampleCertificates, sampleDocuments, sampleHours, sampleOemTerms, sampleTimeline } from '../content/samples.ts';
 
 export type Built = { path: string; html: string; status?: 404 };
 
 /* ---------- small components ---------- */
+
+/** Sample values (preview only): a small tag and a one-line note, both behind SHOW_SAMPLE_TAGS. */
+const samplesOn = (ctx: Ctx) => ctx.mode === 'preview' && SHOW_SAMPLES;
+const sampleTag = (ctx: Ctx): Raw => (samplesOn(ctx) && SHOW_SAMPLE_TAGS ? html`<span class="sample-tag">${t(ctx, 'sample.tag')}</span>` : raw(''));
+const sampleNote = (ctx: Ctx, key: string): Raw => (samplesOn(ctx) && SHOW_SAMPLE_TAGS ? html`<p class="sample-note">${sampleTag(ctx)}<span>${t(ctx, key)}</span></p>` : raw(''));
 
 /** Heading copy: Thai breaks only between phrases. */
 const hd = (ctx: Ctx, key: string): Raw | string => (ctx.locale === 'th' ? raw(phrases(esc(t(ctx, key)))) : t(ctx, key));
@@ -59,7 +66,7 @@ function formatCard(ctx: Ctx, assets: Assets, p: Product, idSuffix: string, leve
   const alt = loc(p.altNames, ctx.locale);
   const summary = fact(ctx, p.summary);
   const heading = level === 'h2' ? html`<h2 class="h3"><a href="${href(ctx.locale, productPath(p.slug))}">${name}</a></h2>` : html`<h3><a href="${href(ctx.locale, productPath(p.slug))}">${name}</a></h3>`;
-  return html`<article class="format-card stripe-${p.stripe} arrive" id="${idSuffix}-${p.id}" data-product data-format="${p.format}" data-names="${namesForSearch(p)}">
+  return html`<article class="format-card tone-${p.tone} arrive" id="${idSuffix}-${p.id}" data-product data-format="${p.format}" data-names="${namesForSearch(p)}">
     ${packDish(ctx, assets, p, plain, idSuffix)}
     ${heading}
     ${alt.length ? html`<p class="format-card__alt">${alt.join(' · ')}</p>` : ''}
@@ -103,6 +110,27 @@ function meta(ctx: Ctx, key: string, path: string, extra: Partial<PageMeta> = {}
 }
 
 /* ---------- home ---------- */
+
+function homeQuality(ctx: Ctx): Raw {
+  const shown = [...certificates, ...sampleCertificates].filter((c) => certCard(ctx, c, ctx.buildDate));
+  if (!shown.length) return raw('');
+  return html`<section class="section quality-band" aria-labelledby="hq-h"><div class="wrap">
+    ${sectionHead(t(ctx, 'home.quality.eyebrow'), html`<span id="hq-h">${hd(ctx, 'home.quality.h2')}</span>`, t(ctx, 'home.quality.lede'))}
+    <ul class="standards" role="list">${shown.map((c) => html`<li class="arrive"><span class="standards__name">${c.standard}</span>${c.status === 'sample' ? sampleTag(ctx) : ''}</li>`)}</ul>
+    <p class="section-link">${linkArrow(href(ctx.locale, ROUTES.quality), t(ctx, 'cta.quality'))}</p>
+  </div></section>`;
+}
+
+function homeHeritage(ctx: Ctx): Raw {
+  const first = sampleTimeline.find((f) => canShow(f, ctx));
+  if (!first) return raw('');
+  const v = val(first, ctx.locale) as { what: Record<Locale, string> };
+  return html`<section class="section section--pause heritage" aria-labelledby="hh-h"><div class="wrap">
+    <p class="eyebrow">${t(ctx, 'home.heritage.eyebrow')} ${sampleTag(ctx)}</p>
+    <p class="heritage__line display" id="hh-h">${marked(v.what[ctx.locale], [first], ctx)}</p>
+    ${linkArrow(href(ctx.locale, ROUTES.about), t(ctx, 'home.heritage.cta'))}
+  </div></section>`;
+}
 
 export function home(ctx: Ctx, assets: Assets): Built {
   const h1 = tx(ctx, 'home.h1', {}, { phrases: true }) ?? html`${t(ctx, 'nav.products')}`;
@@ -165,6 +193,9 @@ ${steps.length ? html`<section class="section" aria-labelledby="process-h">
   </div>
 </section>` : ''}
 
+${homeQuality(ctx)}
+${homeHeritage(ctx)}
+
 <section class="section section--tight">
   <div class="wrap review-grid">
     ${reviewNote(ctx, 'quality module', ['Omitted on purpose: no certificate has been checked, and “documents are being prepared” wording needs the owner’s approval (brief 7.1 §5). The Quality link above is the route.'])}
@@ -206,7 +237,7 @@ export function productsIndex(ctx: Ctx, assets: Assets): Built {
         <button class="chip" type="button" aria-pressed="true" data-filter-format="">${t(ctx, 'products.filter.all')}</button>
         ${formatsPresent.map((f) => {
           const p = list.find((x) => x.format === f)!;
-          return html`<button class="chip stripe-${p.stripe}" type="button" aria-pressed="false" data-filter-format="${f}"><i aria-hidden="true"></i>${t(ctx, `format.${f}`)}</button>`;
+          return html`<button class="chip tone-${p.tone}" type="button" aria-pressed="false" data-filter-format="${f}"><i aria-hidden="true"></i>${t(ctx, `format.${f}`)}</button>`;
         })}
       </div>
     </div>
@@ -265,7 +296,7 @@ ${crumbs(ctx, [{ label: t(ctx, 'nav.home'), path: '' }, { label: t(ctx, 'nav.pro
       ${uses.length ? html`<h2 class="h3 product-sub">${t(ctx, 'product.uses')}</h2><ul class="uses" role="list">${uses.map((u) => html`<li>${marked(u, [p.uses], ctx)}</li>`)}</ul>` : ''}
       <div class="btn-row"><a class="btn btn--primary" href="${href(ctx.locale, ROUTES.oem)}#brief">${t(ctx, 'cta.oem')}</a><a class="btn btn--line" href="${href(ctx.locale, ROUTES.contact)}#contact-form">${t(ctx, 'cta.requestSpec')}</a></div>
     </div>
-    <div class="product-hero__media stripe-${p.stripe}">
+    <div class="product-hero__media tone-${p.tone}">
       ${dry
         ? html`<div class="pair${isBrand ? ' pair--wide' : ''}">
             <figure><div class="frame">${dry}</div><figcaption>${t(ctx, isBrand ? 'nav.products' : 'product.dry')} · ${credit(ctx, isBrand ? 'legacy.mrnoodles.pack' : p.media.pack!)}</figcaption></figure>
@@ -283,7 +314,7 @@ ${isBrand && brandFormats.length ? html`<section class="section section--tight b
 
 <section class="section section--tight" aria-labelledby="spec-h">
   <div class="wrap grid">
-    <div class="spec-intro"><h2 id="spec-h">${t(ctx, 'product.spec.h')}</h2><p class="muted">${t(ctx, 'product.spec.lede')}</p></div>
+    <div class="spec-intro"><h2 id="spec-h">${t(ctx, 'product.spec.h')}</h2>${SPEC_FIELDS.some((k) => p.technical[k]?.status === 'sample' && canShow(p.technical[k] as Fact<unknown>, ctx)) ? sampleNote(ctx, 'sample.spec') : html`<p class="muted">${t(ctx, 'product.spec.lede')}</p>`}</div>
     <div class="spec-body">
       <dl class="spec">
         ${specRow('format', html`${t(ctx, `format.${p.format}`)}`)}
@@ -299,7 +330,7 @@ ${isBrand && brandFormats.length ? html`<section class="section section--tight b
       <h2 class="h3 product-sub">${t(ctx, 'product.claims.h')}</h2>
       ${approvedClaims.length ? html`<ul>${approvedClaims.map((c) => html`<li>${loc(c.text, ctx.locale)}</li>`)}</ul>` : html`<p>${t(ctx, 'product.claims.none')}</p>`}
       <h2 class="h3 product-sub">${t(ctx, 'product.docs.h')}</h2>
-      ${docList(ctx, documents.filter((d) => d.productIds.includes(p.id))) ?? html`<p>${t(ctx, 'product.docs.none')} ${linkArrow(`${href(ctx.locale, ROUTES.contact)}#contact-form`, t(ctx, 'cta.requestSpec'))}</p>`}
+      ${docList(ctx, [...documents, ...sampleDocuments].filter((d) => d.productIds.includes(p.id))) ?? html`<p>${t(ctx, 'product.docs.none')} ${linkArrow(`${href(ctx.locale, ROUTES.contact)}#contact-form`, t(ctx, 'cta.requestSpec'))}</p>`}
       ${reviewNote(ctx, 'claims found on the 2014 site for this product (not shown)', [
         ...productClaims.map((c) => `${c.text.en} — needs: ${c.evidenceNeeded}`),
         ...claims.filter((c) => c.level === 'company').map((c) => `Company-level (not inherited): ${c.text.en}`),
@@ -326,9 +357,12 @@ ${ctaBand(ctx, hd(ctx, 'product.cta.h'), tx(ctx, 'products.cta.body'))}`;
 }
 
 function docList(ctx: Ctx, docs: typeof documents): Raw | null {
-  const pub = docs.filter((d) => d.status === 'current' && (ctx.mode === 'preview' || d.ownerApproved));
+  const pub = docs.filter((d) => (d.status === 'current' && (ctx.mode === 'preview' || d.ownerApproved)) || (d.status === 'sample' && samplesOn(ctx)));
   if (!pub.length) return null;
-  return html`<ul class="doc-list" role="list">${pub.map((d) => html`<li><div><strong>${loc(d.title, ctx.locale)}</strong><p class="small muted">${loc(d.scope, ctx.locale)} · ${d.locale === 'multi' ? 'ไทย / English / Tiếng Việt' : t(ctx, `lang.${d.locale}`)} · v${d.version} · ${formatDate(d.date, ctx.locale)} · ${d.fileType}, ${Math.round(d.bytes / 1024)} KB</p></div><a class="btn btn--line" href="/documents/${d.file}" download>${t(ctx, 'doc.download')}</a></li>`)}</ul>`;
+  const size = (b: number) => (b >= 1_000_000 ? `${(b / 1_048_576).toFixed(1)} MB` : `${Math.round(b / 1024)} KB`);
+  return html`${pub.some((d) => d.status === 'sample') ? sampleNote(ctx, 'sample.docs') : ''}<ul class="doc-list" role="list">${pub.map((d) => html`<li${d.status === 'sample' ? raw(' data-sample') : ''}><div><strong>${loc(d.title, ctx.locale)}</strong><p class="small muted">${loc(d.scope, ctx.locale)} · ${d.locale === 'multi' ? 'ไทย / English / Tiếng Việt' : t(ctx, `lang.${d.locale}`)} · v${d.version} · ${formatDate(d.date, ctx.locale)} · ${d.fileType}, ${size(d.bytes)}</p></div>${d.status === 'sample'
+    ? html`<a class="btn btn--line" href="${href(ctx.locale, ROUTES.contact)}?subject=documents#contact-form">${t(ctx, 'doc.request')}</a>`
+    : html`<a class="btn btn--line" href="/documents/${d.file}" download>${t(ctx, 'doc.download')}</a>`}</li>`)}</ul>`;
 }
 
 /* ---------- OEM ---------- */
@@ -352,9 +386,17 @@ export function oemPage(ctx: Ctx, assets: Assets): Built {
 ${formats.length ? html`<section class="section section--tight band" aria-labelledby="oem-formats-h"><div class="wrap">
   ${sectionHead(null, html`<span id="oem-formats-h">${hd(ctx, 'oem.formats.h')}</span>`, t(ctx, 'oem.formats.lede'))}
   <ul class="format-strip" role="list">
-    ${formats.map((p) => html`<li class="stripe-${p.stripe}"><span class="strands" data-strand="${p.strand}" aria-hidden="true"></span><a href="${href(ctx.locale, productPath(p.slug))}">${fact(ctx, p.name)}</a></li>`)}
-    ${tx(ctx, 'oem.formats.pasta') ? html`<li class="stripe-husk"><span class="strands" data-strand="fine" aria-hidden="true"></span><span>${tx(ctx, 'oem.formats.pasta')}</span></li>` : ''}
+    ${formats.map((p) => html`<li class="tone-${p.tone}"><span class="strands" data-strand="${p.strand}" aria-hidden="true"></span><a href="${href(ctx.locale, productPath(p.slug))}">${fact(ctx, p.name)}</a></li>`)}
+    ${tx(ctx, 'oem.formats.pasta') ? html`<li class="tone-cream"><span class="strands" data-strand="fine" aria-hidden="true"></span><span>${tx(ctx, 'oem.formats.pasta')}</span></li>` : ''}
   </ul>
+</div></section>` : ''}
+
+${sampleOemTerms.some((f) => canShow(f, ctx)) ? html`<section class="section section--tight" aria-labelledby="oem-glance-h"><div class="wrap grid">
+  <div class="spec-intro"><h2 id="oem-glance-h">${hd(ctx, 'oem.glance.h')}</h2>${sampleNote(ctx, 'sample.oem')}</div>
+  <dl class="spec spec-body glance">${sampleOemTerms.filter((f) => canShow(f, ctx)).map((f) => {
+    const v = val(f, ctx.locale) as { label: Record<Locale, string>; value: Record<Locale, string> };
+    return html`<div><dt>${v.label[ctx.locale]}</dt><dd>${marked(v.value[ctx.locale], [f], ctx)}</dd></div>`;
+  })}</dl>
 </div></section>` : ''}
 
 <section class="section" aria-labelledby="oem-path-h"><div class="wrap">
@@ -434,11 +476,14 @@ export function processPage(ctx: Ctx, assets: Assets): Built {
 
 export function certCard(ctx: Ctx, c: Certificate, today: string): Raw | null {
   // QLT-02: an expired, superseded, pending or private certificate never shows as current.
-  if (c.status !== 'current' || c.expiresOn < today) return null;
-  if (ctx.mode === 'production' && !c.ownerApproved) return null;
-  return html`<li class="cert">
+  // Sample entries (preview only) show how real certificates will look; they never claim "current".
+  const isSample = c.status === 'sample';
+  if (isSample) { if (!samplesOn(ctx)) return null; }
+  else if (c.status !== 'current' || c.expiresOn < today) return null;
+  if (!isSample && ctx.mode === 'production' && !c.ownerApproved) return null;
+  return html`<li class="cert${isSample ? ' cert--sample' : ''}"${isSample ? raw(' data-sample') : ''}>
     <h3>${c.standard}</h3>
-    <p class="status status--current">${t(ctx, 'cert.current')}</p>
+    ${isSample ? html`<p class="status status--sample">${t(ctx, 'cert.sample')}</p>` : html`<p class="status status--current">${t(ctx, 'cert.current')}</p>`}
     <dl>
       <dt>${t(ctx, 'cert.scope')}</dt><dd>${loc(c.scope, ctx.locale)}</dd>
       <dt>${t(ctx, 'cert.holder')}</dt><dd>${c.operator} · ${c.facility}</dd>
@@ -451,7 +496,8 @@ export function certCard(ctx: Ctx, c: Certificate, today: string): Raw | null {
 }
 
 export function qualityPage(ctx: Ctx, assets: Assets): Built {
-  const cards = certificates.map((c) => certCard(ctx, c, ctx.buildDate)).filter(Boolean) as Raw[];
+  const cards = [...certificates, ...sampleCertificates].map((c) => certCard(ctx, c, ctx.buildDate)).filter(Boolean) as Raw[];
+  const sampleCards = samplesOn(ctx) && sampleCertificates.length > 0;
   const check = processSteps.find((s) => s.id === 'process.check')!;
   const checkV = canShow(check, ctx) ? (val(check, ctx.locale) as { body: Record<Locale, string> }).body[ctx.locale] : null;
   const main = html`
@@ -460,7 +506,7 @@ export function qualityPage(ctx: Ctx, assets: Assets): Built {
 </div></section>
 <section class="section section--tight" aria-labelledby="register-h"><div class="wrap">
   <h2 id="register-h" class="h3">${t(ctx, 'quality.register.h')}</h2>
-  ${cards.length ? html`<ul class="cert-list" role="list">${cards}</ul>` : html`<div class="register-empty">
+  ${cards.length ? html`${sampleCards ? sampleNote(ctx, 'sample.certs') : ''}<ul class="cert-list" role="list">${cards}</ul>` : html`<div class="register-empty">
     <h3>${hd(ctx, 'quality.empty.h')}</h3>
     <p>${t(ctx, 'quality.empty.body')}</p>
     <div class="btn-row"><a class="btn btn--primary" href="${href(ctx.locale, ROUTES.contact)}?subject=documents#contact-form">${t(ctx, 'cta.requestDocs')}</a></div>
@@ -476,7 +522,7 @@ export function qualityPage(ctx: Ctx, assets: Assets): Built {
 </div></section>
 <section class="section section--tight" aria-labelledby="docs-h"><div class="wrap">
   <h2 id="docs-h" class="h3">${t(ctx, 'quality.docs.h')}</h2>
-  ${docList(ctx, documents) ?? html`<p>${t(ctx, 'quality.docs.none')}</p>`}
+  ${docList(ctx, [...documents, ...sampleDocuments]) ?? html`<p>${t(ctx, 'quality.docs.none')}</p>`}
 </div></section>
 ${ctaBand(ctx, t(ctx, 'cta.requestDocs'), null)}`;
   return page(ctx, assets, {
@@ -486,6 +532,15 @@ ${ctaBand(ctx, t(ctx, 'cta.requestDocs'), null)}`;
 }
 
 /* ---------- about ---------- */
+
+function timeline(ctx: Ctx): Raw | null {
+  const items = sampleTimeline.filter((f) => canShow(f, ctx));
+  if (!items.length) return null;
+  return html`${sampleNote(ctx, 'sample.timeline')}<ol class="timeline" role="list">${items.map((f) => {
+    const v = val(f, ctx.locale) as { when: Record<Locale, string>; what: Record<Locale, string> };
+    return html`<li class="arrive"><span class="timeline__when">${v.when[ctx.locale]}</span><span class="timeline__dot" aria-hidden="true"></span><p class="timeline__what">${marked(v.what[ctx.locale], [f], ctx)}</p></li>`;
+  })}</ol>`;
+}
 
 export function aboutPage(ctx: Ctx, assets: Assets): Built {
   const addr = canShow(address, ctx) ? (val(address, ctx.locale) as string[]) : null;
@@ -501,7 +556,7 @@ export function aboutPage(ctx: Ctx, assets: Assets): Built {
 </div></section>
 <section class="section band" aria-labelledby="history-h"><div class="wrap">
   <h2 id="history-h" class="h3">${t(ctx, 'about.history.h')}</h2>
-  ${tx(ctx, 'about.history.body') ? html`<p class="prose">${tx(ctx, 'about.history.body')}</p>` : ''}
+  ${timeline(ctx) ?? (tx(ctx, 'about.history.body') ? html`<p class="prose">${tx(ctx, 'about.history.body')}</p>` : '')}
   ${reviewNote(ctx, 'heritage timeline candidates (D04) — the timeline renders here once dated evidence is approved', heritageCandidates.map((f) => `${String(val(f, 'en'))} — ${f.status}. ${f.note ?? ''}`))}
   ${reviewNote(ctx, 'legal identity (shown only here until D02)', [
     `${String(val(legalNameTh, 'th'))} / ${String(val(legalNameEn, 'en'))} · registration ${String(val(registration, 'en'))}`,
@@ -547,6 +602,7 @@ export function contactPage(ctx: Ctx, assets: Assets): Built {
     <div>
       <h2 class="h3">${t(ctx, 'contact.channels.h')}</h2>
       <ul class="channel-list" role="list">${join(contactLines(ctx))}</ul>
+      ${canShow(sampleHours, ctx) ? html`<h2 class="h3 hours-h">${t(ctx, 'contact.hours.h')} ${sampleTag(ctx)}</h2><p>${marked(String(val(sampleHours, ctx.locale)), [sampleHours], ctx)}</p>` : ''}
       ${reviewNote(ctx, 'contacts', [`Hours not shown: ${String(val(hours, 'en'))} appears only in Yellow Pages (D10).`, 'Two different mobile numbers appear in sources; neither is shown (may belong to individuals).', `Email: ${String(val(email, 'en'))} (2014 site). A company-domain inbox may be preferred.`, `Phone: ${(val(phone, 'en') as { tel: string }).tel} — agrees across 2014 site, Yellow Pages and THIC.`])}
     </div>
     <div>

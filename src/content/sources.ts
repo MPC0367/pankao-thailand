@@ -68,6 +68,18 @@ sources.push({
   limitations: 'Not evidence of anything the company does. Every fact citing it stays unapproved until the company confirms it.',
 });
 
+sources.push({
+  id: 'O2-SAMPLE',
+  title: 'O2 sample values for the client presentation preview (not company data)',
+  url: 'src/content/samples.ts',
+  publisher: 'O2 Design Studio',
+  sourceType: 'first-party',
+  retrievedAt: '2026-11-19',
+  appliesToEntity: 'manufacturer',
+  claimsSupported: ['Typical specification values, sample certificate and document entries, sample timeline and OEM terms'],
+  limitations: 'Illustrative only. Shown in the private preview with a Sample tag; never owner-approvable; never in a production build.',
+});
+
 export const sourceById = new Map(sources.map((s) => [s.id, s]));
 
 /** The 2024 [removed] restaurant company: kept only as a blocked record. */

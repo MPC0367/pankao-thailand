@@ -105,7 +105,7 @@ test('legacy claims (gluten-free, organic, no MSG…) never reach public text', 
 });
 
 test('PRD-07 / AC-PRD-04: unknown SKU fields say "Not yet published", never zero, N/A or a borrowed value', () => {
-  const html = P.productDetail(ctx('preview', 'en', 'products/rice-flake-guay-jub/'), A, productById.get('rice-flake-guay-jub')!).html;
+  const html = P.productDetail(ctx('production', 'en', 'products/rice-flake-guay-jub/'), A, productById.get('rice-flake-guay-jub')!).html;
   const spec = html.slice(html.indexOf('<dl class="spec">'), html.indexOf('</dl>'));
   assert.ok((spec.match(/Not yet published/g) ?? []).length >= 9);
   assert.doesNotMatch(spec, />\s*(0|N\/A|No|None|-)\s*</);
@@ -159,6 +159,18 @@ test('PRD-08 / AC-PRD-03: an approved specification shows title, language, versi
   } finally {
     documents.pop();
   }
+});
+
+test('samples: shown and tagged in the preview, absent from production, never approvable', () => {
+  const pre = P.productDetail(ctx('preview', 'en', 'products/rice-vermicelli/'), A, productById.get('rice-vermicelli')!).html;
+  for (const s of ['24 months from production', 'About 0.8 mm', 'class="sample-tag"', 'data-status="sample"']) assert.ok(pre.includes(s), s);
+  const prod = P.productDetail(ctx('production', 'en', 'products/rice-vermicelli/'), A, productById.get('rice-vermicelli')!).html;
+  for (const s of ['24 months from production', 'About 0.8 mm', 'sample-tag', 'SAMPLE-']) assert.ok(!prod.includes(s), s);
+  const q = P.qualityPage(ctx('production', 'en', 'quality/'), A).html;
+  assert.ok(!q.includes('BRCGS') && !q.includes('SAMPLE-'), 'no sample certificate in production');
+  const qp = P.qualityPage(ctx('preview', 'en', 'quality/'), A).html;
+  assert.ok(qp.includes('Sample entry') && !qp.includes('>Current<'), 'sample certificates never say Current');
+  assert.ok(guardOutput('x.html', '<span class="sample-tag">Sample</span>', { mode: 'production', allowedMedia: new Set() }).length > 0);
 });
 
 test('heading copy and form strings exist for every locale', () => {

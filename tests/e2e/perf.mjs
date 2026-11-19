@@ -27,7 +27,7 @@ async function run(path, warmCtx) {
   const third = [];
   cdp.on('Network.loadingFinished', () => {});
   const typeById = new Map();
-  cdp.on('Network.responseReceived', (e) => { typeById.set(e.requestId, e.type); if (!e.response.url.startsWith(BASE)) third.push(e.response.url); });
+  cdp.on('Network.responseReceived', (e) => { typeById.set(e.requestId, e.type); if (!e.response.url.startsWith(BASE) && !/^(data|blob):/.test(e.response.url)) third.push(e.response.url); });
   cdp.on('Network.loadingFinished', (e) => {
     const t = (typeById.get(e.requestId) ?? 'Other').toLowerCase();
     const k = t in bytes ? t : 'other';
