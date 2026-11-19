@@ -4,6 +4,21 @@
 
 A new website for the rice-noodle factory in Sai Noi, Nonthaburi (บริษัท สหปั้นข้าว จำกัด), built from scratch in Thai, English and Vietnamese. It is finished and tested **on O2's computer only**: nothing is online, nothing was sent to anyone, and the company has not yet confirmed any of the facts it shows. The preview marks every unconfirmed fact; the "production" version of the same site already removes them automatically, which is why it currently shows almost nothing about products. Twenty decisions from the company stand between this and publication; they are listed below in plain words.
 
+## Premium audit (20 Nov 2026): built on branch `o2/premium-audit-2026-11-20` (`1f40bbb`), not yet on the public preview
+
+The owner sent `Pankao_Thailand_Live_UI_UX_Premium_Audit.pdf` (31 pages) with no words. Every buildable item is built; the record, item by item, is `docs/PREMIUM_AUDIT_2026-11-20.md`. The headlines:
+- **Phones:** one-row header and a one-line dismissible preview strip, 106 px at worst (audit: ≤ 112).
+- **Homepage:** 8.3 phone screens, down from 11.9.
+- **OEM:** 7 required inputs with an optional second step, "Prepare my brief", and four of the company's own photographs.
+- **Packs:** the real packs re-staged on cream.
+- **Archive:** factory, trays, building and lab enhanced (non-generative), with an edit log for every image.
+- **Media:** `MEDIA_INVENTORY.md` classifies all 61 legacy files.
+- **Captions:** one system, a filled dot for the company's own photos and an open ring for illustrative ones.
+- **Opening:** the full ~4 s logo once per session, then instant (the owner chose this over the audit's 1.4 s).
+- **Waiting on the company:** new photography, certificates, contacts and native review.
+
+**To publish:** fast-forward `o2/pankao-greenfield-build` to the branch, then run `npm run pages:deploy` (on the owner's word).
+
 ## Fourth round (20 Nov 2026) — on the public preview since 20 Nov 2026 (`gh-pages` `eb5971e` from `3da9420`; the way back `43724cc`)
 
 - **Loading animation fixed** ("where is my loading animation"):
