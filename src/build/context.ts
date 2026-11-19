@@ -6,7 +6,7 @@ import { common } from '../content/copy-common.ts';
 import { pages } from '../content/copy-pages.ts';
 import { allCompanyFacts, brandName } from '../content/facts.ts';
 import { products } from '../content/products.ts';
-import { SHOW_SAMPLES } from '../content/presentation.ts';
+import { BASE, PUBLIC_PREVIEW, SHOW_SAMPLES } from '../content/presentation.ts';
 import { sampleHours, sampleOemTerms, sampleTimeline } from '../content/samples.ts';
 import type { CopyEntry, EvidenceStatus, Fact, Locale, Localized, Mode, Value } from '../content/types.ts';
 import { esc, raw, type Raw } from './html.ts';
@@ -78,7 +78,7 @@ export function factsShowable(ids: string[], ctx: Pick<Ctx, 'mode'>): boolean {
 }
 
 function needsMark(fs: Fact<unknown>[], ctx: Ctx): boolean {
-  return ctx.mode === 'preview' && fs.some((f) => !f.ownerApproved);
+  return ctx.mode === 'preview' && !PUBLIC_PREVIEW && fs.some((f) => !f.ownerApproved);
 }
 
 function markAttrs(fs: Fact<unknown>[], ctx: Ctx): string {
@@ -175,5 +175,5 @@ export const ROUTES = {
   accessibility: 'accessibility/',
 } as const;
 
-export const href = (locale: Locale, path: string): string => `/${locale}/${path}`;
+export const href = (locale: Locale, path: string): string => `${BASE}/${locale}/${path}`;
 export const productPath = (slug: string): string => `products/${slug}/`;

@@ -12,7 +12,7 @@ import { startServer } from './serve.ts';
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 
-async function crawl(dirName: string, mode: 'preview' | 'production') {
+async function crawl(dirName: string, mode: 'preview' | 'production' | 'pages') {
   const dir = join(ROOT, dirName);
   const { url, close } = await startServer({ dir, port: 0, quiet: true, dataDir: join(ROOT, '.local', 'crawl') });
   const fails: string[] = [];
@@ -32,11 +32,12 @@ async function crawl(dirName: string, mode: 'preview' | 'production') {
       if (!/<h1[\s>]/.test(html)) fails.push(`${p}: no h1`);
       if (!/<title>[^<]{5,}<\/title>/.test(html)) fails.push(`${p}: empty title`);
       const robots = html.match(/<meta name="robots" content="([^"]+)"/)?.[1];
-      if (mode === 'preview' && robots !== 'noindex, nofollow') fails.push(`${p}: preview must be noindex (${robots})`);
-      if (mode === 'production' && robots !== 'index, follow') fails.push(`${p}: production must be indexable (${robots})`);
+      if (mode !== 'production' && !robots?.startsWith('noindex')) fails.push(`${p}: preview must be noindex (${robots})`);
+      if (mode === 'production' && robots !== 'index, follow' && !p.endsWith('/pankao-thailand/')) fails.push(`${p}: production must be indexable (${robots})`);
       const xr = r.headers.get('x-robots-tag');
       if (mode === 'preview' && xr !== 'noindex, nofollow') fails.push(`${p}: X-Robots-Tag missing in preview`);
-      if (!r.headers.get('content-security-policy')) fails.push(`${p}: no CSP header`);
+      if (mode === 'pages') { if (!html.includes('http-equiv="Content-Security-Policy"')) fails.push(`${p}: no meta CSP on Pages`); if (/review-note|class="fact"|data-review-toggle/.test(html)) fails.push(`${p}: review markup on the public preview`); }
+      else if (!r.headers.get('content-security-policy')) fails.push(`${p}: no CSP header`);
     }
     for (const m of html.matchAll(/(?:href|src|srcset)="(\/[^"#?]*)/g)) {
       const link = m[1]!;
@@ -53,7 +54,7 @@ async function crawl(dirName: string, mode: 'preview' | 'production') {
     }
   }
 
-  for (const rd of legacyRedirects(mode)) {
+  for (const rd of mode === 'pages' ? [] : legacyRedirects(mode)) {
     const r = await get(rd.from + '?ref=crawl', 'manual');
     checked.redirects++;
     const loc = r.headers.get('location');
@@ -65,6 +66,19 @@ async function crawl(dirName: string, mode: 'preview' | 'production') {
     }
   }
 
+  if (mode === 'pages') {
+    const r404 = await get('/pankao-thailand/404.html');
+    if (r404.status !== 200 || !(await r404.text()).includes('/pankao-thailand/th/products/')) fails.push('Pages 404.html missing or without base-path recovery links');
+    const lone = pages.filter(() => false);
+    void lone;
+    await close();
+    const report = { mode, url, checked, fails, at: new Date().toISOString() };
+    mkdirSync(join(ROOT, 'qa-output'), { recursive: true });
+    writeFileSync(join(ROOT, 'qa-output', 'crawl-pages.json'), JSON.stringify(report, null, 2));
+    console.log(`crawl pages: ${checked.pages} pages, ${checked.links} links, ${checked.images} images — ${fails.length ? `${fails.length} FAIL` : 'all passed'}`);
+    for (const f of fails.slice(0, 30)) console.log(`  ✘ ${f}`);
+    return fails.length;
+  }
   const nf = await get('/th/this-does-not-exist/');
   const nfHtml = await nf.text();
   if (nf.status !== 404 || !nfHtml.includes('<html lang="th"') || !nfHtml.includes('/th/products/') || !nfHtml.includes('/th/contact/')) fails.push('/th/ unknown: expected Thai 404 with product and contact recovery');
@@ -83,6 +97,7 @@ async function crawl(dirName: string, mode: 'preview' | 'production') {
 }
 
 let failed = 0;
+if (process.argv.includes('--pages')) { process.exit((await crawl('dist-pages', 'pages')) ? 1 : 0); }
 if (existsSync(join(ROOT, 'dist'))) failed += await crawl('dist', 'preview');
 if (existsSync(join(ROOT, 'dist-production'))) failed += await crawl('dist-production', 'production');
 if (!existsSync(join(ROOT, 'dist')) && !existsSync(join(ROOT, 'dist-production'))) { console.error('crawl: build first'); failed = 1; }

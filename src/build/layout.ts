@@ -4,12 +4,12 @@ import { address, brandDescriptor, brandName, email, fax, location, phone } from
 import { formatProducts } from '../content/products.ts';
 import { LOCALES, type Locale } from '../content/types.ts';
 import { pkMark } from './mark.ts';
-import { MARK_APPROVED, SHOW_LOADER } from '../content/presentation.ts';
+import { BASE, MARK_APPROVED, ORIGIN, PUBLIC_PREVIEW, SHOW_LOADER } from '../content/presentation.ts';
 import { canShow, fact, formatDate, href, loc, ROUTES, t, val, type Ctx } from './context.ts';
 import { attrs, html, join, raw, type Raw } from './html.ts';
 import type { Assets } from './assets-out.ts';
 
-export const SITE_ORIGIN = 'https://www.pankaothai.com';
+export const SITE_ORIGIN = ORIGIN;
 
 export type PageMeta = {
   title: string; // already localized, without brand suffix
@@ -112,6 +112,7 @@ function loader(ctx: Ctx): Raw {
 
 function previewBar(ctx: Ctx): Raw {
   if (ctx.mode !== 'preview') return raw('');
+  if (PUBLIC_PREVIEW) return html`<div class="preview-bar" role="region" aria-label="O2 preview"><div class="wrap"><p>${t(ctx, 'preview.public')}</p></div></div>`;
   return html`<div class="preview-bar" role="region" aria-label="O2 preview">
   <div class="wrap">
     <p>${t(ctx, 'preview.text')}</p>
@@ -205,8 +206,9 @@ ${ogImage}
 <meta name="twitter:card" content="summary">
 <meta name="theme-color" content="#f7f2e7">
 <meta name="format-detection" content="telephone=no">
-<link rel="preload" href="/fonts/trirong-600-${fontSubset}.woff2" as="font" type="font/woff2" crossorigin>
-${fontSubset === 'latin' ? '' : '<link rel="preload" href="/fonts/trirong-600-latin.woff2" as="font" type="font/woff2" crossorigin>'}
+${PUBLIC_PREVIEW ? `<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src https://www.google.com; form-action 'self'; base-uri 'self'; object-src 'none'">` : ''}
+<link rel="preload" href="${BASE}/fonts/trirong-600-${fontSubset}.woff2" as="font" type="font/woff2" crossorigin>
+${fontSubset === 'latin' ? '' : `<link rel="preload" href="${BASE}/fonts/trirong-600-latin.woff2" as="font" type="font/woff2" crossorigin>`}
 ${assets.glisseCss ? `<link rel="stylesheet" id="glisse-styles" href="${assets.glisseCss}">` : ''}
 <link rel="stylesheet" href="${assets.css}">
 <script src="${assets.headJs}"></script>

@@ -84,7 +84,7 @@ export function validateContent(): string[] {
 
 const MARKERS = [/\[VERIFY/i, /\bTODO\b/, /\bTBC\b/, /lorem ipsum/i, /\bLOREM\b/, /\[object Object\]/, /\bundefined\b/, /\bNaN\b/];
 
-export type GuardContext = { mode: Mode; allowedMedia: Set<string> };
+export type GuardContext = { mode: Mode; allowedMedia: Set<string>; publicPreview?: boolean };
 
 /** Returns problems found in one generated text file. */
 export function guardOutput(file: string, text: string, g: GuardContext): string[] {
@@ -93,6 +93,10 @@ export function guardOutput(file: string, text: string, g: GuardContext): string
   for (const m of MARKERS) if (m.test(text)) out.push(`${file}: contains internal marker ${m}`);
   const regs = text.match(/\b0\d{12}\b/g) ?? [];
   for (const reg of regs) if (reg !== MANUFACTURER_REGISTRATION) out.push(`${file}: unknown 13-digit registration ${reg}`);
+  if (g.publicPreview && file.endsWith('.html')) {
+    for (const s of ['review-note', 'class="fact"', 'data-review-toggle', 'data-backend="mock"']) if (text.includes(s)) out.push(`${file}: public preview contains private review markup "${s}"`);
+    if (!text.includes('<meta name="robots" content="noindex')) out.push(`${file}: public preview page without noindex`);
+  }
   if (g.mode === 'production') {
     if (text.includes(MANUFACTURER_REGISTRATION)) out.push(`${file}: legal registration rendered without owner approval (D02)`);
     for (const s of ['class="fact"', 'review-note', 'preview-bar', 'data-review-toggle', 'noindex', 'sample-tag', 'data-status="sample"', 'SAMPLE-', 'data-sample']) if (text.includes(s) && !(s === 'noindex' && (/404/.test(file) || file === 'index.html'))) out.push(`${file}: production output contains preview-only markup "${s}"`);

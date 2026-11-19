@@ -7,5 +7,6 @@
     var l = langs[i].slice(0, 2);
     if (l === 'th' || l === 'en' || l === 'vi') { pick = l; break; }
   }
-  location.replace('/' + pick + '/' + location.search + location.hash);
+  var base = location.pathname.replace(/index\.html$/, '').replace(/\/$/, '');
+  location.replace(base + '/' + pick + '/' + location.search + location.hash);
 })();

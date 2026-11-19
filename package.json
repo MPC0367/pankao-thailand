@@ -20,7 +20,9 @@
     "e2e": "node tests/e2e/run.mjs",
     "check": "npm run typecheck && npm test && npm run build && npm run build:production && npm run crawl && npm run reports",
     "reports": "node scripts/reports.ts",
-    "perf": "node tests/e2e/perf.mjs"
+    "perf": "node tests/e2e/perf.mjs",
+    "build:pages": "PANKAO_BASE=/pankao-thailand PANKAO_ORIGIN=https://mpc0367.github.io PANKAO_PUBLIC_PREVIEW=on node src/build/build.ts --mode=preview --out=dist-pages/pankao-thailand",
+    "crawl:pages": "node scripts/crawl.ts --pages"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",

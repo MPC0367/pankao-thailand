@@ -19,7 +19,8 @@ import { products } from '../content/products.ts';
 import { LOCALES, type Locale, type Mode } from '../content/types.ts';
 import type { Assets, MediaOut } from './assets-out.ts';
 import { canShow, href, productPath, ROUTES, t, type Ctx } from './context.ts';
-import { SITE_ORIGIN } from './layout.ts';
+import { BASE, PUBLIC_PREVIEW } from '../content/presentation.ts';
+import { O2_CREDIT, SITE_ORIGIN } from './layout.ts';
 import { assetAllowed } from './media.ts';
 import * as P from './pages.ts';
 import { BuildError, factApprovalSummary, guardOutput, validateContent } from './validate.ts';
@@ -67,7 +68,7 @@ function write(outDir: string, rel: string, data: string | Buffer): void {
 }
 
 function buildAssets(outDir: string, mode: Mode): Assets {
-  const css = minifyCss(readFileSync(join(ROOT, 'src/fonts/fonts.css'), 'utf8') + '\n' + readFileSync(join(ROOT, 'src/styles/site.css'), 'utf8'));
+  const css = minifyCss(readFileSync(join(ROOT, 'src/fonts/fonts.css'), 'utf8').replaceAll('url("/fonts/', `url("${BASE}/fonts/`) + '\n' + readFileSync(join(ROOT, 'src/styles/site.css'), 'utf8'));
   const cssName = `assets/site.${hash(css)}.css`;
   write(outDir, cssName, css);
   const head = readFileSync(join(ROOT, 'src/client/head.js'), 'utf8');
@@ -109,13 +110,13 @@ function buildAssets(outDir: string, mode: Mode): Assets {
     execFileSync('cwebp', ['-quiet', ...(ext === '.png' ? ['-lossless'] : ['-q', '82']), src, '-o', join(outDir, webpName)]);
     const webpSmaller = statSync(join(outDir, webpName)).size < buf.length;
     if (!webpSmaller) rmSync(join(outDir, webpName));
-    media.set(a.id, { src: `/${name}`, webp: webpSmaller ? `/${webpName}` : undefined, width: a.width, height: a.height });
+    media.set(a.id, { src: `${BASE}/${name}`, webp: webpSmaller ? `${BASE}/${webpName}` : undefined, width: a.width, height: a.height });
   }
-  return { css: `/${cssName}`, headJs: `/${headName}`, siteJs: `/${siteName}`, glassJs: `/${glassName}`, glisseCss: `/${glisseName}`, media };
+  return { css: `${BASE}/${cssName}`, headJs: `${BASE}/${headName}`, siteJs: `${BASE}/${siteName}`, glassJs: `${BASE}/${glassName}`, glisseCss: `${BASE}/${glisseName}`, media };
 }
 
 function rootPage(mode: Mode, assets: Assets, rootJs: string): string {
-  const links = LOCALES.map((l) => `<li><a href="/${l}/" hreflang="${l}" lang="${l}">${t({ locale: l }, `lang.${l}`)}</a></li>`).join('');
+  const links = LOCALES.map((l) => `<li><a href="${BASE}/${l}/" hreflang="${l}" lang="${l}">${t({ locale: l }, `lang.${l}`)}</a></li>`).join('');
   return `<!doctype html>
 <html lang="th" class="no-js" data-mode="${mode}">
 <head>
@@ -123,10 +124,11 @@ function rootPage(mode: Mode, assets: Assets, rootJs: string): string {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${t({ locale: 'th' }, 'root.title')} · ${t({ locale: 'en' }, 'root.title')} · ${t({ locale: 'vi' }, 'root.title')}</title>
 <meta name="robots" content="noindex, follow">
-<link rel="canonical" href="${SITE_ORIGIN}/th/">
-${LOCALES.map((l) => `<link rel="alternate" hreflang="${l}" href="${SITE_ORIGIN}/${l}/">`).join('\n')}
-<link rel="alternate" hreflang="x-default" href="${SITE_ORIGIN}/th/">
-<noscript><meta http-equiv="refresh" content="0; url=/th/"></noscript>
+${PUBLIC_PREVIEW ? `<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'">` : ''}
+<link rel="canonical" href="${SITE_ORIGIN}${BASE}/th/">
+${LOCALES.map((l) => `<link rel="alternate" hreflang="${l}" href="${SITE_ORIGIN}${BASE}/${l}/">`).join('\n')}
+<link rel="alternate" hreflang="x-default" href="${SITE_ORIGIN}${BASE}/th/">
+<noscript><meta http-equiv="refresh" content="0; url=${BASE}/th/"></noscript>
 <link rel="stylesheet" href="${assets.css}">
 <script src="${rootJs}"></script>
 </head>
@@ -135,6 +137,7 @@ ${LOCALES.map((l) => `<link rel="alternate" hreflang="${l}" href="${SITE_ORIGIN}
 <h1 class="h2">${t({ locale: 'th' }, 'root.title')} <span lang="en">· ${t({ locale: 'en' }, 'root.title')}</span> <span lang="vi">· ${t({ locale: 'vi' }, 'root.title')}</span></h1>
 <ul class="root-langs" role="list">${links}</ul>
 </div></main>
+<footer class="root-foot"><div class="wrap">${O2_CREDIT}</div></footer>
 </body>
 </html>
 `;
@@ -174,7 +177,7 @@ export function build(mode: Mode, opts: { outDir?: string; buildDate?: string; q
   const buildDate = opts.buildDate ?? new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok' }).format(new Date());
 
   const assets = buildAssets(outDir, mode);
-  const rootJs = `/assets/${readdirSync(join(outDir, 'assets')).find((f) => f.startsWith('root.'))!}`;
+  const rootJs = `${BASE}/assets/${readdirSync(join(outDir, 'assets')).find((f) => f.startsWith('root.'))!}`;
   const built: P.Built[] = [];
   const pagesList: string[] = [];
 
@@ -201,9 +204,14 @@ export function build(mode: Mode, opts: { outDir?: string; buildDate?: string; q
   write(outDir, '404.html', built.find((b) => b.path === 'th/404.html')!.html);
 
   // Redirects: legacy pages → modern locale routes (one hop, 301). Host/protocol variants are zone rules (docs/RUNBOOK.md).
-  const redirects = legacyRedirects(mode);
-  write(outDir, '_redirects', redirects.map((r) => `${r.from} ${r.to} 301`).join('\n') + '\n');
-  write(outDir, '_headers', headersFile(mode));
+  if (PUBLIC_PREVIEW) {
+    // GitHub Pages: no _redirects/_headers (a meta CSP and meta noindex stand in); no Jekyll processing.
+    write(outDir, '.nojekyll', '');
+  } else {
+    const redirects = legacyRedirects(mode);
+    write(outDir, '_redirects', redirects.map((r) => `${r.from} ${r.to} 301`).join('\n') + '\n');
+    write(outDir, '_headers', headersFile(mode));
+  }
   if (mode === 'production') {
     write(outDir, 'robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${SITE_ORIGIN}/sitemap.xml\n`);
     const urls = pagesList.map((p) => {
@@ -212,7 +220,7 @@ export function build(mode: Mode, opts: { outDir?: string; buildDate?: string; q
       return `  <url>\n    <loc>${SITE_ORIGIN}${p}</loc>\n    <lastmod>${buildDate}</lastmod>\n${alts}\n    <xhtml:link rel="alternate" hreflang="x-default" href="${SITE_ORIGIN}/th/${path}"/>\n  </url>`;
     });
     write(outDir, 'sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls.join('\n')}\n</urlset>\n`);
-  } else {
+  } else if (!PUBLIC_PREVIEW) {
     write(outDir, 'robots.txt', 'User-agent: *\nDisallow: /\n');
   }
 
@@ -224,7 +232,7 @@ export function build(mode: Mode, opts: { outDir?: string; buildDate?: string; q
   const problems: string[] = [];
   for (const f of files) {
     if (!/\.(html|xml|txt|json)$|_redirects$|_headers$/.test(f)) continue;
-    problems.push(...guardOutput(relative(outDir, f), readFileSync(f, 'utf8'), { mode, allowedMedia }));
+    problems.push(...guardOutput(relative(outDir, f), readFileSync(f, 'utf8'), { mode, allowedMedia, publicPreview: PUBLIC_PREVIEW }));
   }
   if (problems.length) throw new BuildError(`output guards failed:\n  ${problems.join('\n  ')}`);
 
@@ -245,7 +253,8 @@ export function build(mode: Mode, opts: { outDir?: string; buildDate?: string; q
     files: files.map((f) => ({ path: relative(outDir, f), sha256: createHash('sha256').update(readFileSync(f)).digest('hex') })),
     blockers,
   };
-  writeFileSync(join(outDir, 'release-manifest.json'), JSON.stringify(manifest, null, 2));
+  // The manifest is O2's release record; a public preview keeps it beside the site, not in it.
+  writeFileSync(PUBLIC_PREVIEW ? join(outDir, '..', 'release-manifest.json') : join(outDir, 'release-manifest.json'), JSON.stringify(manifest, null, 2));
   if (!opts.quiet) {
     console.log(`build (${mode}): ${pagesList.length} pages, ${files.length} files → ${relative(ROOT, outDir) || outDir}`);
     console.log(`  guards: passed · facts owner-approved: ${facts.approved}/${facts.total} · release blockers: ${blockers.length}`);
@@ -255,8 +264,9 @@ export function build(mode: Mode, opts: { outDir?: string; buildDate?: string; q
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   const mode = (process.argv.find((a) => a.startsWith('--mode='))?.split('=')[1] ?? 'preview') as Mode;
+  const out = process.argv.find((a) => a.startsWith('--out='))?.split('=')[1];
   try {
-    build(mode);
+    build(mode, out ? { outDir: resolve(ROOT, out) } : {});
   } catch (e) {
     console.error(e instanceof BuildError ? `BUILD FAILED\n${e.message}` : e);
     process.exit(1);

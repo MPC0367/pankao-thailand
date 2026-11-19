@@ -15,7 +15,7 @@ import { esc, html, join, raw, type Raw } from './html.ts';
 import { ARROW, contactLines, document, PIN, type PageMeta } from './layout.ts';
 import { assetImg, credit, packDish, strandPlate } from './media.ts';
 import { breadcrumbs, organization, productLd } from './seo.ts';
-import { SHOW_SAMPLES, SHOW_SAMPLE_TAGS } from '../content/presentation.ts';
+import { BASE, PUBLIC_PREVIEW, SHOW_SAMPLES, SHOW_SAMPLE_TAGS } from '../content/presentation.ts';
 import { sampleCertificates, sampleDocuments, sampleHours, sampleOemTerms, sampleTimeline } from '../content/samples.ts';
 
 export type Built = { path: string; html: string; status?: 404 };
@@ -33,7 +33,7 @@ const hd = (ctx: Ctx, key: string): Raw | string => (ctx.locale === 'th' ? raw(p
 const linkArrow = (url: string, label: string, extra = '') => html`<a class="link-arrow" href="${url}"${raw(extra)}><span>${label}</span>${ARROW}</a>`;
 
 function reviewNote(ctx: Ctx, title: string, items: (string | Raw)[]): Raw {
-  if (ctx.mode !== 'preview') return raw('');
+  if (ctx.mode !== 'preview' || PUBLIC_PREVIEW) return raw('');
   return html`<aside class="review-note" lang="en" aria-label="O2 review note"><strong>Review note — ${title}</strong>${items.length ? html`<ul>${items.map((i) => html`<li>${i}</li>`)}</ul>` : ''}</aside>`;
 }
 
@@ -362,7 +362,7 @@ function docList(ctx: Ctx, docs: typeof documents): Raw | null {
   const size = (b: number) => (b >= 1_000_000 ? `${(b / 1_048_576).toFixed(1)} MB` : `${Math.round(b / 1024)} KB`);
   return html`${pub.some((d) => d.status === 'sample') ? sampleNote(ctx, 'sample.docs') : ''}<ul class="doc-list" role="list">${pub.map((d) => html`<li${d.status === 'sample' ? raw(' data-sample') : ''}><div><strong>${loc(d.title, ctx.locale)}</strong><p class="small muted">${loc(d.scope, ctx.locale)} · ${d.locale === 'multi' ? 'ไทย / English / Tiếng Việt' : t(ctx, `lang.${d.locale}`)} · v${d.version} · ${formatDate(d.date, ctx.locale)} · ${d.fileType}, ${size(d.bytes)}</p></div>${d.status === 'sample'
     ? html`<a class="btn btn--line" href="${href(ctx.locale, ROUTES.contact)}?subject=documents#contact-form">${t(ctx, 'doc.request')}</a>`
-    : html`<a class="btn btn--line" href="/documents/${d.file}" download>${t(ctx, 'doc.download')}</a>`}</li>`)}</ul>`;
+    : html`<a class="btn btn--line" href="${BASE}/documents/${d.file}" download>${t(ctx, 'doc.download')}</a>`}</li>`)}</ul>`;
 }
 
 /* ---------- OEM ---------- */

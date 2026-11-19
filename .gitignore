@@ -6,3 +6,4 @@ media-source/
 qa-output/
 *.log
 .DS_Store
+dist-pages/

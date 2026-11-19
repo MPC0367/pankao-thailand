@@ -6,6 +6,7 @@
 import { diprom2024, email, phone } from '../content/facts.ts';
 import { formatProducts } from '../content/products.ts';
 import { canShow, href, ROUTES, t, val, type Ctx } from './context.ts';
+import { BASE, PUBLIC_PREVIEW } from '../content/presentation.ts';
 import { attrs, html, raw, type Raw } from './html.ts';
 
 export type FormKind = 'oem' | 'general';
@@ -40,7 +41,7 @@ function select(ctx: Ctx, kind: FormKind, name: string, options: [string, string
 }
 
 export function enquiryForm(ctx: Ctx, kind: FormKind): Raw {
-  const backend = ctx.mode === 'preview' ? 'mock' : 'none';
+  const backend = ctx.mode === 'preview' && !PUBLIC_PREVIEW ? 'mock' : 'none';
   const formats = formatProducts.filter((p) => canShow(p.name, ctx));
   const tel = canShow(phone, ctx) ? (val(phone, ctx.locale) as { tel: string; display: Record<string, string> }) : null;
   const mail = canShow(email, ctx) ? String(val(email, ctx.locale)) : null;
@@ -133,7 +134,7 @@ export function enquiryForm(ctx: Ctx, kind: FormKind): Raw {
     briefTitle: t(ctx, kind === 'oem' ? 'brief.title.oem' : 'brief.title.general'),
   };
 
-  return html`<form class="form" id="${kind}-form" action="/api/enquiries" method="post" novalidate data-enquiry-form="${kind}" data-backend="${backend}" data-locale="${ctx.locale}"${attrs({ 'data-tel': tel?.tel ?? null, 'data-mail': mail })}>
+  return html`<form class="form" id="${kind}-form" action="${BASE}/api/enquiries" method="post" novalidate data-enquiry-form="${kind}" data-backend="${backend}" data-locale="${ctx.locale}"${attrs({ 'data-tel': tel?.tel ?? null, 'data-mail': mail })}>
   <p class="form-notice">${t(ctx, backend === 'mock' ? 'form.preview' : 'form.notConnected')}</p>
   <p class="form-notice no-js-only">${t(ctx, 'form.noJs')}</p>
   <div class="form-status js-only" data-restored hidden><p>${t(ctx, 'form.restored')}</p><div class="btn-row"><button class="btn btn--line" type="button" data-clear-draft>${t(ctx, 'form.clear')}</button></div></div>

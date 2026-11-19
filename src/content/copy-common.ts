@@ -38,6 +38,11 @@ export const common: Record<string, CopyEntry> = {
     en: 'Private preview by O2 Design Studio, not the company’s published website. Content comes from its 2014 website and public records and is not yet confirmed by the company.',
     vi: 'Bản xem trước riêng của O2 Design Studio, chưa phải trang web chính thức của công ty. Nội dung lấy từ trang web năm 2014 và hồ sơ công khai, chưa được công ty xác nhận.',
   },
+  'preview.public': {
+    th: 'พรีวิวโดย O2 Design Studio ยังไม่ใช่เว็บไซต์ทางการของบริษัท ข้อมูลที่มีป้าย “ตัวอย่าง” เป็นค่าตัวอย่างที่รอบริษัทยืนยัน',
+    en: 'Preview by O2 Design Studio, not yet the company’s official website. Values tagged “Sample” are placeholders awaiting the company’s confirmation.',
+    vi: 'Bản xem trước của O2 Design Studio, chưa phải trang web chính thức của công ty. Các giá trị gắn nhãn “Mẫu” là dữ liệu mẫu chờ công ty xác nhận.',
+  },
   'preview.toggle': { th: 'แสดงบันทึกตรวจทาน', en: 'Show review notes', vi: 'Hiện ghi chú rà soát' },
 
   'footer.products': { th: 'ผลิตภัณฑ์', en: 'Products', vi: 'Sản phẩm' },

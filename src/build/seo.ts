@@ -6,13 +6,14 @@ import { address, brandName, email, phone } from '../content/facts.ts';
 import type { Locale, Product } from '../content/types.ts';
 import { canShow, href, val, type Ctx } from './context.ts';
 import { SITE_ORIGIN } from './layout.ts';
+import { BASE } from '../content/presentation.ts';
 
 export function organization(ctx: Ctx): object[] {
   if (!canShow(brandName, ctx)) return [];
   const org: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    '@id': `${SITE_ORIGIN}/#organization`,
+    '@id': `${SITE_ORIGIN}${BASE}/#organization`,
     name: val(brandName, ctx.locale),
     url: `${SITE_ORIGIN}${href(ctx.locale, '')}`,
   };
@@ -34,11 +35,11 @@ export function organization(ctx: Ctx): object[] {
   const site = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    '@id': `${SITE_ORIGIN}/#website`,
-    url: `${SITE_ORIGIN}/`,
+    '@id': `${SITE_ORIGIN}${BASE}/#website`,
+    url: `${SITE_ORIGIN}${BASE}/`,
     name: val(brandName, ctx.locale),
     inLanguage: ['th', 'en', 'vi'],
-    publisher: { '@id': `${SITE_ORIGIN}/#organization` },
+    publisher: { '@id': `${SITE_ORIGIN}${BASE}/#organization` },
   };
   return [org, site];
 }
@@ -62,7 +63,7 @@ export function productLd(ctx: Ctx, p: Product, locale: Locale): object | null {
     category: 'Dried rice noodles',
     url: `${SITE_ORIGIN}${href(locale, `products/${p.slug}/`)}`,
   };
-  if (canShow(brandName, ctx)) o.manufacturer = { '@id': `${SITE_ORIGIN}/#organization` };
+  if (canShow(brandName, ctx)) o.manufacturer = { '@id': `${SITE_ORIGIN}${BASE}/#organization` };
   if (p.brand && canShow(p.brand, ctx) && p.format === 'brand') o.brand = { '@type': 'Brand', name: val(p.brand, locale) };
   return o;
 }
