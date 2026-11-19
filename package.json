@@ -1,0 +1,31 @@
+{
+  "name": "pankao-thailand-site",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Greenfield website for the Pankao noodle manufacturer (SAHA PANKAO COMPANY LIMITED). Local build only; publication needs the owner's separate release instruction.",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "media": "node scripts/media.ts",
+    "build": "node src/build/build.ts --mode=preview",
+    "build:production": "node src/build/build.ts --mode=production",
+    "serve": "node scripts/serve.ts --dir=dist --port=4530",
+    "serve:production": "node scripts/serve.ts --dir=dist-production --port=4531",
+    "typecheck": "tsc --noEmit -p .",
+    "test": "node --test tests/unit/",
+    "crawl": "node scripts/crawl.ts",
+    "gate": "node scripts/gate.ts",
+    "e2e": "node tests/e2e/run.mjs",
+    "check": "npm run typecheck && npm test && npm run build && npm run build:production && npm run crawl && npm run reports",
+    "reports": "node scripts/reports.ts",
+    "perf": "node tests/e2e/perf.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "axe-core": "^4.14.1",
+    "playwright": "^1.63.0",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "tests/unit/truth.test.ts"
+        ],
+        "createdAt": "2026-11-19T13:46:00.452Z",
+        "reason": "Claude: fixture string asserting the production guard rejects unapproved assets; not rendered markup"
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "scripts/crawl.ts"
+        ],
+        "createdAt": "2026-11-19T13:46:35.772Z",
+        "reason": "Claude: regex that audits img tags in built HTML; not markup"
+      }
+    ]
+  }
+}

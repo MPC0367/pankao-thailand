@@ -1,0 +1,68 @@
+/**
+ * Structured data built only from facts that may show in this mode (TEC-02). Never a
+ * Restaurant type, never ratings, offers, nutrition or certificates without evidence.
+ */
+import { address, brandName, email, phone } from '../content/facts.ts';
+import type { Locale, Product } from '../content/types.ts';
+import { canShow, href, val, type Ctx } from './context.ts';
+import { SITE_ORIGIN } from './layout.ts';
+
+export function organization(ctx: Ctx): object[] {
+  if (!canShow(brandName, ctx)) return [];
+  const org: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': `${SITE_ORIGIN}/#organization`,
+    name: val(brandName, ctx.locale),
+    url: `${SITE_ORIGIN}${href(ctx.locale, '')}`,
+  };
+  if (canShow(address, ctx)) {
+    const a = val(address, 'en') as string[];
+    org.address = {
+      '@type': 'PostalAddress',
+      streetAddress: `${a[0]}, ${a[1]}`,
+      addressLocality: 'Sai Noi',
+      addressRegion: 'Nonthaburi',
+      postalCode: '11150',
+      addressCountry: 'TH',
+    };
+  }
+  const points: object[] = [];
+  if (canShow(phone, ctx)) points.push({ '@type': 'ContactPoint', contactType: 'sales', telephone: (val(phone, ctx.locale) as { tel: string }).tel, availableLanguage: ['th', 'en'] });
+  if (canShow(email, ctx)) points.push({ '@type': 'ContactPoint', contactType: 'customer service', email: val(email, ctx.locale) });
+  if (points.length) org.contactPoint = points;
+  const site = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${SITE_ORIGIN}/#website`,
+    url: `${SITE_ORIGIN}/`,
+    name: val(brandName, ctx.locale),
+    inLanguage: ['th', 'en', 'vi'],
+    publisher: { '@id': `${SITE_ORIGIN}/#organization` },
+  };
+  return [org, site];
+}
+
+export function breadcrumbs(ctx: Ctx, items: { name: string; path: string }[]): object {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((it, i) => ({ '@type': 'ListItem', position: i + 1, name: it.name, item: `${SITE_ORIGIN}${href(ctx.locale, it.path)}` })),
+  };
+}
+
+/** Product only with a stable public identity; no offers, ratings or nutrition. */
+export function productLd(ctx: Ctx, p: Product, locale: Locale): object | null {
+  if (!canShow(p.name, ctx) || !canShow(p.summary, ctx)) return null;
+  const o: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: val(p.name, locale),
+    description: val(p.summary, locale),
+    category: 'Dried rice noodles',
+    url: `${SITE_ORIGIN}${href(locale, `products/${p.slug}/`)}`,
+  };
+  if (canShow(brandName, ctx)) o.manufacturer = { '@id': `${SITE_ORIGIN}/#organization` };
+  if (p.brand && canShow(p.brand, ctx) && p.format === 'brand') o.brand = { '@type': 'Brand', name: val(p.brand, locale) };
+  return o;
+}
