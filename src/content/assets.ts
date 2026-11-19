@@ -69,7 +69,7 @@ export const assets: Asset[] = [
       vi: 'Túi bún gạo khô Mr. Noodles trong suốt, sọc xanh dương',
     },
     rasterText: 'Pack print: Mr.NOODLES, BEST QUALITY, 米粉, เส้นหมี่อบแห้ง, RICE VERMICELLI',
-    crop: 'x 25–215, y 5–263 of the 460×380 original: the blue pack only; excludes the generic food strip. Enlarged 2.2× (Lanczos, light sharpen).',
+    crop: 'x 25–215, y 5–263 of the 460×380 original: the blue pack only; excludes the generic food strip. Enlarged 2.2× (Lanczos, contrast-adaptive sharpening).',
   }),
   legacy({
     id: 'legacy.mrnoodles.pack', from: 'mr_noodles_package.jpg', file: 'legacy/mrnoodles-packs.jpg', w: 460, h: 262,
@@ -83,7 +83,7 @@ export const assets: Asset[] = [
     crop: 'Top 262 px of the 460×380 original; the lower strip of generic food photographs is excluded.',
   }),
   legacy({
-    id: 'legacy.mrnoodles.tile.dish', from: 'product_noodle_dish.jpg', file: 'legacy/dish-thin-noodles.jpg', w: 465, h: 525,
+    id: 'legacy.mrnoodles.tile.dish', from: 'product_noodle_dish.jpg', file: 'legacy/dish-thin-noodles.jpg', w: 632, h: 714,
     subject: 'Stir-fried thin rice noodles with shiitake, carrot and greens (styled dish; origin not stated).',
     alt: { th: 'เส้นเล็กผัดกับเห็ดหอม แครอท และผักใบเขียว', en: 'Thin rice noodles stir-fried with shiitake, carrot and greens', vi: 'Sợi gạo nhỏ xào nấm hương, cà rốt và rau xanh' },
   }),
@@ -96,10 +96,10 @@ export const assets: Asset[] = [
     ] as const
   ).flatMap(([key, stem, dryAlt, dishAlt]) => [
     legacy({
-      id: `legacy.tile.${key}`, from: `${stem}.jpg`, file: `legacy/${key}-dry.jpg`, w: 465, h: 525,
+      id: `legacy.tile.${key}`, from: `${stem}.jpg`, file: `legacy/${key}-dry.jpg`, w: 632, h: 714,
       subject: `Close-up of the dry ${stem.replace('_', ' ')} product (2014 product page).`,
       alt: dryAlt,
-      crop: 'The 186×210 original enlarged 2.5× (Lanczos, light sharpen); nothing generated.',
+      crop: 'The 186×210 original deblocked, lightly denoised and enlarged 3.4× in two Lanczos steps with contrast-adaptive sharpening; nothing generated.',
     }),
     legacy({
       id: `legacy.tile.${key}.dish`, from: `${stem}_bg.jpg`, file: `legacy/${key}-dish.jpg`, w: 460, h: 400,

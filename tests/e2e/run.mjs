@@ -50,7 +50,7 @@ for (const b of Object.values(browsers)) {
   b.newContext = async (o = {}) => {
     const { withLoader, ...rest } = o;
     const c = await open(rest);
-    if (!withLoader) await c.addInitScript(() => { try { sessionStorage.setItem('pk-loaded', '1'); } catch {} });
+    if (!withLoader) await c.addInitScript(() => { try { sessionStorage.setItem('pk-noloader', '1'); } catch {} });
     return c;
   };
 }
@@ -306,7 +306,7 @@ await check('chromium: map loads only after "Show map"; address copy works (AC-C
   await ctx.close();
 });
 
-await check('chromium: loader plays on a fresh tab, ends by ~4.6 s (the logo forms slowly), skips within the session and on click (owner request)', async () => {
+await check('chromium: loader plays on every open, reload and root entry; ends by ~4.6 s; not between pages; a click skips it (owner request)', async () => {
   const ctx = await C.newContext(ctxOpts({ withLoader: true }));
   const page = await ctx.newPage();
   await page.goto(`${BASE}/en/`, { waitUntil: 'commit' });
@@ -315,9 +315,18 @@ await check('chromium: loader plays on a fresh tab, ends by ~4.6 s (the logo for
   await page.waitForFunction(() => !document.documentElement.classList.contains('loading'), null, { timeout: 6000 });
   const took = Date.now() - t0;
   const h1 = await page.locator('h1').isVisible();
-  await page.goto(`${BASE}/th/`);
+  await page.click('.site-footer a[href$="/en/about/"]');
+  await page.waitForURL('**/en/about/');
   const again = await page.evaluate(() => document.documentElement.classList.contains('loading'));
+  await page.reload({ waitUntil: 'commit' });
+  const onReload = await page.waitForSelector('div.loader', { state: 'visible', timeout: 3000 }).then(() => true, () => false);
   await ctx.close();
+  const ctx3 = await C.newContext(ctxOpts({ withLoader: true }));
+  const p3 = await ctx3.newPage();
+  await p3.goto(`${BASE}/`, { waitUntil: 'commit' });
+  await p3.waitForURL(/\/(th|en|vi)\/$/);
+  const viaRoot = await p3.waitForSelector('div.loader', { state: 'visible', timeout: 3000 }).then(() => true, () => false);
+  await ctx3.close();
   const ctx2 = await C.newContext(ctxOpts({ withLoader: true }));
   const p2 = await ctx2.newPage();
   await p2.goto(`${BASE}/vi/`, { waitUntil: 'commit' });
@@ -327,7 +336,9 @@ await check('chromium: loader plays on a fresh tab, ends by ~4.6 s (the logo for
   await ctx2.close();
   assert(took <= 4600, `loader gone in ${took} ms`);
   assert(h1, 'page underneath is rendered');
-  assert(!again, 'second page in the same tab: no loader');
+  assert(!again, 'moving to another page of the site: no loader');
+  assert(onReload, 'a reload plays the loader again');
+  assert(viaRoot, 'arriving through the root language chooser plays the loader');
   return `cleared ${took} ms after it appeared; click skips`;
 });
 

@@ -27,7 +27,7 @@ for (const [engine, type] of [['webkit', webkit], ['chromium', chromium]]) {
   const browser = await type.launch();
   await check(`${engine}: every page in 3 languages loads with no errors, one h1, noindex, no review markup`, async () => {
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
-    await ctx.addInitScript(() => { try { sessionStorage.setItem('pk-loaded', '1'); } catch {} });
+    await ctx.addInitScript(() => { try { sessionStorage.setItem('pk-noloader', '1'); } catch {} });
     const page = await ctx.newPage();
     const errors = [];
     page.on('pageerror', (e) => errors.push(e.message));
@@ -46,11 +46,13 @@ for (const [engine, type] of [['webkit', webkit], ['chromium', chromium]]) {
     assert(!errors.length, errors.slice(0, 3).join(' | '));
     return `${n} pages`;
   });
-  await check(`${engine}: loader plays and lifts; root redirects into a language; glass header mounts`, async () => {
+  await check(`${engine}: loader appears through the root link and lifts; glass header mounts`, async () => {
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, locale: 'en-GB' });
     const page = await ctx.newPage();
     await page.goto(`${SITE}/`, { waitUntil: 'commit' });
     await page.waitForURL(/\/pankao-thailand\/(th|en|vi)\/$/, { timeout: 8000 });
+    // It must actually appear (arriving through the root link), not merely be absent.
+    await page.waitForSelector('div.loader', { state: 'visible', timeout: 4000 });
     await page.waitForFunction(() => !document.documentElement.classList.contains('loading'), null, { timeout: 7000 });
     await page.waitForSelector('[data-glass] .lg-glass', { timeout: 8000 });
     const url = page.url();
@@ -59,7 +61,7 @@ for (const [engine, type] of [['webkit', webkit], ['chromium', chromium]]) {
   });
   await check(`${engine}: enquiry form sends nothing and offers copy, download, email and phone`, async () => {
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
-    await ctx.addInitScript(() => { try { sessionStorage.setItem('pk-loaded', '1'); } catch {} });
+    await ctx.addInitScript(() => { try { sessionStorage.setItem('pk-noloader', '1'); } catch {} });
     const page = await ctx.newPage();
     const posts = [];
     page.on('request', (r) => { if (r.method() === 'POST') posts.push(r.url()); });

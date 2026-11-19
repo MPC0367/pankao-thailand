@@ -22,11 +22,15 @@ if (!existsSync(research)) {
 }
 
 type Job = { from: string; to: string; vf?: string };
+/** The 186x210 close-ups (owner, 20 Nov 2026: "make the dry noodle photos clearer too"): deblock and lightly
+ * denoise the 2014 JPEG, enlarge in two Lanczos steps with contrast-adaptive sharpening (AMD CAS) after
+ * each, to 632x714 so the browser barely scales them. Not generative: no detail is invented. */
+const CLEAN = 'deblock=filter=strong:block=8,nlmeans=s=1.4:p=5:r=9,scale=344:388:flags=lanczos+accurate_rnd+full_chroma_int,cas=strength=0.5,scale=632:714:flags=lanczos+accurate_rnd+full_chroma_int,cas=strength=0.65';
 const jobs: Job[] = [
   { from: 'pankao_logo.gif', to: 'logo.png' },
-  { from: 'mr_noodles_package.jpg', to: 'hero-pack.jpg', vf: 'crop=190:258:25:5,scale=418:568:flags=lanczos+accurate_rnd+full_chroma_int,unsharp=5:5:0.55:5:5:0' },
+  { from: 'mr_noodles_package.jpg', to: 'hero-pack.jpg', vf: 'crop=190:258:25:5,scale=418:568:flags=lanczos+accurate_rnd+full_chroma_int,cas=strength=0.55' },
   { from: 'mr_noodles_package.jpg', to: 'mrnoodles-packs.jpg', vf: 'crop=460:262:0:0' },
-  { from: 'product_noodle_dish.jpg', to: 'dish-thin-noodles.jpg', vf: 'scale=465:525:flags=lanczos+accurate_rnd+full_chroma_int,unsharp=5:5:0.55:5:5:0' },
+  { from: 'product_noodle_dish.jpg', to: 'dish-thin-noodles.jpg', vf: CLEAN },
   { from: 'process_rice.jpg', to: 'process-rice.jpg' },
   { from: 'process_factory.jpg', to: 'process-factory.jpg' },
   { from: 'history_img01.jpg', to: 'process-drying.jpg' },
@@ -35,7 +39,7 @@ const jobs: Job[] = [
   { from: 'contact_img01.jpg', to: 'contact-building.jpg' },
 ];
 for (const [key, stem] of [['vermicelli', 'rice_vermicelli'], ['ricestick', 'rice_stick'], ['flake', 'rice_flake'], ['brown', 'rice_brown']] as const) {
-  jobs.push({ from: `${stem}.jpg`, to: `${key}-dry.jpg`, vf: 'scale=465:525:flags=lanczos+accurate_rnd+full_chroma_int,unsharp=5:5:0.55:5:5:0' });
+  jobs.push({ from: `${stem}.jpg`, to: `${key}-dry.jpg`, vf: CLEAN });
   // The dish photographs are 460x400 page backgrounds: used whole, at their own size.
   jobs.push({ from: `${stem}_bg.jpg`, to: `${key}-dish.jpg` });
 }

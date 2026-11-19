@@ -19,7 +19,6 @@
     var endLoader = function () {
       if (ended) return;
       ended = true;
-      store.set('pk-loaded', '1', true);
       d.classList.add('loaded', 'reveal');
       setTimeout(function () { d.classList.remove('loading', 'loaded'); }, 480);
       setTimeout(function () { d.classList.remove('reveal'); }, 1500);
