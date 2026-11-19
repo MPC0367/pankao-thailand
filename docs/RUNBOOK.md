@@ -10,6 +10,15 @@
 4. `npm run check` and `npm run e2e` pass on the release commit; `npm run perf` within budget.
 5. Content freeze: tag the commit, keep `dist-production/release-manifest.json` (file hashes, blockers = none).
 
+## 1a. Labelled public preview (GitHub Pages, live since 19 Nov 2026)
+
+Not a release: the preview build at https://mpc0367.github.io/pankao-thailand/, for showing the company.
+
+1. Commit everything (the deploy names the source commit).
+2. `npm run pages:deploy` — only on the owner's word. Builds `dist-pages/` (`PANKAO_PUBLIC_PREVIEW=on`, base `/pankao-thailand`), runs `crawl:pages`, force-pushes the output as the single commit of `gh-pages`.
+3. `npm run pages:smoke -- --url=https://mpc0367.github.io/pankao-thailand` (WebKit + Chromium: 30 pages each, loader, glass, form sends nothing, axe).
+4. Rollback: push an earlier build the same way, or turn Pages off in the repository settings.
+
 ## 2. Private staging (Gate D)
 
 - Cloudflare Pages project (in the company's account, or O2's with their agreement), **preview deployment only**, from `dist-production/` plus `X-Robots-Tag: noindex` added for staging, or protected with Cloudflare Access.

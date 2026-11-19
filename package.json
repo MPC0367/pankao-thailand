@@ -22,7 +22,9 @@
     "reports": "node scripts/reports.ts",
     "perf": "node tests/e2e/perf.mjs",
     "build:pages": "PANKAO_BASE=/pankao-thailand PANKAO_ORIGIN=https://mpc0367.github.io PANKAO_PUBLIC_PREVIEW=on node src/build/build.ts --mode=preview --out=dist-pages/pankao-thailand",
-    "crawl:pages": "node scripts/crawl.ts --pages"
+    "crawl:pages": "node scripts/crawl.ts --pages",
+    "pages:deploy": "node scripts/pages-deploy.mjs",
+    "pages:smoke": "node tests/e2e/pages-smoke.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",

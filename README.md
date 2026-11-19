@@ -2,7 +2,7 @@
 
 The new website for the Nonthaburi rice-noodle manufacturer **บริษัท สหปั้นข้าว จำกัด / SAHA PANKAO COMPANY LIMITED** (registration 0125550039493). Built from scratch by O2 Design Studio from the brief `../documents/brief/` (19 Nov 2026). The current site, pankaothai.com, is research and migration evidence only.
 
-**Status: VERIFIED LOCALLY — private preview. Not deployed, not live, not approved by the company.** A separate 2024 Bangkok restaurant company with a near-identical Thai name is blocked from every output (`src/content/sources.ts`).
+**Status: a labelled public preview is on GitHub Pages since 19 Nov 2026 — https://mpc0367.github.io/pankao-thailand/ (O2's owner: "publish live"). It is not pankaothai.com, not the production site, and nothing on it is approved by the company yet.** The preview is `noindex`, has no review notes, keeps the gold Sample tags, and its enquiry form sends nothing (it offers copy, download, email and phone). Republish with `npm run pages:deploy` (only on the owner's word), check with `npm run pages:smoke -- --url=https://mpc0367.github.io/pankao-thailand`. A separate 2024 Bangkok restaurant company with a near-identical Thai name is blocked from every output (`src/content/sources.ts`).
 
 ## Commands
 
@@ -51,4 +51,4 @@ Set `ownerApproved: true` and `ownerApprovalRef` (where the confirmation is) on 
 
 `docs/HANDOVER.md` (start here) · `docs/PREFLIGHT.md` · `docs/ADR-001-stack.md` · `docs/ART_DIRECTION.md` · `docs/INFORMATION_ARCHITECTURE.md` · `docs/FORMS_AND_PRIVACY.md` · `docs/SEO.md` · `docs/QA_REPORT.md` · `docs/RUNBOOK.md` · `docs/REQUIREMENTS_TRACE.md` · `docs/generated/` (source ledger, truth ledger, claims, certificates, assets, decisions, redirects, locale parity, catalogue, content requests).
 
-Public on GitHub at https://github.com/MPC0367/pankao-thailand since 19 Nov 2026, with Pankao's confirmation (relayed by O2's owner). Client photographs, the full research record and the brief stay in `../documents/` and never enter this repository; the research ledger here omits personal phone numbers, a private person's name and the brands Pankao produces for (OEM). Being public does not publish the website: nothing is deployed.
+Public on GitHub at https://github.com/MPC0367/pankao-thailand since 19 Nov 2026, with Pankao's confirmation (relayed by O2's owner). Client photographs, the full research record and the brief stay in `../documents/` and never enter this repository; the research ledger here omits personal phone numbers, a private person's name and the brands Pankao produces for (OEM). The website itself is published only as the labelled preview on the `gh-pages` branch (built output, which does carry the 2014 site's photographs: Pankao's own, already public on its old site; rights not yet confirmed in writing); `main` and the working branch hold no photographs.

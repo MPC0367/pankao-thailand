@@ -32,7 +32,8 @@ for (const [engine, type] of [['webkit', webkit], ['chromium', chromium]]) {
     const errors = [];
     page.on('pageerror', (e) => errors.push(e.message));
     page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
-    page.on('requestfailed', (r) => errors.push(`failed ${r.url()}`));
+    // A lazy image still loading when the test moves to the next page is cancelled, not broken.
+    page.on('requestfailed', (r) => { const why = r.failure()?.errorText ?? ''; if (!/cancel|abort/i.test(why)) errors.push(`failed ${r.url()} (${why})`); });
     let n = 0;
     for (const l of ['th', 'en', 'vi']) for (const p of PAGES) {
       const r = await page.goto(`${SITE}/${l}/${p}`);
