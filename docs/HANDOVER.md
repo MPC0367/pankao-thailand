@@ -4,7 +4,7 @@
 
 A new website for the rice-noodle factory in Sai Noi, Nonthaburi (บริษัท สหปั้นข้าว จำกัด), built from scratch in Thai, English and Vietnamese. It is finished and tested **on O2's computer only**: nothing is online, nothing was sent to anyone, and the company has not yet confirmed any of the facts it shows. The preview marks every unconfirmed fact; the "production" version of the same site already removes them automatically, which is why it currently shows almost nothing about products. Twenty decisions from the company stand between this and publication; they are listed below in plain words.
 
-## Second round from O2's owner (19–20 Nov 2026) — built and committed, not yet on the public preview
+## Second round from O2's owner (19–20 Nov 2026) — on the public preview since 20 Nov 2026 (`gh-pages` `d75a80b` from `0e34b75`; the way back `dddf471`)
 
 - **Background:** a fixed layer of soft gold and cream lights drifts as the page scrolls (`.aura`, site.js; still under reduced motion). The bands and the dark chapters fade into it at their edges instead of stopping square.
 - **Photographs fill their frames:** cards, product-page frames and the home hero panel are now the photograph itself, edge to edge and rounded. The owner's words: "make the picture larger we dont need a border image in the background". MED-04 is amended: up to 3.5× in those frames, native size elsewhere. The 2014 photos are small, so they look soft at that size until new photography arrives.
@@ -21,7 +21,7 @@ A new website for the rice-noodle factory in Sai Noi, Nonthaburi (บริษ�
   - By the owner's choice the arcs keep the 2014 wording, drawn as outlines so the old name is never text (`scripts/logo/make-logo-art.py`; record `../documents/Approvals/2026-11-19 Logo keeps the 2014 wording (O2 owner decision).md`; D21).
   - The header mark is the same logo.
 - **Checks:** unit 27/27, crawl (preview, production, pages), e2e 35/35 in WebKit and Chromium, Pages smoke 7/7 locally.
-- **Not yet published:** run `npm run pages:deploy` on the owner's word, then `npm run pages:smoke -- --url=https://mpc0367.github.io/pankao-thailand`.
+- **Published 20 Nov 2026** on the owner's "Yes, publish" after the ship check (Ready): `npm run pages:deploy` → `gh-pages` `d75a80b`. To go back, push the earlier build (`dddf471`, from `56d92cc`) the same way.
 
 ## Public preview on GitHub Pages (19 Nov 2026)
 
