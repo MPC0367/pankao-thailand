@@ -51,4 +51,4 @@ Set `ownerApproved: true` and `ownerApprovalRef` (where the confirmation is) on 
 
 `docs/HANDOVER.md` (start here) · `docs/PREFLIGHT.md` · `docs/ADR-001-stack.md` · `docs/ART_DIRECTION.md` · `docs/INFORMATION_ARCHITECTURE.md` · `docs/FORMS_AND_PRIVACY.md` · `docs/SEO.md` · `docs/QA_REPORT.md` · `docs/RUNBOOK.md` · `docs/REQUIREMENTS_TRACE.md` · `docs/generated/` (source ledger, truth ledger, claims, certificates, assets, decisions, redirects, locale parity, catalogue, content requests).
 
-Client photographs and research files stay in `../documents/` and never enter this repository. This repository has no remote; do not push it anywhere public.
+Public on GitHub at https://github.com/MPC0367/pankao-thailand since 19 Nov 2026, with Pankao's confirmation (relayed by O2's owner). Client photographs, the full research record and the brief stay in `../documents/` and never enter this repository; the research ledger here omits personal phone numbers, a private person's name and the brands Pankao produces for (OEM). Being public does not publish the website: nothing is deployed.

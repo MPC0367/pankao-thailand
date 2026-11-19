@@ -70,7 +70,7 @@ A different company — a 2024 restaurant business in [removed], Bangkok, regist
 
 ## Where things are
 
-- Site code and docs: `Clients/Pankao Thailand/site/` (local git, branch `o2/pankao-greenfield-build`, no remote).
+- Site code and docs: `Clients/Pankao Thailand/site/`, public on GitHub at https://github.com/MPC0367/pankao-thailand (Pankao confirmed, 19 Nov 2026; default branch `o2/pankao-greenfield-build`). The website itself is not deployed.
 - Brief, research, legacy-site archive, screenshots: `Clients/Pankao Thailand/documents/`.
 - Preview: `npm run serve` → http://localhost:4530 (studio preview `pankao`); production rehearsal on 4531 (`pankao-production`).
 
