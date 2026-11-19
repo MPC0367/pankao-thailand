@@ -4,7 +4,7 @@
 
 A new website for the rice-noodle factory in Sai Noi, Nonthaburi (บริษัท สหปั้นข้าว จำกัด), built from scratch in Thai, English and Vietnamese. It is finished and tested **on O2's computer only**: nothing is online, nothing was sent to anyone, and the company has not yet confirmed any of the facts it shows. The preview marks every unconfirmed fact; the "production" version of the same site already removes them automatically, which is why it currently shows almost nothing about products. Twenty decisions from the company stand between this and publication; they are listed below in plain words.
 
-## Premium audit (20 Nov 2026): built on branch `o2/premium-audit-2026-11-20` (`1f40bbb`), not yet on the public preview
+## Premium audit (20 Nov 2026): on the public preview since 20 Nov 2026 (`gh-pages` `8c0c623` from `395fd00`; `o2/pankao-greenfield-build` fast-forwarded to the audit branch; the way back `eb5971e`)
 
 The owner sent `Pankao_Thailand_Live_UI_UX_Premium_Audit.pdf` (31 pages) with no words. Every buildable item is built; the record, item by item, is `docs/PREMIUM_AUDIT_2026-11-20.md`. The headlines:
 - **Phones:** one-row header and a one-line dismissible preview strip, 106 px at worst (audit: ≤ 112).
@@ -17,7 +17,7 @@ The owner sent `Pankao_Thailand_Live_UI_UX_Premium_Audit.pdf` (31 pages) with no
 - **Opening:** the full ~4 s logo once per session, then instant (the owner chose this over the audit's 1.4 s).
 - **Waiting on the company:** new photography, certificates, contacts and native review.
 
-**To publish:** fast-forward `o2/pankao-greenfield-build` to the branch, then run `npm run pages:deploy` (on the owner's word).
+**Published** on the owner's "Yes, publish" after the ship check (Ready).
 
 ## Fourth round (20 Nov 2026) — on the public preview since 20 Nov 2026 (`gh-pages` `eb5971e` from `3da9420`; the way back `43724cc`)
 
