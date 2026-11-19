@@ -98,7 +98,7 @@ test('legacy claims (gluten-free, organic, no MSG…) never reach public text', 
   for (const mode of ['preview', 'production'] as const) {
     for (const p of [...productById.values()]) {
       const html = P.productDetail(ctx(mode, 'en', `products/${p.slug}/`), A, p).html;
-      const pub = publicText(html);
+      const pub = publicText(untagged(html));
       for (const bad of ['100% natural', 'Organic', 'No MSG', 'No cholesterol', 'trans fat', 'more vitamins']) assert.ok(!pub.toLowerCase().includes(bad.toLowerCase()), `${p.id} ${mode}: ${bad}`);
     }
   }
@@ -111,9 +111,37 @@ test('PRD-07 / AC-PRD-04: unknown SKU fields say "Not yet published", never zero
   assert.doesNotMatch(spec, />\s*(0|N\/A|No|None|-)\s*</);
 });
 
-test('AC-EV-03: About never states 30 years, eight decades, a founder or "first in Thailand" publicly', () => {
+/**
+ * The company's current website in its own words (owner, 19 Nov 2026) renders in the preview
+ * only, inside blocks tagged "From the current website". Everything outside them keeps the
+ * brief's rules; production has no such blocks at all.
+ */
+const untagged = (html: string) => html
+  .replace(/<figure class="legacy-quote[^"]*">[\s\S]*?<\/figure>/g, '')
+  .replace(/<section class="section (?:welcome|band best|band range)"[\s\S]*?<\/section>/g, '')
+  .replace(/<div>\s*<h2 class="h3">[^<]*<span class="legacy-tag">[\s\S]*?<\/div>/g, '')
+  .replace(/<span class="step-cap">[\s\S]*?<\/span><\/span>/g, '');
+
+test('legacy words: tagged in the preview, absent from production', () => {
+  const pages = (mode: 'preview' | 'production', locale: 'th' | 'en' | 'vi') => [
+    P.home(ctx(mode, locale), A).html, P.productsIndex(ctx(mode, locale, 'products/'), A).html,
+    P.aboutPage(ctx(mode, locale, 'about/'), A).html, P.processPage(ctx(mode, locale, 'process/'), A).html,
+    P.contactPage(ctx(mode, locale, 'contact/'), A).html,
+    ...[...productById.values()].map((p) => P.productDetail(ctx(mode, locale, `products/${p.slug}/`), A, p).html),
+  ];
   for (const locale of ['th', 'en', 'vi'] as const) {
-    const pub = publicText(P.aboutPage(ctx('preview', locale, 'about/'), A).html);
+    const prod = pages('production', locale).join('');
+    assert.ok(!prod.includes('legacy-tag'), `${locale}: production carries legacy blocks`);
+    for (const bad of ['30 ปี', 'more than 30', 'hơn 30 năm', 'Organic', 'cholesterol', 'คอเลสเตอรอล', '0-1255-50039-49-3']) assert.ok(!publicText(prod).toLowerCase().includes(bad.toLowerCase()), `${locale} production: ${bad}`);
+    const prev = pages('preview', locale).join('');
+    assert.ok(prev.includes('legacy-tag'), `${locale}: preview lacks the legacy blocks`);
+    for (const bad of ['30 ปี', 'more than 30', 'hơn 30 năm', 'Organic', 'cholesterol', 'คอเลสเตอรอล']) assert.ok(!publicText(untagged(prev)).toLowerCase().includes(bad.toLowerCase()), `${locale} preview, outside a tagged block: ${bad}`);
+  }
+});
+
+test('AC-EV-03: About never states 30 years, eight decades, a founder or "first in Thailand" publicly (outside the tagged legacy block)', () => {
+  for (const locale of ['th', 'en', 'vi'] as const) {
+    const pub = publicText(untagged(P.aboutPage(ctx('preview', locale, 'about/'), A).html));
     for (const bad of ['30 ปี', 'more than 30', '30 years', 'กว่า 8 ทศวรรษ', 'eight decades', '80 years', 'first rice', 'โรงงานแห่งแรก', 'hơn 30 năm', 'founder']) assert.ok(!pub.toLowerCase().includes(bad.toLowerCase()), `${locale}: ${bad}`);
   }
 });

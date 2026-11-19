@@ -24,7 +24,7 @@
       setTimeout(function () { d.classList.remove('loading', 'loaded'); }, 480);
       setTimeout(function () { d.classList.remove('reveal'); }, 1500);
     };
-    setTimeout(endLoader, Math.max(0, 1850 - performance.now()));
+    setTimeout(endLoader, Math.max(0, 2100 - performance.now()));
     if (ldr) ldr.addEventListener('click', endLoader);
     window.addEventListener('keydown', endLoader, { once: true });
   }
@@ -48,6 +48,33 @@
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
   }
+
+  /* ---------- the flowing ground: four soft lights wander as the page scrolls (owner, 19 Nov 2026:
+     "background gradients that fade into each other ... more dynamic"). Bounded, so a light never
+     leaves for good on a long page; still under reduced motion. ---------- */
+  var lights = $$('.aura i');
+  if (lights.length && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+    var ways = [[900, 0.16, 0.08], [1300, 0.22, 0.1], [1100, 0.26, 0.12], [1600, 0.2, 0.09]];
+    var drifting = false;
+    var drift = function () {
+      drifting = false;
+      var y = window.scrollY, h = window.innerHeight, w = window.innerWidth;
+      for (var i = 0; i < lights.length; i++) {
+        var k = ways[i % ways.length], a = y / k[0] + i * 1.7;
+        lights[i].style.transform = 'translate3d(' + (Math.cos(a) * k[2] * w).toFixed(1) + 'px,' + (Math.sin(a) * k[1] * h - y * 0.04).toFixed(1) + 'px,0)';
+      }
+    };
+    window.addEventListener('scroll', function () { if (!drifting) { drifting = true; requestAnimationFrame(drift); } }, { passive: true });
+    drift();
+  }
+
+  /* ---------- dropdowns (language, products): one open at a time; Escape and outside clicks close ---------- */
+  var drops = $$('[data-dropdown]');
+  drops.forEach(function (d) {
+    d.addEventListener('toggle', function () { if (d.open) drops.forEach(function (o) { if (o !== d) o.open = false; }); });
+    d.addEventListener('keydown', function (e) { if (e.key === 'Escape' && d.open) { d.open = false; d.querySelector('summary').focus(); } });
+  });
+  document.addEventListener('click', function (e) { drops.forEach(function (d) { if (d.open && !d.contains(e.target)) d.open = false; }); });
 
   /* ---------- M4 drawer (native modal dialog) ---------- */
   var drawer = $('[data-drawer]');

@@ -15,7 +15,8 @@ import { esc, html, join, raw, type Raw } from './html.ts';
 import { ARROW, contactLines, document, PIN, type PageMeta } from './layout.ts';
 import { assetImg, credit, packDish, strandPlate } from './media.ts';
 import { breadcrumbs, organization, productLd } from './seo.ts';
-import { BASE, PUBLIC_PREVIEW, SHOW_SAMPLES, SHOW_SAMPLE_TAGS } from '../content/presentation.ts';
+import { BASE, PUBLIC_PREVIEW, SHOW_LEGACY, SHOW_SAMPLES, SHOW_SAMPLE_TAGS } from '../content/presentation.ts';
+import * as legacy from '../content/legacy.ts';
 import { sampleCertificates, sampleDocuments, sampleHours, sampleOemTerms, sampleTimeline } from '../content/samples.ts';
 
 export type Built = { path: string; html: string; status?: 404 };
@@ -26,6 +27,12 @@ export type Built = { path: string; html: string; status?: 404 };
 const samplesOn = (ctx: Ctx) => ctx.mode === 'preview' && SHOW_SAMPLES;
 const sampleTag = (ctx: Ctx): Raw => (samplesOn(ctx) && SHOW_SAMPLE_TAGS ? html`<span class="sample-tag">${t(ctx, 'sample.tag')}</span>` : raw(''));
 const sampleNote = (ctx: Ctx, key: string): Raw => (samplesOn(ctx) && SHOW_SAMPLE_TAGS ? html`<p class="sample-note">${sampleTag(ctx)}<span>${t(ctx, key)}</span></p>` : raw(''));
+
+/** The company's current website in its own words (preview only, tagged; owner, 19 Nov 2026). */
+const legacyOn = (ctx: Ctx) => ctx.mode === 'preview' && SHOW_LEGACY;
+const legacyTag = (ctx: Ctx): Raw => html`<span class="legacy-tag">${t(ctx, 'legacy.tag')}</span>`;
+/** Display copy: Thai breaks only between phrases. */
+const ph = (ctx: Ctx, s: string): Raw | string => (ctx.locale === 'th' ? raw(phrases(esc(s))) : s);
 
 /** Heading copy: Thai breaks only between phrases. */
 const hd = (ctx: Ctx, key: string): Raw | string => (ctx.locale === 'th' ? raw(phrases(esc(t(ctx, key)))) : t(ctx, key));
@@ -111,6 +118,41 @@ function meta(ctx: Ctx, key: string, path: string, extra: Partial<PageMeta> = {}
 
 /* ---------- home ---------- */
 
+function homeWelcome(ctx: Ctx): Raw {
+  if (!legacyOn(ctx)) return raw('');
+  const w = legacy.welcome;
+  return html`<section class="section welcome" aria-labelledby="welcome-h"><div class="wrap grid">
+    <div class="welcome__words">
+      <h2 id="welcome-h" class="eyebrow welcome__h">${loc(w.h, ctx.locale)} ${legacyTag(ctx)}</h2>
+      <p class="welcome__lines display">${loc(w.slogan, ctx.locale).map((l) => html`<span class="arrive">${ph(ctx, l)}</span>`)}</p>
+    </div>
+    <div class="welcome__body">
+      <p class="lede">${loc(w.body, ctx.locale)}</p>
+      ${linkArrow(href(ctx.locale, ROUTES.about), loc(legacy.history.h, ctx.locale))}
+    </div>
+  </div></section>`;
+}
+
+function certsLegacy(ctx: Ctx): Raw {
+  const c = legacy.certs;
+  return html`<div class="certs-legacy grid">
+    <div class="certs-legacy__text"><h3>${ph(ctx, loc(c.h, ctx.locale))}</h3><p>${loc(c.body, ctx.locale)}</p></div>
+    <div class="certs-legacy__marks">
+      <ul class="marks" role="list">${c.marks.map((m) => html`<li class="arrive"><strong>${loc(m.name, ctx.locale)}</strong><span>${loc(m.by, ctx.locale)}</span></li>`)}</ul>
+      <p class="small muted">${t(ctx, 'legacy.marks.note')}</p>
+    </div>
+  </div>`;
+}
+
+function homeBest(ctx: Ctx): Raw {
+  return html`<section class="section band best" aria-labelledby="best-h"><div class="wrap">
+    ${sectionHead(html`${t(ctx, 'nav.quality')} ${legacyTag(ctx)}`, html`<span id="best-h">${loc(legacy.best.h, ctx.locale)}</span>`, null)}
+    <ul class="promises" role="list">${loc(legacy.best.items, ctx.locale).map((it, i) => html`<li class="arrive"><span class="promises__n" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span><span>${ph(ctx, it)}</span></li>`)}</ul>
+    ${certsLegacy(ctx)}
+    <p class="section-link">${linkArrow(href(ctx.locale, ROUTES.quality), t(ctx, 'cta.quality'))}</p>
+  </div></section>`;
+}
+
 function homeQuality(ctx: Ctx): Raw {
   const shown = [...certificates, ...sampleCertificates].filter((c) => certCard(ctx, c, ctx.buildDate));
   if (!shown.length) return raw('');
@@ -163,6 +205,8 @@ export function home(ctx: Ctx, assets: Assets): Built {
   </div>
 </section>
 
+${homeWelcome(ctx)}
+
 ${formats.length ? html`<section class="section section--tight" aria-labelledby="formats-h">
   <div class="wrap">
     ${sectionHead(t(ctx, 'home.formats.eyebrow'), html`<span id="formats-h">${hd(ctx, 'home.formats.h2')}</span>`, t(ctx, 'home.formats.lede'))}
@@ -193,7 +237,7 @@ ${steps.length ? html`<section class="section" aria-labelledby="process-h">
   </div>
 </section>` : ''}
 
-${homeQuality(ctx)}
+${legacyOn(ctx) ? homeBest(ctx) : homeQuality(ctx)}
 ${homeHeritage(ctx)}
 
 <section class="section section--tight">
@@ -218,6 +262,16 @@ ${homeHeritage(ctx)}
 }
 
 /* ---------- products index ---------- */
+
+function legacyRange(ctx: Ctx): Raw {
+  if (!legacyOn(ctx)) return raw('');
+  const r = legacy.range;
+  return html`<section class="section band range" aria-labelledby="range-h"><div class="wrap grid">
+    <div class="range__names"><p class="eyebrow">${legacyTag(ctx)}</p><h2 id="range-h">${loc(r.h, ctx.locale)}</h2>
+      <ul class="range-list" role="list">${loc(r.items, ctx.locale).map((n) => html`<li class="arrive">${n}</li>`)}</ul></div>
+    <div class="range__promises"><ul class="checklist" role="list">${loc(r.promises, ctx.locale).map((x) => html`<li>${x}</li>`)}</ul></div>
+  </div></section>`;
+}
 
 export function productsIndex(ctx: Ctx, assets: Assets): Built {
   const list = products.filter((p) => canShow(p.name, ctx));
@@ -256,6 +310,7 @@ export function productsIndex(ctx: Ctx, assets: Assets): Built {
     </div>
   </div>
 </section>
+${legacyRange(ctx)}
 ${ctaBand(ctx, hd(ctx, 'products.cta.h'), tx(ctx, 'products.cta.body'))}`;
   return page(ctx, assets, {
     ...meta(ctx, 'products', ROUTES.products),
@@ -264,6 +319,18 @@ ${ctaBand(ctx, hd(ctx, 'products.cta.h'), tx(ctx, 'products.cta.body'))}`;
 }
 
 /* ---------- product detail ---------- */
+
+function legacyProduct(ctx: Ctx, p: Product): Raw {
+  const x = legacy.productText[p.id];
+  if (!legacyOn(ctx) || !x) return raw('');
+  return html`<section class="section section--tight" aria-label="${t(ctx, 'legacy.tag')}"><div class="wrap">
+    <figure class="legacy-quote">
+      <p class="eyebrow">${legacyTag(ctx)}</p>
+      ${x.lead ? html`<p class="legacy-quote__lead">${loc(x.lead, ctx.locale)}</p>` : ''}
+      <blockquote><p>${loc(x.body, ctx.locale)}</p></blockquote>
+    </figure>
+  </div></section>`;
+}
 
 const SPEC_FIELDS = ['ingredients', 'allergen', 'packWeights', 'shelfLife', 'storage', 'cooking', 'origin', 'widthMm', 'caseConfiguration'] as const;
 
@@ -306,6 +373,8 @@ ${crumbs(ctx, [{ label: t(ctx, 'nav.home'), path: '' }, { label: t(ctx, 'nav.pro
     </div>
   </div>
 </section>
+
+${legacyProduct(ctx, p)}
 
 ${isBrand && brandFormats.length ? html`<section class="section section--tight band"><div class="wrap">
   <h2 class="h3">${t(ctx, 'product.brandFormats')}</h2>
@@ -445,6 +514,9 @@ export function processPage(ctx: Ctx, assets: Assets): Built {
 <section class="section section--tight page-head"><div class="wrap">
   ${sectionHead(t(ctx, 'process.eyebrow'), hd(ctx, 'process.h1'), tx(ctx, 'process.lede') ?? tx(ctx, 'home.process.lede'), 'h1')}
 </div></section>
+${legacyOn(ctx) ? html`<section class="section section--tight" aria-label="${loc(legacy.process.h, ctx.locale)}"><div class="wrap">
+  <figure class="legacy-quote"><p class="eyebrow">${loc(legacy.process.h, ctx.locale)} ${legacyTag(ctx)}</p><blockquote><p>${loc(legacy.process.intro, ctx.locale)}</p></blockquote></figure>
+</div></section>` : ''}
 <section class="section section--tight" aria-label="${hd(ctx, 'process.h1')}"><div class="wrap">
   ${steps.length ? html`<ol class="process" role="list" data-process>
     <span class="process__thread" aria-hidden="true"><i data-process-thread></i></span>
@@ -455,7 +527,7 @@ export function processPage(ctx: Ctx, assets: Assets): Built {
         <span class="process-step__dot" aria-hidden="true"><span></span></span>
         <div class="process-step__body">
           <div><p class="eyebrow">${t(ctx, 'process.step', { n: i + 1 })}</p><h2 class="h3">${v.title[ctx.locale]}</h2><p class="body">${marked(v.body[ctx.locale], [s], ctx)}</p></div>
-          ${img ? html`<figure>${img}<figcaption>${credit(ctx, STEP_IMAGES[s.id]!)}</figcaption></figure>` : ''}
+          ${img ? html`<figure>${img}<figcaption>${legacyOn(ctx) && legacy.process.captions[s.id] ? html`<span class="step-cap">${loc(legacy.process.captions[s.id]!, ctx.locale)} ${legacyTag(ctx)}</span>` : ''}${credit(ctx, STEP_IMAGES[s.id]!)}</figcaption></figure>` : ''}
         </div>
       </li>`;
     })}
@@ -556,6 +628,7 @@ export function aboutPage(ctx: Ctx, assets: Assets): Built {
 </div></section>
 <section class="section band" aria-labelledby="history-h"><div class="wrap">
   <h2 id="history-h" class="h3">${t(ctx, 'about.history.h')}</h2>
+  ${legacyOn(ctx) ? html`<figure class="legacy-quote"><p class="eyebrow">${loc(legacy.history.h, ctx.locale)} ${legacyTag(ctx)}</p><blockquote><p>${loc(legacy.history.body, ctx.locale)}</p></blockquote></figure>` : ''}
   ${timeline(ctx) ?? (tx(ctx, 'about.history.body') ? html`<p class="prose">${tx(ctx, 'about.history.body')}</p>` : '')}
   ${reviewNote(ctx, 'heritage timeline candidates (D04) — the timeline renders here once dated evidence is approved', heritageCandidates.map((f) => `${String(val(f, 'en'))} — ${f.status}. ${f.note ?? ''}`))}
   ${reviewNote(ctx, 'legal identity (shown only here until D02)', [
@@ -598,6 +671,11 @@ export function contactPage(ctx: Ctx, assets: Assets): Built {
         ${directions ? html`<a class="btn btn--line" href="${directions}" target="_blank" rel="noopener">${t(ctx, 'contact.directions')} <span class="sr-only">${t(ctx, 'contact.newTab')}</span></a>` : ''}
       </div>
       <p class="sr-only" data-copy-status aria-live="polite"></p>
+    </div>` : ''}
+    ${legacyOn(ctx) ? html`<div>
+      <h2 class="h3">${t(ctx, 'contact.company.h')} ${legacyTag(ctx)}</h2>
+      <p><span lang="th">${String(val(legalNameTh, 'th'))}</span><br><span lang="en">${String(val(legalNameEn, 'en'))}</span></p>
+      <p>${loc(legacy.contact.taxLabel, ctx.locale)} <span class="num">${legacy.contact.tax}</span></p>
     </div>` : ''}
     <div>
       <h2 class="h3">${t(ctx, 'contact.channels.h')}</h2>

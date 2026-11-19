@@ -188,11 +188,13 @@ for (const [engine, browser] of Object.entries(browsers)) {
     const ctx = await browser.newContext(ctxOpts());
     const page = await ctx.newPage();
     await page.goto(`${BASE}/vi/products/rice-stick-pad-thai/`);
+    await page.click('.site-header .lang-menu summary');
     await page.click('.site-header [data-lang-switch="en"]');
     await page.waitForURL('**/en/products/rice-stick-pad-thai/');
     await page.goto(`${BASE}/en/oem/`);
     await page.fill('#oem-company', 'Draft Co');
     await page.fill('#oem-message', 'Half-written brief');
+    await page.click('.site-header .lang-menu summary');
     await page.click('.site-header [data-lang-switch="th"]');
     await page.waitForURL('**/th/oem/**');
     assert((await page.inputValue('#oem-company')) === 'Draft Co', 'company restored');
@@ -304,7 +306,7 @@ await check('chromium: map loads only after "Show map"; address copy works (AC-C
   await ctx.close();
 });
 
-await check('chromium: loader plays on a fresh tab, ends by ~2.4 s, skips within the session and on click (owner request)', async () => {
+await check('chromium: loader plays on a fresh tab, ends by ~2.8 s (the logo forms), skips within the session and on click (owner request)', async () => {
   const ctx = await C.newContext(ctxOpts({ withLoader: true }));
   const page = await ctx.newPage();
   await page.goto(`${BASE}/en/`, { waitUntil: 'commit' });
@@ -323,7 +325,7 @@ await check('chromium: loader plays on a fresh tab, ends by ~2.4 s, skips within
   await p2.mouse.click(400, 300);
   await p2.waitForFunction(() => !document.documentElement.classList.contains('loading'), null, { timeout: 1500 });
   await ctx2.close();
-  assert(took <= 2600, `loader gone in ${took} ms`);
+  assert(took <= 2800, `loader gone in ${took} ms`);
   assert(h1, 'page underneath is rendered');
   assert(!again, 'second page in the same tab: no loader');
   return `cleared ${took} ms after it appeared; click skips`;
@@ -406,7 +408,9 @@ await check('chromium: no sideways scroll at 320–1920 px in all locales (UX-01
   return `${widths.length} widths × ${LOCALES.length} locales × ${Object.keys(TEMPLATES).length} templates`;
 });
 
-await check('chromium: no image renders wider or taller than its native pixels (MED-04, AC-MED-03)', async () => {
+// MED-04 as amended by the owner (19 Nov 2026): photographs fill cards, product frames and the hero panel,
+// so there they may be enlarged up to 3.5x; everywhere else an image still never renders past its native pixels.
+await check('chromium: images stay at native size except in filled photo frames, at most 3.5x (MED-04 amended)', async () => {
   const ctx = await C.newContext(ctxOpts());
   const page = await ctx.newPage();
   const bad = [];
@@ -416,8 +420,8 @@ await check('chromium: no image renders wider or taller than its native pixels (
     for (const p of ['', 'products/', 'products/rice-stick-pad-thai/', 'products/mr-noodles/', 'process/', 'about/']) {
       await page.goto(`${BASE}/en/${p}`);
       await page.evaluate(async () => { document.querySelectorAll('img').forEach((i) => { i.loading = 'eager'; }); await Promise.all([...document.images].map((i) => (i.complete ? 0 : new Promise((r) => { i.onload = i.onerror = r; })))); });
-      const r = await page.evaluate(() => [...document.images].filter((i) => i.offsetParent !== null && i.naturalWidth).map((i) => { const b = i.getBoundingClientRect(); return [i.dataset.asset, Math.round(b.width), Math.round(b.height), i.naturalWidth, i.naturalHeight]; }));
-      for (const [id, rw, rh, nw, nh] of r) { n++; if (rw > nw + 1 || rh > nh + 1) bad.push(`${w} /${p} ${id} ${rw}×${rh} > ${nw}×${nh}`); }
+      const r = await page.evaluate(() => [...document.images].filter((i) => i.offsetParent !== null && i.naturalWidth).map((i) => { const b = i.getBoundingClientRect(); return [i.dataset.asset, Math.round(b.width), Math.round(b.height), i.naturalWidth, i.naturalHeight, !!i.closest('.format-card__media, .frame, .aperture')]; }));
+      for (const [id, rw, rh, nw, nh, filled] of r) { n++; const k = filled ? 3.5 : 1; if (rw > nw * k + 1 || rh > nh * k + 1) bad.push(`${w} /${p} ${id} ${rw}×${rh} > ${k}× ${nw}×${nh}`); }
     }
   }
   await ctx.close();
@@ -446,8 +450,8 @@ await check('chromium: targets ≥ 44×44 px and header ≤ 20% of an 844 px pho
   const small = [];
   for (const p of ['', 'products/', 'oem/', 'contact/']) {
     await page.goto(`${BASE}/en/${p}`);
-    const r = await page.evaluate(() => [...document.querySelectorAll('.btn, .chip, .view-toggle, .menu-button, .lang a, .nav a, .crumbs a, .site-footer li a, .o2-credit, .link-arrow, [data-review-toggle]')]
-      .filter((e) => e.offsetParent !== null).map((e) => { const b = e.getBoundingClientRect(); return [e.className || e.tagName, Math.round(b.width), Math.round(b.height)]; })
+    const r = await page.evaluate(() => [...document.querySelectorAll('.btn, .chip, .view-toggle, .menu-button, .lang-menu summary, .nav-sub summary, .dropdown a, .nav a, .crumbs a, .site-footer li a, .o2-credit, .link-arrow, [data-review-toggle]')]
+      .filter((e) => e.offsetParent !== null && !e.closest('details:not([open]) > ul')).map((e) => { const b = e.getBoundingClientRect(); return [e.className || e.tagName, Math.round(b.width), Math.round(b.height)]; })
       .filter(([, w, h]) => h < 44 || w < 44));
     small.push(...r.map((x) => `${p}: ${x.join(' ')}`));
   }

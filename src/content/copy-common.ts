@@ -9,6 +9,8 @@ export const common: Record<string, CopyEntry> = {
   'skip': { th: 'ข้ามไปยังเนื้อหา', en: 'Skip to content', vi: 'Bỏ qua, đến nội dung chính' },
   'nav.label': { th: 'เมนูหลัก', en: 'Main', vi: 'Điều hướng chính' },
   'nav.products': { th: 'ผลิตภัณฑ์', en: 'Products', vi: 'Sản phẩm' },
+  'nav.products.more': { th: 'แสดงรายการผลิตภัณฑ์', en: 'Show the products', vi: 'Xem danh sách sản phẩm' },
+  'nav.products.all': { th: 'ดูผลิตภัณฑ์ทั้งหมด', en: 'All products', vi: 'Tất cả sản phẩm' },
   'nav.oem': { th: 'รับผลิต OEM', en: 'OEM', vi: 'Gia công OEM' },
   'nav.process': { th: 'กระบวนการผลิต', en: 'Process', vi: 'Quy trình' },
   'nav.quality': { th: 'คุณภาพ', en: 'Quality', vi: 'Chất lượng' },
@@ -68,6 +70,9 @@ export const common: Record<string, CopyEntry> = {
   'status.sample': { th: 'ข้อมูลตัวอย่าง', en: 'Sample', vi: 'Mẫu' },
 
   'sample.tag': { th: 'ตัวอย่าง', en: 'Sample', vi: 'Mẫu' },
+  'legacy.tag': { th: 'จากเว็บไซต์เดิม', en: 'From the current website', vi: 'Từ website hiện tại' },
+  'legacy.marks.note': { th: 'ชื่อเครื่องหมายตามที่แสดงบนเว็บไซต์เดิม ใบรับรองฉบับปัจจุบัน (ผู้ถือ ขอบเขต เลขที่ และวันหมดอายุ) รอบริษัทส่งมา', en: 'The marks as shown on the current website. Current certificates (holder, scope, number and expiry) are still to come from the company.', vi: 'Các dấu hiệu như trên website hiện tại. Chứng nhận hiện hành (đơn vị, phạm vi, số và ngày hết hạn) sẽ do công ty cung cấp.' },
+  'contact.company.h': { th: 'บริษัท', en: 'Company', vi: 'Công ty' },
   'sample.spec': { th: 'ค่าตัวอย่างสำหรับพรีวิว รอยืนยันกับฉลากปัจจุบัน', en: 'Sample values for this preview, to be confirmed against current labels.', vi: 'Giá trị mẫu cho bản xem trước, sẽ đối chiếu với nhãn hiện hành.' },
   'sample.certs': { th: 'ตัวอย่างการแสดงใบรับรอง ใบรับรองจริงจะแสดงเมื่อได้รับเอกสารจากบริษัท', en: 'Sample entries showing how certificates will appear once the company sends them.', vi: 'Mục mẫu cho thấy chứng nhận sẽ hiển thị thế nào khi công ty gửi tài liệu.' },
   'sample.docs': { th: 'รายการเอกสารตัวอย่าง ขอรับเอกสารจริงได้ทางแบบฟอร์ม', en: 'Sample document list. Real documents are sent on request.', vi: 'Danh sách tài liệu mẫu. Tài liệu thật được gửi theo yêu cầu.' },

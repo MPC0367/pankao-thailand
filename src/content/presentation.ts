@@ -10,6 +10,8 @@ const env = (k: string) => (typeof process !== 'undefined' ? process.env[k] : un
 export const SHOW_SAMPLES = env('PANKAO_SAMPLES') !== 'off';
 export const SHOW_SAMPLE_TAGS = env('PANKAO_SAMPLE_TAGS') !== 'off';
 export const SHOW_LOADER = env('PANKAO_LOADER') !== 'off';
+/** The company's current website in its own words, tagged, preview only (owner, 19 Nov 2026). */
+export const SHOW_LEGACY = env('PANKAO_LEGACY') !== 'off';
 
 /**
  * Public preview on GitHub Pages (owner: "publish live", 19 Nov 2026). Same content as the client preview

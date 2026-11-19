@@ -1,7 +1,7 @@
 /** Page shell: head, preview bar, header, drawer, footer, O2 credit. */
 import { readFileSync } from 'node:fs';
 import { address, brandDescriptor, brandName, email, fax, location, phone } from '../content/facts.ts';
-import { formatProducts } from '../content/products.ts';
+import { formatProducts, products as allProducts } from '../content/products.ts';
 import { LOCALES, type Locale } from '../content/types.ts';
 import { pkMark } from './mark.ts';
 import { BASE, MARK_APPROVED, ORIGIN, PUBLIC_PREVIEW, SHOW_LOADER } from '../content/presentation.ts';
@@ -38,10 +38,20 @@ const OG_LOCALE: Record<Locale, string> = { th: 'th_TH', en: 'en_GB', vi: 'vi_VN
 
 const isCurrent = (ctx: Ctx, path: string) => path !== '' && (ctx.path === path || ctx.path.startsWith(path));
 
-export function langSwitch(ctx: Ctx, path: string, cls = 'lang'): Raw {
-  return html`<nav class="${cls}" aria-label="${t(ctx, 'lang.label')}">${LOCALES.map((l) =>
-    html`<a href="${href(l, path)}" hreflang="${l}" lang="${l}" data-lang-switch="${l}"${attrs({ 'aria-current': l === ctx.locale ? 'true' : null })}><span aria-hidden="true">${LANG_SHORT[l]}</span><span class="sr-only">${t({ locale: l }, `lang.${l}`)}</span></a>`,
-  )}</nav>`;
+const GLOBE = raw('<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M2.2 9h13.6M9 2c2.2 2.3 2.2 11.7 0 14M9 2c-2.2 2.3-2.2 11.7 0 14" stroke="currentColor" stroke-width="1.1" fill="none"/></svg>');
+const CHEVRON = raw('<svg class="chev" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+
+/**
+ * Language dropdown (owner, 19 Nov 2026: "make the language change a dropdown menu"). A native
+ * <details>, so it opens without JavaScript; site.js closes it on Escape and outside clicks.
+ */
+export function langSwitch(ctx: Ctx, path: string, cls = ''): Raw {
+  return html`<details class="lang-menu${cls ? ` ${cls}` : ''}" data-dropdown>
+    <summary>${GLOBE}<span class="sr-only">${t(ctx, 'lang.label')}: </span><span class="lang-menu__current">${t(ctx, `lang.${ctx.locale}`)}</span><span class="lang-menu__code" aria-hidden="true">${LANG_SHORT[ctx.locale]}</span>${CHEVRON}</summary>
+    <ul role="list" class="dropdown">${LOCALES.map((l) =>
+      html`<li><a href="${href(l, path)}" hreflang="${l}" lang="${l}" data-lang-switch="${l}"${attrs({ 'aria-current': l === ctx.locale ? 'true' : null })}><span>${t({ locale: l }, `lang.${l}`)}</span><span class="dropdown__meta" aria-hidden="true">${LANG_SHORT[l]}</span></a></li>`,
+    )}</ul>
+  </details>`;
 }
 
 function brandBlock(ctx: Ctx, assets: Assets): Raw {
@@ -59,10 +69,25 @@ function brandBlock(ctx: Ctx, assets: Assets): Raw {
   </a>`;
 }
 
-function navList(ctx: Ctx): Raw {
-  return html`<ul role="list">${NAV.map((n) =>
-    html`<li><a href="${href(ctx.locale, n.path)}"${attrs({ 'aria-current': isCurrent(ctx, n.path) ? 'page' : null })}>${t(ctx, n.key)}</a></li>`,
-  )}</ul>`;
+/** Every product, as on the 2014 sidebar's "ปั้นข้าวของเรา" submenu. */
+function productLinks(ctx: Ctx): Raw[] {
+  return allProducts.filter((p) => canShow(p.name, ctx)).map((p) =>
+    html`<li><a href="${href(ctx.locale, `products/${p.slug}/`)}"${attrs({ 'aria-current': ctx.path === `products/${p.slug}/` ? 'page' : null })}>${String(val(p.name, ctx.locale))}</a></li>`);
+}
+
+/** In the header the products item has a submenu; in the drawer the products are listed under it. */
+function navList(ctx: Ctx, place: 'header' | 'drawer'): Raw {
+  return html`<ul role="list">${NAV.map((n) => {
+    const link = html`<a href="${href(ctx.locale, n.path)}"${attrs({ 'aria-current': isCurrent(ctx, n.path) ? 'page' : null })}>${t(ctx, n.key)}</a>`;
+    if (n.path !== ROUTES.products) return html`<li>${link}</li>`;
+    const items = productLinks(ctx);
+    if (!items.length) return html`<li>${link}</li>`;
+    if (place === 'drawer') return html`<li>${link}<ul role="list" class="drawer-sub">${items}</ul></li>`;
+    return html`<li class="nav-has-sub">${link}<details class="nav-sub" data-dropdown>
+      <summary><span class="sr-only">${t(ctx, 'nav.products.more')}</span>${CHEVRON}</summary>
+      <ul role="list" class="dropdown">${items}<li class="dropdown__all"><a href="${href(ctx.locale, ROUTES.products)}">${t(ctx, 'nav.products.all')} ${ARROW}</a></li></ul>
+    </details></li>`;
+  })}</ul>`;
 }
 
 const MENU_ICON = raw('<svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="M2 5h14M2 9h14M2 13h14" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>');
@@ -76,7 +101,7 @@ function header(ctx: Ctx, assets: Assets): Raw {
   <div class="header-glass" data-glass aria-hidden="true"></div>
   <div class="header-bar__inner">
     ${brandBlock(ctx, assets)}
-    <nav class="nav" aria-label="${t(ctx, 'nav.label')}">${navList(ctx)}</nav>
+    <nav class="nav" aria-label="${t(ctx, 'nav.label')}">${navList(ctx, 'header')}</nav>
     ${langSwitch(ctx, ctx.path)}
     <a class="btn btn--primary header-cta" href="${href(ctx.locale, ROUTES.oem)}#brief">${t(ctx, 'cta.oem')}</a>
     <button class="menu-button" type="button" aria-haspopup="dialog" aria-controls="drawer" data-menu-open>${MENU_ICON}<span>${t(ctx, 'nav.menu')}</span></button>
@@ -89,22 +114,19 @@ function header(ctx: Ctx, assets: Assets): Raw {
       <span class="brand__name">${fact(ctx, brandName) ?? ''}</span>
       <button class="menu-button" type="button" data-menu-close>${CLOSE_ICON}<span>${t(ctx, 'nav.close')}</span></button>
     </div>
-    <nav aria-label="${t(ctx, 'nav.label')}">${navList(ctx)}</nav>
+    <nav aria-label="${t(ctx, 'nav.label')}">${navList(ctx, 'drawer')}</nav>
     <a class="btn btn--primary" href="${href(ctx.locale, ROUTES.oem)}#brief">${t(ctx, 'cta.oem')}</a>
-    ${langSwitch(ctx, ctx.path)}
   </div>
 </dialog>`;
 }
 
-/** Loading animation: the PK mark draws itself, rice grains appear, gold threads fall (owner's request). */
+/** Loading animation: Pankao's oval logo forms (oval, sprigs, PK, then the arc lettering), gold threads fall (owner's request). */
 function loader(ctx: Ctx): Raw {
   if (!SHOW_LOADER) return raw('');
   const showMark = ctx.mode === 'preview' || MARK_APPROVED;
-  const word = fact(ctx, brandName);
   return html`<div class="loader" aria-hidden="true" data-loader>
   <div class="loader__inner">
     ${showMark ? pkMark('ld', 'loader__mark') : ''}
-    ${word ? html`<p class="loader__word">${String(val(brandName, ctx.locale))}</p>` : ''}
     <div class="loader__threads"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
   </div>
 </div>`;
@@ -168,7 +190,7 @@ function footer(ctx: Ctx): Raw {
         <li><a href="${href(ctx.locale, ROUTES.accessibility)}">${t(ctx, 'footer.accessibility')}</a></li>
         <li><span>${t(ctx, 'footer.reviewed', { date: formatDate(ctx.buildDate, ctx.locale) })}</span></li>
       </ul>
-      ${langSwitch(ctx, ctx.path)}
+      ${langSwitch(ctx, ctx.path, 'lang-menu--up')}
       ${O2_CREDIT}
     </div>
   </div>
@@ -216,6 +238,7 @@ ${assets.glisseCss ? `<link rel="stylesheet" id="glisse-styles" href="${assets.g
 ${ld}
 </head>
 <body${meta.bodyClass ? ` class="${meta.bodyClass}"` : ''}>
+<div class="aura" aria-hidden="true"><i class="a1"></i><i class="a2"></i><i class="a3"></i><i class="a4"></i></div>
 ${loader(ctx).html}
 <a class="skip" href="#main">${escText(t(ctx, 'skip'))}</a>
 ${previewBar(ctx).html}
