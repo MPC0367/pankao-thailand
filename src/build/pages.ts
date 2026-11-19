@@ -14,6 +14,7 @@ import { enquiryForm } from './forms.ts';
 import { esc, html, join, raw, type Raw } from './html.ts';
 import { ARROW, contactLines, document, PIN, type PageMeta } from './layout.ts';
 import { assetImg, credit, packDish, strandPlate } from './media.ts';
+import { assetById } from '../content/assets.ts';
 import { breadcrumbs, organization, productLd } from './seo.ts';
 import { BASE, PUBLIC_PREVIEW, SHOW_LEGACY, SHOW_SAMPLES, SHOW_SAMPLE_TAGS } from '../content/presentation.ts';
 import * as legacy from '../content/legacy.ts';
@@ -33,6 +34,26 @@ const legacyOn = (ctx: Ctx) => ctx.mode === 'preview' && SHOW_LEGACY;
 const legacyTag = (ctx: Ctx): Raw => html`<span class="legacy-tag">${t(ctx, 'legacy.tag')}</span>`;
 /** Display copy: Thai breaks only between phrases. */
 const ph = (ctx: Ctx, s: string): Raw | string => (ctx.locale === 'th' ? raw(phrases(esc(s))) : s);
+
+/**
+ * An illustrative photograph (licensed stock, owner 20 Nov 2026): tagged, captioned and credited with a link to
+ * its source; preview only (assetImg returns nothing in production until the company approves it).
+ */
+function illus(ctx: Ctx, assets: Assets, id: string, cls = ''): Raw {
+  const img = assetImg(ctx, assets, id, {});
+  if (!img) return raw('');
+  const a = assetById.get(id)!;
+  return html`<figure class="illus${cls ? ` ${cls}` : ''}">${img}<figcaption><span class="illus-tag">${t(ctx, 'illus.tag')}</span><span>${a.caption ? loc(a.caption, ctx.locale) : ''}</span><a class="illus-credit" href="${a.sourceUrl}" rel="noopener" target="_blank">${credit(ctx, id)}<span class="sr-only"> ${t(ctx, 'contact.newTab')}</span></a></figcaption></figure>`;
+}
+
+/** Words beside a photograph; either may be absent. */
+function story(text: Raw | string, photo: Raw): Raw {
+  const t_ = String(text), p_ = String(photo);
+  if (!t_ && !p_) return raw('');
+  if (!p_) return raw(t_);
+  if (!t_) return photo;
+  return html`<div class="story grid"><div class="story__text">${raw(t_)}</div><div class="story__photo">${photo}</div></div>`;
+}
 
 /** Heading copy: Thai breaks only between phrases. */
 const hd = (ctx: Ctx, key: string): Raw | string => (ctx.locale === 'th' ? raw(phrases(esc(t(ctx, key)))) : t(ctx, key));
@@ -118,7 +139,7 @@ function meta(ctx: Ctx, key: string, path: string, extra: Partial<PageMeta> = {}
 
 /* ---------- home ---------- */
 
-function homeWelcome(ctx: Ctx): Raw {
+function homeWelcome(ctx: Ctx, assets: Assets): Raw {
   if (!legacyOn(ctx)) return raw('');
   const w = legacy.welcome;
   return html`<section class="section welcome" aria-labelledby="welcome-h"><div class="wrap grid">
@@ -130,7 +151,7 @@ function homeWelcome(ctx: Ctx): Raw {
       <p class="lede">${loc(w.body, ctx.locale)}</p>
       ${linkArrow(href(ctx.locale, ROUTES.about), loc(legacy.history.h, ctx.locale))}
     </div>
-  </div></section>`;
+  </div><div class="wrap welcome__photo">${illus(ctx, assets, 'illus.ricefield', 'illus--wide')}</div></section>`;
 }
 
 function certsLegacy(ctx: Ctx): Raw {
@@ -205,7 +226,7 @@ export function home(ctx: Ctx, assets: Assets): Built {
   </div>
 </section>
 
-${homeWelcome(ctx)}
+${homeWelcome(ctx, assets)}
 
 ${formats.length ? html`<section class="section section--tight" aria-labelledby="formats-h">
   <div class="wrap">
@@ -263,13 +284,13 @@ ${homeHeritage(ctx)}
 
 /* ---------- products index ---------- */
 
-function legacyRange(ctx: Ctx): Raw {
+function legacyRange(ctx: Ctx, assets: Assets): Raw {
   if (!legacyOn(ctx)) return raw('');
   const r = legacy.range;
   return html`<section class="section band range" aria-labelledby="range-h"><div class="wrap grid">
     <div class="range__names"><p class="eyebrow">${legacyTag(ctx)}</p><h2 id="range-h">${loc(r.h, ctx.locale)}</h2>
       <ul class="range-list" role="list">${loc(r.items, ctx.locale).map((n) => html`<li class="arrive">${n}</li>`)}</ul></div>
-    <div class="range__promises"><ul class="checklist" role="list">${loc(r.promises, ctx.locale).map((x) => html`<li>${x}</li>`)}</ul></div>
+    <div class="range__promises">${illus(ctx, assets, 'illus.dried')}<ul class="checklist" role="list">${loc(r.promises, ctx.locale).map((x) => html`<li>${x}</li>`)}</ul></div>
   </div></section>`;
 }
 
@@ -310,7 +331,7 @@ export function productsIndex(ctx: Ctx, assets: Assets): Built {
     </div>
   </div>
 </section>
-${legacyRange(ctx)}
+${legacyRange(ctx, assets)}
 ${ctaBand(ctx, hd(ctx, 'products.cta.h'), tx(ctx, 'products.cta.body'))}`;
   return page(ctx, assets, {
     ...meta(ctx, 'products', ROUTES.products),
@@ -320,16 +341,24 @@ ${ctaBand(ctx, hd(ctx, 'products.cta.h'), tx(ctx, 'products.cta.body'))}`;
 
 /* ---------- product detail ---------- */
 
-function legacyProduct(ctx: Ctx, p: Product): Raw {
+const SERVING: Record<string, string> = {
+  'rice-vermicelli': 'illus.dish.vermicelli',
+  'rice-stick-pad-thai': 'illus.dish.padthai',
+  'rice-flake-guay-jub': 'illus.dish.guayjub',
+  'brown-rice-noodles': 'illus.brownrice',
+};
+
+function legacyProduct(ctx: Ctx, assets: Assets, p: Product): Raw {
   const x = legacy.productText[p.id];
-  if (!legacyOn(ctx) || !x) return raw('');
-  return html`<section class="section section--tight" aria-label="${t(ctx, 'legacy.tag')}"><div class="wrap">
-    <figure class="legacy-quote">
+  const quote = legacyOn(ctx) && x ? html`<figure class="legacy-quote">
       <p class="eyebrow">${legacyTag(ctx)}</p>
       ${x.lead ? html`<p class="legacy-quote__lead">${loc(x.lead, ctx.locale)}</p>` : ''}
       <blockquote><p>${loc(x.body, ctx.locale)}</p></blockquote>
-    </figure>
-  </div></section>`;
+    </figure>` : raw('');
+  const photo = SERVING[p.id] ? illus(ctx, assets, SERVING[p.id]!) : raw('');
+  const inner = story(quote, photo);
+  if (!String(inner)) return raw('');
+  return html`<section class="section section--tight" aria-label="${t(ctx, 'legacy.tag')}"><div class="wrap">${inner}</div></section>`;
 }
 
 const SPEC_FIELDS = ['ingredients', 'allergen', 'packWeights', 'shelfLife', 'storage', 'cooking', 'origin', 'widthMm', 'caseConfiguration'] as const;
@@ -374,7 +403,7 @@ ${crumbs(ctx, [{ label: t(ctx, 'nav.home'), path: '' }, { label: t(ctx, 'nav.pro
   </div>
 </section>
 
-${legacyProduct(ctx, p)}
+${legacyProduct(ctx, assets, p)}
 
 ${isBrand && brandFormats.length ? html`<section class="section section--tight band"><div class="wrap">
   <h2 class="h3">${t(ctx, 'product.brandFormats')}</h2>
@@ -514,9 +543,9 @@ export function processPage(ctx: Ctx, assets: Assets): Built {
 <section class="section section--tight page-head"><div class="wrap">
   ${sectionHead(t(ctx, 'process.eyebrow'), hd(ctx, 'process.h1'), tx(ctx, 'process.lede') ?? tx(ctx, 'home.process.lede'), 'h1')}
 </div></section>
-${legacyOn(ctx) ? html`<section class="section section--tight" aria-label="${loc(legacy.process.h, ctx.locale)}"><div class="wrap">
-  <figure class="legacy-quote"><p class="eyebrow">${loc(legacy.process.h, ctx.locale)} ${legacyTag(ctx)}</p><blockquote><p>${loc(legacy.process.intro, ctx.locale)}</p></blockquote></figure>
-</div></section>` : ''}
+<section class="section section--tight" aria-label="${loc(legacy.process.h, ctx.locale)}"><div class="wrap">
+  ${story(legacyOn(ctx) ? html`<figure class="legacy-quote"><p class="eyebrow">${loc(legacy.process.h, ctx.locale)} ${legacyTag(ctx)}</p><blockquote><p>${loc(legacy.process.intro, ctx.locale)}</p></blockquote></figure>` : raw(''), illus(ctx, assets, 'illus.jasmine'))}
+</div></section>
 <section class="section section--tight" aria-label="${hd(ctx, 'process.h1')}"><div class="wrap">
   ${steps.length ? html`<ol class="process" role="list" data-process>
     <span class="process__thread" aria-hidden="true"><i data-process-thread></i></span>
@@ -575,6 +604,7 @@ export function qualityPage(ctx: Ctx, assets: Assets): Built {
   const main = html`
 <section class="section section--tight page-head"><div class="wrap">
   ${sectionHead(t(ctx, 'quality.eyebrow'), hd(ctx, 'quality.h1'), t(ctx, 'quality.lede'), 'h1')}
+  ${illus(ctx, assets, 'illus.paddies', 'illus--wide quality-photo')}
 </div></section>
 <section class="section section--tight" aria-labelledby="register-h"><div class="wrap">
   <h2 id="register-h" class="h3">${t(ctx, 'quality.register.h')}</h2>
@@ -643,7 +673,7 @@ export function aboutPage(ctx: Ctx, assets: Assets): Built {
     ${linkArrow(href(ctx.locale, ROUTES.contact), t(ctx, 'cta.directions'))}
   </div>
   ${building ? html`<figure class="about-photo">${building}<figcaption class="small muted">${credit(ctx, 'legacy.contact.building')}</figcaption></figure>` : ''}
-</div></section>`;
+</div><div class="wrap about-region">${illus(ctx, assets, 'illus.nonthaburi', 'illus--wide')}</div></section>`;
   return page(ctx, assets, {
     ...meta(ctx, 'about', ROUTES.about),
     jsonLd: [breadcrumbs(ctx, [{ name: t(ctx, 'nav.home'), path: '' }, { name: t(ctx, 'nav.about'), path: ROUTES.about }])],

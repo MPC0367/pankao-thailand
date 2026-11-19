@@ -21,7 +21,7 @@ if (!existsSync(research)) {
   process.exit(1);
 }
 
-type Job = { from: string; to: string; vf?: string };
+type Job = { from: string; to: string; vf?: string; dir?: string };
 /** The 186x210 close-ups (owner, 20 Nov 2026: "make the dry noodle photos clearer too"): deblock and lightly
  * denoise the 2014 JPEG, enlarge in two Lanczos steps with contrast-adaptive sharpening (AMD CAS) after
  * each, to 632x714 so the browser barely scales them. Not generative: no detail is invented. */
@@ -44,8 +44,19 @@ for (const [key, stem] of [['vermicelli', 'rice_vermicelli'], ['ricestick', 'ric
   jobs.push({ from: `${stem}_bg.jpg`, to: `${key}-dish.jpg` });
 }
 
+/* Illustrative photographs with free commercial licences (owner, 20 Nov 2026: "with photos to add to the website
+   you may use the internet to do research add what is appropriate for each page"). Sources and licences:
+   ../documents/photos/illustrative-2026-11-20/README.md. Resized to 1600 px wide; never shown as Pankao's own. */
+const ILLUS = resolve(root, '../documents/photos/illustrative-2026-11-20');
+if (existsSync(ILLUS)) {
+  for (const name of ['ricefield-thailand', 'paddies', 'jasmine-rice', 'dried-vermicelli', 'dish-vermicelli', 'dish-padthai', 'dish-guayjub', 'brown-rice', 'nonthaburi-canal']) {
+    jobs.push({ dir: ILLUS, from: `${name}.jpg`, to: `../illus/${name}.jpg`, vf: 'scale=1600:-2:flags=lanczos+accurate_rnd+full_chroma_int' });
+  }
+}
+mkdirSync(join(root, 'media-source/illus'), { recursive: true });
+
 for (const j of jobs) {
-  const src = join(research, j.from);
+  const src = join(j.dir ?? research, j.from);
   const dst = join(out, j.to);
   const args = ['-v', 'error', '-y', '-i', src, '-frames:v', '1', '-update', '1'];
   if (j.vf) args.push('-vf', j.vf);

@@ -70,6 +70,7 @@ export const common: Record<string, CopyEntry> = {
   'status.sample': { th: 'ข้อมูลตัวอย่าง', en: 'Sample', vi: 'Mẫu' },
 
   'sample.tag': { th: 'ตัวอย่าง', en: 'Sample', vi: 'Mẫu' },
+  'illus.tag': { th: 'ภาพประกอบ', en: 'Illustrative photo', vi: 'Ảnh minh họa' },
   'legacy.tag': { th: 'จากเว็บไซต์เดิม', en: 'From the current website', vi: 'Từ website hiện tại' },
   'legacy.marks.note': { th: 'ชื่อเครื่องหมายตามที่แสดงบนเว็บไซต์เดิม ใบรับรองฉบับปัจจุบัน (ผู้ถือ ขอบเขต เลขที่ และวันหมดอายุ) รอบริษัทส่งมา', en: 'The marks as shown on the current website. Current certificates (holder, scope, number and expiry) are still to come from the company.', vi: 'Các dấu hiệu như trên website hiện tại. Chứng nhận hiện hành (đơn vị, phạm vi, số và ngày hết hạn) sẽ do công ty cung cấp.' },
   'contact.company.h': { th: 'บริษัท', en: 'Company', vi: 'Công ty' },

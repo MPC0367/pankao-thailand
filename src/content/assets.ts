@@ -52,6 +52,81 @@ const legacy = (s: Spec): Asset => ({
   reviewOrExpiryDate: REVIEW,
 });
 
+/**
+ * Illustrative photographs (owner, 20 Nov 2026: "with photos to add to the website you may use the internet
+ * to do research add what is appropriate for each page"). Free licences that allow commercial use; none
+ * shows Pankao, its plant or its products, and each renders with an "Illustrative photo" tag and its
+ * photographer's credit, in the preview only. Record: ../documents/photos/illustrative-2026-11-20/README.md.
+ */
+type StockSpec = {
+  id: string; file: string; w: number; h: number; page: string; author: string;
+  site: 'Pexels' | 'Unsplash' | 'Wikimedia Commons'; licence: string; licenceUrl: string;
+  subject: string; alt: Localized; caption: Localized;
+};
+const LICENCE = {
+  pexels: ['Pexels License', 'https://www.pexels.com/license/'],
+  unsplash: ['Unsplash License', 'https://unsplash.com/license'],
+  cc0: ['CC0 1.0', 'https://creativecommons.org/publicdomain/zero/1.0/'],
+} as const;
+const stock = (s: StockSpec): Asset => ({
+  id: s.id,
+  file: s.file,
+  sourceUrl: s.page,
+  sourceOwner: `${s.author} (${s.site})`,
+  retrievedAt: '2026-11-20',
+  rightsBasis: 'licensed-stock',
+  permissionReference: `${s.licence}: ${s.licenceUrl}`,
+  subject: s.subject,
+  actualPankaoOrGeneric: 'generic',
+  width: s.w,
+  height: s.h,
+  maxDisplayWidth: s.w,
+  alt: s.alt,
+  caption: s.caption,
+  credit: { th: `ภาพ: ${s.author} / ${s.site}`, en: `Photo: ${s.author} / ${s.site}`, vi: `Ảnh: ${s.author} / ${s.site}` },
+  productionApproved: false,
+  reviewOrExpiryDate: REVIEW,
+});
+const P = LICENCE.pexels, U = LICENCE.unsplash;
+const STOCK: Asset[] = [
+  stock({ id: 'illus.ricefield', file: 'illus/ricefield-thailand.jpg', w: 1600, h: 1066, page: 'https://www.pexels.com/photo/scenic-view-of-lush-green-rice-fields-with-canal-38849279/', author: 'Sinan KRIYA', site: 'Pexels', licence: P[0], licenceUrl: P[1],
+    subject: 'Green rice paddy with a field canal and sugar palms, Thailand.',
+    alt: { th: 'ทุ่งนาเขียวขจีมีคูน้ำและต้นตาล', en: 'A green rice paddy with a field canal and sugar palms', vi: 'Cánh đồng lúa xanh với mương nước và hàng thốt nốt' },
+    caption: { th: 'ทุ่งนาในประเทศไทย', en: 'Rice fields in Thailand', vi: 'Ruộng lúa ở Thái Lan' } }),
+  stock({ id: 'illus.paddies', file: 'illus/paddies.jpg', w: 1600, h: 1066, page: 'https://www.pexels.com/photo/photo-of-a-paddy-field-5174197/', author: 'Sirikul R', site: 'Pexels', licence: P[0], licenceUrl: P[1],
+    subject: 'Young rice in curving paddies (location not stated).',
+    alt: { th: 'ต้นข้าวอ่อนในแปลงนาโค้ง', en: 'Young rice plants in curving paddies', vi: 'Lúa non trên những thửa ruộng uốn cong' },
+    caption: { th: 'ต้นข้าวในนา', en: 'Rice growing in the paddies', vi: 'Lúa trên ruộng' } }),
+  stock({ id: 'illus.jasmine', file: 'illus/jasmine-rice.jpg', w: 1600, h: 1066, page: 'https://unsplash.com/photos/M5hX7319EBA', author: 'Kseniya Nekrasova', site: 'Unsplash', licence: U[0], licenceUrl: U[1],
+    subject: 'Uncooked jasmine rice, full frame.',
+    alt: { th: 'เมล็ดข้าวสารหอมมะลิ', en: 'Uncooked jasmine rice grains', vi: 'Hạt gạo lài chưa nấu' },
+    caption: { th: 'ข้าวสารก่อนเข้าสู่การผลิต', en: 'Rice before it becomes noodles', vi: 'Gạo trước khi thành sợi' } }),
+  stock({ id: 'illus.dried', file: 'illus/dried-vermicelli.jpg', w: 1600, h: 1066, page: 'https://unsplash.com/photos/3Z1kIDz2yXc', author: 'Bakd&Raw by Karolin Baitinger', site: 'Unsplash', licence: U[0], licenceUrl: U[1],
+    subject: 'Three nests of dry rice vermicelli on white (not a Pankao product).',
+    alt: { th: 'เส้นหมี่แห้งสามก้อนวางซ้อนกัน', en: 'Three nests of dry rice vermicelli stacked on white', vi: 'Ba bánh bún gạo khô xếp chồng trên nền trắng' },
+    caption: { th: 'เส้นหมี่แห้ง (ภาพทั่วไป ไม่ใช่สินค้าของปั้นข้าว)', en: 'Dry rice vermicelli (a general photo, not a Pankao product)', vi: 'Bún gạo khô (ảnh chung, không phải sản phẩm của Pankao)' } }),
+  stock({ id: 'illus.dish.vermicelli', file: 'illus/dish-vermicelli.jpg', w: 1600, h: 1068, page: 'https://unsplash.com/photos/V2rH_Ed0teI', author: 'Lee Milo', site: 'Unsplash', licence: U[0], licenceUrl: U[1],
+    subject: 'Stir-fried rice vermicelli with mushroom, carrot and prawn.',
+    alt: { th: 'เส้นหมี่ผัดกับเห็ด แครอท และกุ้ง ในชามใหญ่', en: 'A large bowl of rice vermicelli stir-fried with mushroom, carrot and prawns', vi: 'Một tô lớn bún gạo xào nấm, cà rốt và tôm' },
+    caption: { th: 'ตัวอย่างเมนู: เส้นหมี่ผัดกุ้งกับผัก', en: 'Serving idea: rice vermicelli stir-fried with prawns and vegetables', vi: 'Gợi ý món: bún gạo xào tôm và rau' } }),
+  stock({ id: 'illus.dish.padthai', file: 'illus/dish-padthai.jpg', w: 1600, h: 1066, page: 'https://www.pexels.com/photo/authentic-pad-thai-dish-with-shrimp-and-bean-sprouts-34723305/', author: 'UNDO KIM', site: 'Pexels', licence: P[0], licenceUrl: P[1],
+    subject: 'Prawn pad thai with bean sprouts, peanuts and lime.',
+    alt: { th: 'ผัดไทยกุ้ง ถั่วงอก ถั่วลิสง และมะนาว', en: 'Prawn pad thai with bean sprouts, peanuts and lime', vi: 'Pad thai tôm với giá, đậu phộng và chanh' },
+    caption: { th: 'ตัวอย่างเมนู: ผัดไทยกุ้ง', en: 'Serving idea: prawn pad thai', vi: 'Gợi ý món: pad thai tôm' } }),
+  stock({ id: 'illus.dish.guayjub', file: 'illus/dish-guayjub.jpg', w: 1600, h: 1200, page: 'https://commons.wikimedia.org/wiki/File:Kuaichap_(rolled_noodle_soup_with_intestines),_Chiang_Mai,_2018-07-28_(4).jpg', author: 'Bitterschoko', site: 'Wikimedia Commons', licence: LICENCE.cc0[0], licenceUrl: LICENCE.cc0[1],
+    subject: 'Guay jub (rolled rice-noodle soup) with crispy pork and egg, Chiang Mai.',
+    alt: { th: 'ก๋วยจั๊บเส้นม้วน หมูกรอบ และไข่', en: 'Guay jub: rolled rice noodles in broth with crispy pork and egg', vi: 'Guay jub: bánh cuộn trong nước dùng với heo giòn và trứng' },
+    caption: { th: 'ตัวอย่างเมนู: ก๋วยจั๊บหมูกรอบ', en: 'Serving idea: guay jub with crispy pork', vi: 'Gợi ý món: guay jub với heo giòn' } }),
+  stock({ id: 'illus.brownrice', file: 'illus/brown-rice.jpg', w: 1600, h: 1066, page: 'https://www.pexels.com/photo/extreme-close-up-photo-of-rice-grain-pile-18358661/', author: 'Petr Ganaj', site: 'Pexels', licence: P[0], licenceUrl: P[1],
+    subject: 'Uncooked long-grain brown rice, macro.',
+    alt: { th: 'เมล็ดข้าวกล้องระยะใกล้', en: 'Uncooked brown rice grains, close up', vi: 'Hạt gạo lứt chưa nấu, cận cảnh' },
+    caption: { th: 'ข้าวกล้อง วัตถุดิบของเส้นข้าวกล้อง', en: 'Brown rice, the grain behind brown-rice noodles', vi: 'Gạo lứt, nguyên liệu của bún gạo lứt' } }),
+  stock({ id: 'illus.nonthaburi', file: 'illus/nonthaburi-canal.jpg', w: 1600, h: 1064, page: 'https://www.pexels.com/photo/serene-canal-landscape-with-lush-greenery-38189663/', author: 'Worawat Li', site: 'Pexels', licence: P[0], licenceUrl: P[1],
+    subject: 'A canal in Bang Khu Rat, Nonthaburi (not Sai Noi).',
+    alt: { th: 'คลองกว้าง ริมฝั่งหญ้าเขียว ใต้ท้องฟ้าโปร่ง', en: 'A wide canal with green banks under an open sky', vi: 'Một con kênh rộng, bờ cỏ xanh dưới bầu trời rộng' },
+    caption: { th: 'คลองในจังหวัดนนทบุรี (บางคูรัด)', en: 'A canal in Nonthaburi (Bang Khu Rat)', vi: 'Một con kênh ở Nonthaburi (Bang Khu Rat)' } }),
+];
+
 export const assets: Asset[] = [
   legacy({
     id: 'legacy.logo', from: 'pankao_logo.gif', file: 'legacy/logo.png', w: 88, h: 61,
@@ -135,6 +210,7 @@ export const assets: Asset[] = [
     subject: 'White factory building behind a rice field (2014 contact page; no signage legible).',
     alt: { th: 'อาคารโรงงานสีขาวหลังทุ่งนา', en: 'A white factory building behind a rice field', vi: 'Tòa nhà nhà máy màu trắng phía sau cánh đồng lúa' },
   }),
+  ...STOCK,
 ];
 
 export const assetById = new Map(assets.map((a) => [a.id, a]));
