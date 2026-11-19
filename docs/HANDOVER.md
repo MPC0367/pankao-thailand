@@ -4,7 +4,7 @@
 
 A new website for the rice-noodle factory in Sai Noi, Nonthaburi (บริษัท สหปั้นข้าว จำกัด), built from scratch in Thai, English and Vietnamese. It is finished and tested **on O2's computer only**: nothing is online, nothing was sent to anyone, and the company has not yet confirmed any of the facts it shows. The preview marks every unconfirmed fact; the "production" version of the same site already removes them automatically, which is why it currently shows almost nothing about products. Twenty decisions from the company stand between this and publication; they are listed below in plain words.
 
-## Fourth round (20 Nov 2026) — committed `e96d41d` and `2b3089d`, not yet on the public preview
+## Fourth round (20 Nov 2026) — on the public preview since 20 Nov 2026 (`gh-pages` `eb5971e` from `3da9420`; the way back `43724cc`)
 
 - **Loading animation fixed** ("where is my loading animation"):
   - **What was wrong:** it never played when arriving through the root link. The language redirect made the referrer this site, and on github.io every other project shares that origin. It also played only once per tab.
