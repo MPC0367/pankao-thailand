@@ -2,7 +2,8 @@
  * Writes docs/generated/*.md from the content model, so registers never drift from what
  * the site renders. Run by `npm run reports` (and by `npm run check`).
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { legacyRedirects } from '../src/build/build.ts';
@@ -46,9 +47,22 @@ writeFileSync(join(OUT, 'CERTIFICATE_REGISTER.md'), header('Certificate and docu
   `\n\n## Marks observed (not certificates; never shown)\n\n` + table(['Mark', 'Seen on', 'Missing before it could be listed'], observedMarks.map((m) => [m.name, m.seenOn, m.missing])) +
   `\n\n## Documents (${documents.length})\n\n` + (documents.length ? table(['ID', 'Title', 'Version', 'Date', 'Type/size', 'Status'], documents.map((d) => [d.id, d.title.en, d.version, d.date, `${d.fileType} ${d.bytes} B`, d.status])) : 'None approved (company profile, specification sheets and certificates are on the request list).'));
 
-writeFileSync(join(OUT, 'ASSET_LEDGER.md'), header('Asset ledger', 'Every rendered image. Production renders only `productionApproved` entries (none yet).') +
-  table(['asset_id', 'file', 'source', 'owner', 'retrieved', 'rights basis', 'permission', 'subject', 'actual/generic', 'px', 'max display', 'crop and edit log', 'alt (EN)', 'raster text', 'production approved', 'review by'],
-    assets.map((a) => [a.id, a.file, a.sourceUrl, a.sourceOwner, a.retrievedAt, a.rightsBasis, a.permissionReference ?? '—', a.subject, a.actualPankaoOrGeneric, `${a.width}×${a.height}`, `${a.maxDisplayWidth}px`, a.cropLimits ?? 'none: the original, re-encoded', a.alt.en || '(decorative)', a.rasterText ?? '', a.productionApproved, a.reviewOrExpiryDate])));
+/* Original and derivative fingerprints, and the review state (Codex audit F21.1, F22.1). Local copies only. */
+const SITE = resolve(fileURLToPath(new URL('..', import.meta.url)));
+const sha = (p: string) => (existsSync(p) ? createHash('sha256').update(readFileSync(p)).digest('hex').slice(0, 12) : '—');
+const originalOf = (a: (typeof assets)[number]) => {
+  const name = a.sourceUrl.match(/images\/([^/?#]+)$/)?.[1];
+  if (a.rightsBasis === 'first-party-legacy-unconfirmed' && name) return join(SITE, '../documents/research/legacy-site/images', name);
+  if (a.rightsBasis === 'licensed-stock') return join(SITE, '../documents/photos/illustrative-2026-11-20', a.file.split('/').pop()!);
+  return '';
+};
+const reviewOf = (a: (typeof assets)[number]) => (a.cropLimits?.startsWith('Edit log')
+  ? 'O2 side-by-side review 2026-11-20 (../documents/photos/enhanced-2026-11-20/side-by-side.png); owner approval pending'
+  : 'no edits beyond resizing; owner approval pending');
+
+writeFileSync(join(OUT, 'ASSET_LEDGER.md'), header('Asset ledger', 'Every rendered image. Production renders only `productionApproved` entries (none yet). Currentness separates the company\'s own archive from current proof (Codex audit F18.1); fingerprints are the first 12 hex of SHA-256 (F21.1).') +
+  table(['asset_id', 'file', 'source', 'owner', 'retrieved', 'rights basis', 'permission', 'subject', 'actual/generic', 'currentness', 'era', 'px', 'max display', 'crop and edit log', 'original sha256', 'derivative sha256', 'review', 'alt (EN)', 'raster text', 'production approved', 'review/expiry'],
+    assets.map((a) => [a.id, a.file, a.sourceUrl, a.sourceOwner, a.retrievedAt, a.rightsBasis, a.permissionReference ?? '—', a.subject, a.actualPankaoOrGeneric, a.currentness ?? '—', a.era ?? '—', `${a.width}×${a.height}`, `${a.maxDisplayWidth}px`, a.cropLimits ?? 'none: the original, re-encoded', sha(originalOf(a)), sha(join(SITE, 'media-source', a.file)), reviewOf(a), a.alt.en || '(decorative)', a.rasterText ?? '', a.productionApproved, a.reviewOrExpiryDate])));
 
 writeFileSync(join(OUT, 'OWNER_DECISIONS.md'), header('Owner decision register', 'A decision is resolved only from a written owner instruction.') +
   table(['ID', 'Gate', 'Decision', 'Why it matters', 'Safe default now', 'Options', 'Evidence needed', 'Release consequence', 'Status'],

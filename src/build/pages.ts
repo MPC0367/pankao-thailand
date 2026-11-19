@@ -404,7 +404,10 @@ export function productDetail(ctx: Ctx, assets: Assets, p: Product): Built {
 
   const main = html`
 ${crumbs(ctx, [{ label: t(ctx, 'nav.home'), path: '' }, { label: t(ctx, 'nav.products'), path: ROUTES.products }, { label: plain }])}
-<section class="section section--tight product-hero">
+<nav class="jumps wrap" aria-label="${t(ctx, 'product.jumps')}"><ul role="list">
+  <li><a href="#overview">${t(ctx, 'product.jump.overview')}</a></li><li><a href="#spec">${t(ctx, 'product.jump.spec')}</a></li><li><a href="#docs">${t(ctx, 'product.jump.docs')}</a></li>${relatedList.length ? html`<li><a href="#related">${t(ctx, 'product.jump.related')}</a></li>` : ''}
+</ul></nav>
+<section class="section section--tight product-hero" id="overview">
   <div class="wrap grid">
     <div class="product-hero__text">
       <p class="eyebrow">${t(ctx, `format.${p.format}`)}</p>
@@ -430,7 +433,7 @@ ${isBrand && brandFormats.length ? html`<section class="section section--tight b
   <div class="formats">${brandFormats.map((x) => formatCard(ctx, assets, x, 'brand'))}</div>
 </div></section>` : ''}
 
-<section class="section section--tight" aria-labelledby="spec-h">
+<section class="section section--tight" id="spec" aria-labelledby="spec-h">
   <div class="wrap grid">
     <div class="spec-intro"><h2 id="spec-h">${t(ctx, 'product.spec.h')}</h2>${SPEC_FIELDS.some((k) => p.technical[k]?.status === 'sample' && canShow(p.technical[k] as Fact<unknown>, ctx)) ? sampleNote(ctx, 'sample.spec') : html`<p class="muted">${t(ctx, 'product.spec.lede')}</p>`}</div>
     <div class="spec-body">
@@ -447,20 +450,21 @@ ${isBrand && brandFormats.length ? html`<section class="section section--tight b
       </dl>
       <h2 class="h3 product-sub">${t(ctx, 'product.claims.h')}</h2>
       ${approvedClaims.length ? html`<ul>${approvedClaims.map((c) => html`<li>${loc(c.text, ctx.locale)}</li>`)}</ul>` : html`<p>${t(ctx, 'product.claims.none')}</p>`}
-      <h2 class="h3 product-sub">${t(ctx, 'product.docs.h')}</h2>
+      <h2 class="h3 product-sub" id="docs">${t(ctx, 'product.docs.h')}</h2>
       ${docList(ctx, [...documents, ...sampleDocuments].filter((d) => d.productIds.includes(p.id))) ?? html`<p>${t(ctx, 'product.docs.none')} ${linkArrow(`${href(ctx.locale, ROUTES.contact)}#contact-form`, t(ctx, 'cta.requestSpec'))}</p>`}
       ${reviewNote(ctx, 'claims found on the 2014 site for this product (not shown)', [
         ...productClaims.map((c) => `${c.text.en} — needs: ${c.evidenceNeeded}`),
         ...claims.filter((c) => c.level === 'company').map((c) => `Company-level (not inherited): ${c.text.en}`),
       ])}
       ${reviewNote(ctx, 'fact status', [factNote(p.name as Fact<unknown>), factNote(p.summary as Fact<unknown>)])}
+      <p class="section-link">${linkArrow(href(ctx.locale, ROUTES.products), t(ctx, 'product.backToFormats'))}</p>
     </div>
   </div>
 </section>
 
 ${legacyProduct(ctx, assets, p)}
 
-${relatedList.length ? html`<section class="section section--tight band" aria-labelledby="related-h"><div class="wrap">
+${relatedList.length ? html`<section class="section section--tight band" id="related" aria-labelledby="related-h"><div class="wrap">
   <h2 id="related-h" class="h3">${t(ctx, 'product.related')}</h2>
   <div class="formats">${relatedList.map((x) => formatCard(ctx, assets, x, 'related'))}</div>
 </div></section>` : ''}
@@ -511,6 +515,7 @@ export function oemPage(ctx: Ctx, assets: Assets): Built {
     ${proof(ctx, assets, 'legacy.process.drying', 'oem.proof.drying')}
     ${proof(ctx, assets, 'legacy.contact.building', 'oem.proof.plant')}
   </div>
+  <p class="section-link proof-next"><a class="btn btn--primary" href="#brief">${t(ctx, 'cta.startBrief')}</a></p>
 </div></section>
 
 ${formats.length ? html`<section class="section section--tight band" aria-labelledby="oem-formats-h"><div class="wrap">
@@ -521,13 +526,7 @@ ${formats.length ? html`<section class="section section--tight band" aria-labell
   </ul>
 </div></section>` : ''}
 
-${sampleOemTerms.some((f) => canShow(f, ctx)) ? html`<section class="section section--tight" aria-labelledby="oem-glance-h"><div class="wrap grid">
-  <div class="spec-intro"><h2 id="oem-glance-h">${hd(ctx, 'oem.glance.h')}</h2>${sampleNote(ctx, 'sample.oem')}</div>
-  <dl class="spec spec-body glance">${sampleOemTerms.filter((f) => canShow(f, ctx)).map((f) => {
-    const v = val(f, ctx.locale) as { label: Record<Locale, string>; value: Record<Locale, string> };
-    return html`<div><dt>${v.label[ctx.locale]}</dt><dd>${marked(v.value[ctx.locale], [f], ctx)}</dd></div>`;
-  })}</dl>
-</div></section>` : ''}
+
 
 <section class="section" aria-labelledby="oem-path-h"><div class="wrap">
   ${sectionHead(null, html`<span id="oem-path-h">${hd(ctx, 'oem.path.h')}</span>`, null)}
@@ -552,9 +551,22 @@ ${sampleOemTerms.some((f) => canShow(f, ctx)) ? html`<section class="section sec
 <section class="section" id="brief" aria-labelledby="oem-form-h" tabindex="-1"><div class="wrap grid">
   <div class="form-intro"><h2 id="oem-form-h">${hd(ctx, 'oem.form.h')}</h2><ul class="contact-mini" role="list">${join(contactLines(ctx, { fax: false }))}</ul></div>
   <div class="form-col">${enquiryForm(ctx, 'oem')}</div>
-</div></section>`;
+</div></section>
+
+${sampleOemTerms.some((f) => canShow(f, ctx)) ? html`<section class="section section--tight" aria-labelledby="oem-glance-h"><div class="wrap">
+  <details class="form-more glance-fold">
+    <summary><span id="oem-glance-h">${t(ctx, 'oem.glance.h')}</span>${sampleTag(ctx)}</summary>
+    ${sampleNote(ctx, 'sample.oem')}
+    <dl class="spec glance">${sampleOemTerms.filter((f) => canShow(f, ctx)).map((f) => {
+      const v = val(f, ctx.locale) as { label: Record<Locale, string>; value: Record<Locale, string> };
+      return html`<div><dt>${v.label[ctx.locale]}</dt><dd>${marked(v.value[ctx.locale], [f], ctx)}</dd></div>`;
+    })}</dl>
+  </details>
+</div></section>` : ''}
+<a class="brief-fab js-only" href="#brief" data-brief-fab hidden>${t(ctx, 'cta.startBrief')}</a>`;
   return page(ctx, assets, {
     ...meta(ctx, 'oem', ROUTES.oem),
+    bodyClass: 'page-oem',
     jsonLd: [breadcrumbs(ctx, [{ name: t(ctx, 'nav.home'), path: '' }, { name: t(ctx, 'nav.oem'), path: ROUTES.oem }])],
   }, main);
 }
@@ -607,13 +619,14 @@ export function processPage(ctx: Ctx, assets: Assets): Built {
 
 /* ---------- quality ---------- */
 
-export function certCard(ctx: Ctx, c: Certificate, today: string): Raw | null {
+export function certCard(ctx: Ctx, c: Certificate, today: string, compact = false): Raw | null {
   // QLT-02: an expired, superseded, pending or private certificate never shows as current.
   // Sample entries (preview only) show how real certificates will look; they never claim "current".
   const isSample = c.status === 'sample';
   if (isSample) { if (!samplesOn(ctx)) return null; }
   else if (c.status !== 'current' || c.expiresOn < today) return null;
   if (!isSample && ctx.mode === 'production' && !c.ownerApproved) return null;
+  if (compact && isSample) return html`<li class="cert cert--sample cert--compact" data-sample><h3>${c.standard}</h3><p class="status status--sample">${t(ctx, 'cert.sample')}</p><p class="small muted">${loc(c.scope, ctx.locale)}</p></li>`;
   return html`<li class="cert${isSample ? ' cert--sample' : ''}"${isSample ? raw(' data-sample') : ''}>
     <h3>${c.standard}</h3>
     ${isSample ? html`<p class="status status--sample">${t(ctx, 'cert.sample')}</p>` : html`<p class="status status--current">${t(ctx, 'cert.current')}</p>`}
@@ -629,7 +642,8 @@ export function certCard(ctx: Ctx, c: Certificate, today: string): Raw | null {
 }
 
 export function qualityPage(ctx: Ctx, assets: Assets): Built {
-  const cards = [...certificates, ...sampleCertificates].map((c) => certCard(ctx, c, ctx.buildDate)).filter(Boolean) as Raw[];
+  // One sample shown in full shows the format; the rest stay compact so the preview is not padded with repeats (Codex F14.3).
+  const cards = [...certificates, ...sampleCertificates].map((c, i) => certCard(ctx, c, ctx.buildDate, i > certificates.length)).filter(Boolean) as Raw[];
   const sampleCards = samplesOn(ctx) && sampleCertificates.length > 0;
   const check = processSteps.find((s) => s.id === 'process.check')!;
   const checkV = canShow(check, ctx) ? (val(check, ctx.locale) as { body: Record<Locale, string> }).body[ctx.locale] : null;
@@ -655,7 +669,7 @@ export function qualityPage(ctx: Ctx, assets: Assets): Built {
 </div></section>
 ${legacyOn(ctx) ? html`<section class="section section--tight" aria-labelledby="best-h"><div class="wrap">
   ${sectionHead(html`${legacyTag(ctx)}`, html`<span id="best-h">${loc(legacy.best.h, ctx.locale)}</span>`, null)}
-  <ul class="promises" role="list">${loc(legacy.best.items, ctx.locale).map((it, i) => html`<li class="arrive"><span class="promises__n" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span><span>${ph(ctx, it)}</span></li>`)}</ul>
+  <ul class="best-line" role="list">${loc(legacy.best.items, ctx.locale).map((it) => html`<li>${ph(ctx, it)}</li>`)}</ul>
   ${certsLegacy(ctx)}
 </div></section>` : ''}
 <section class="section section--tight" aria-labelledby="docs-h"><div class="wrap">
@@ -694,8 +708,7 @@ export function aboutPage(ctx: Ctx, assets: Assets): Built {
 </div></section>
 <section class="section band" aria-labelledby="history-h"><div class="wrap">
   <h2 id="history-h" class="h3">${t(ctx, 'about.history.h')}</h2>
-  ${legacyOn(ctx) ? story(html`<figure class="legacy-quote"><p class="eyebrow">${loc(legacy.welcome.h, ctx.locale)} ${legacyTag(ctx)}</p><p class="welcome__lines display">${loc(legacy.welcome.slogan, ctx.locale).map((l) => html`<span>${ph(ctx, l)}</span>`)}</p></figure>`, illus(ctx, assets, 'illus.ricefield')) : ''}
-  ${legacyOn(ctx) ? html`<figure class="legacy-quote about-history"><p class="eyebrow">${loc(legacy.history.h, ctx.locale)} ${legacyTag(ctx)}</p><blockquote><p>${loc(legacy.history.body, ctx.locale)}</p></blockquote></figure>` : ''}
+  ${legacyOn(ctx) ? story(html`<figure class="legacy-quote"><p class="eyebrow">${loc(legacy.history.h, ctx.locale)} ${legacyTag(ctx)}</p><p class="about-slogan display">${ph(ctx, loc(legacy.welcome.slogan, ctx.locale)[0]!)}</p><blockquote><p>${loc(legacy.history.body, ctx.locale)}</p></blockquote></figure>`, illus(ctx, assets, 'illus.ricefield')) : ''}
   ${timeline(ctx) ?? (tx(ctx, 'about.history.body') ? html`<p class="prose">${tx(ctx, 'about.history.body')}</p>` : '')}
   ${reviewNote(ctx, 'heritage timeline candidates (D04) — the timeline renders here once dated evidence is approved', heritageCandidates.map((f) => `${String(val(f, 'en'))} — ${f.status}. ${f.note ?? ''}`))}
   ${reviewNote(ctx, 'legal identity (shown only here until D02)', [

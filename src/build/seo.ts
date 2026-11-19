@@ -4,12 +4,12 @@
  */
 import { address, brandName, email, phone } from '../content/facts.ts';
 import type { Locale, Product } from '../content/types.ts';
-import { canShow, href, val, type Ctx } from './context.ts';
+import { canPublishStructured, href, val, type Ctx } from './context.ts';
 import { SITE_ORIGIN } from './layout.ts';
 import { BASE } from '../content/presentation.ts';
 
 export function organization(ctx: Ctx): object[] {
-  if (!canShow(brandName, ctx)) return [];
+  if (!canPublishStructured(brandName)) return [];
   const org: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -17,7 +17,7 @@ export function organization(ctx: Ctx): object[] {
     name: val(brandName, ctx.locale),
     url: `${SITE_ORIGIN}${href(ctx.locale, '')}`,
   };
-  if (canShow(address, ctx)) {
+  if (canPublishStructured(address)) {
     const a = val(address, 'en') as string[];
     org.address = {
       '@type': 'PostalAddress',
@@ -29,8 +29,8 @@ export function organization(ctx: Ctx): object[] {
     };
   }
   const points: object[] = [];
-  if (canShow(phone, ctx)) points.push({ '@type': 'ContactPoint', contactType: 'sales', telephone: (val(phone, ctx.locale) as { tel: string }).tel, availableLanguage: ['th', 'en'] });
-  if (canShow(email, ctx)) points.push({ '@type': 'ContactPoint', contactType: 'customer service', email: val(email, ctx.locale) });
+  if (canPublishStructured(phone)) points.push({ '@type': 'ContactPoint', contactType: 'sales', telephone: (val(phone, ctx.locale) as { tel: string }).tel, availableLanguage: ['th', 'en'] });
+  if (canPublishStructured(email)) points.push({ '@type': 'ContactPoint', contactType: 'customer service', email: val(email, ctx.locale) });
   if (points.length) org.contactPoint = points;
   const site = {
     '@context': 'https://schema.org',
@@ -54,7 +54,7 @@ export function breadcrumbs(ctx: Ctx, items: { name: string; path: string }[]): 
 
 /** Product only with a stable public identity; no offers, ratings or nutrition. */
 export function productLd(ctx: Ctx, p: Product, locale: Locale): object | null {
-  if (!canShow(p.name, ctx) || !canShow(p.summary, ctx)) return null;
+  if (!canPublishStructured(p.name) || !canPublishStructured(p.summary)) return null;
   const o: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -63,7 +63,7 @@ export function productLd(ctx: Ctx, p: Product, locale: Locale): object | null {
     category: 'Dried rice noodles',
     url: `${SITE_ORIGIN}${href(locale, `products/${p.slug}/`)}`,
   };
-  if (canShow(brandName, ctx)) o.manufacturer = { '@id': `${SITE_ORIGIN}${BASE}/#organization` };
-  if (p.brand && canShow(p.brand, ctx) && p.format === 'brand') o.brand = { '@type': 'Brand', name: val(p.brand, locale) };
+  if (canPublishStructured(brandName)) o.manufacturer = { '@id': `${SITE_ORIGIN}${BASE}/#organization` };
+  if (p.brand && canPublishStructured(p.brand) && p.format === 'brand') o.brand = { '@type': 'Brand', name: val(p.brand, locale) };
   return o;
 }

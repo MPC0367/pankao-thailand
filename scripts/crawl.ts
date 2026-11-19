@@ -36,7 +36,7 @@ async function crawl(dirName: string, mode: 'preview' | 'production' | 'pages') 
       if (mode === 'production' && robots !== 'index, follow' && !p.endsWith('/pankao-thailand/')) fails.push(`${p}: production must be indexable (${robots})`);
       const xr = r.headers.get('x-robots-tag');
       if (mode === 'preview' && xr !== 'noindex, nofollow') fails.push(`${p}: X-Robots-Tag missing in preview`);
-      if (mode === 'pages') { if (!html.includes('http-equiv="Content-Security-Policy"')) fails.push(`${p}: no meta CSP on Pages`); if (/review-note|class="fact"|data-review-toggle/.test(html)) fails.push(`${p}: review markup on the public preview`); }
+      if (mode === 'pages') { if (!html.includes('http-equiv="Content-Security-Policy"')) fails.push(`${p}: no meta CSP on Pages`); if (/review-note|class="fact"|data-review-toggle/.test(html)) fails.push(`${p}: review markup on the public preview`); if (/"@type":"(Organization|Product)"|PostalAddress|ContactPoint/.test(html)) fails.push(`${p}: unapproved business/product facts in structured data (Codex F16.1)`); if (!/<title>[^<]*·/.test(html)) fails.push(`${p}: title lacks the Preview prefix`); }
       else if (!r.headers.get('content-security-policy')) fails.push(`${p}: no CSP header`);
     }
     for (const m of html.matchAll(/(?:href|src|srcset)="(\/[^"#?]*)/g)) {

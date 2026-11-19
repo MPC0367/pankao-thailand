@@ -26,7 +26,8 @@
     "pages:deploy": "node scripts/pages-deploy.mjs",
     "pages:smoke": "node tests/e2e/pages-smoke.mjs",
     "media:inventory": "node scripts/media-inventory.ts",
-    "audit:metrics": "node tests/e2e/audit-metrics.mjs"
+    "audit:metrics": "node tests/e2e/audit-metrics.mjs",
+    "screens:public": "node tests/e2e/public-screens.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",

@@ -1,0 +1,52 @@
+# Read-only checks of the deployed public preview (Codex audit F05.1 / F17.3): the same 30 pages × 2 engines,
+# loader, glass header, no-send form and axe-core as `npm run pages:smoke`, plus the audit metrics, run on GitHub's
+# machines after each Pages build, with the results kept as an artifact. Nothing here writes to the site.
+name: Post-deploy checks
+
+on:
+  page_build:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: Preview address to check
+        default: https://mpc0367.github.io/pankao-thailand
+
+permissions:
+  contents: read
+
+jobs:
+  live:
+    if: github.event_name == 'workflow_dispatch' || github.event.build.status == 'built'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      URL: ${{ inputs.url || 'https://mpc0367.github.io/pankao-thailand' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - run: mkdir -p qa-output
+      - name: Smoke (30 pages × 2 engines, loader, glass, form sends nothing, axe)
+        run: node tests/e2e/pages-smoke.mjs --url="$URL" | tee qa-output/live-smoke.txt
+      - name: Audit metrics (header, route lengths, OEM, schema, titles, opening)
+        run: node tests/e2e/audit-metrics.mjs --url="$URL" | tee qa-output/live-metrics.txt
+      - name: Record what was checked
+        if: always()
+        run: |
+          {
+            echo "url: $URL"
+            echo "checked at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "source commit (default branch): $GITHUB_SHA"
+            echo "pages build commit: ${{ github.event.build.commit || 'manual run' }}"
+            echo "node: $(node --version)"
+            echo "playwright: $(npx playwright --version)"
+          } > qa-output/live-release.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-checks
+          path: qa-output/live-*.txt

@@ -69,6 +69,15 @@ export function canShow(f: Fact<unknown> | null | undefined, ctx: Pick<Ctx, 'mod
   return true;
 }
 
+/**
+ * Structured data carries more implied authority than labelled page copy and is read without its context
+ * (Codex audit F10.2/F16.1, P0). So schema may assert a fact only when the owner has approved it, in every
+ * build: a preview shows unapproved facts to people, with markers, but never to machines.
+ */
+export function canPublishStructured(f: Fact<unknown> | null | undefined): f is Fact<unknown> {
+  return !!f && f.visibility === 'public' && f.status !== 'conflicted' && f.status !== 'sample' && f.ownerApproved === true;
+}
+
 export function factsShowable(ids: string[], ctx: Pick<Ctx, 'mode'>): boolean {
   return ids.every((id) => {
     const f = factRegistry.get(id);

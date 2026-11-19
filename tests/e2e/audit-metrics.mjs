@@ -68,6 +68,44 @@ for (const l of ['en', 'th']) {
   await c.close();
 }
 
+// Codex audit, third edition (20 Nov 2026): route lengths, preview semantics and navigation.
+{
+  const len = async (vp, path) => {
+    const c = await b.newContext({ viewport: vp });
+    await c.addInitScript(() => { try { sessionStorage.setItem('pk-noloader', '1'); } catch {} });
+    const p = await c.newPage();
+    await p.goto(`${SITE}${path}`);
+    const v = await p.evaluate((h) => document.documentElement.scrollHeight / h, vp.height);
+    await c.close();
+    return v;
+  };
+  const M = { width: 390, height: 844 }, D = { width: 1440, height: 900 };
+  for (const [label, vp, path, max] of [
+    ['OEM, phone', M, '/en/oem/', 8.2], ['Quality, phone', M, '/en/quality/', 6.2], ['About, phone', M, '/en/about/', 5.2],
+    ['Home, desktop', D, '/en/', 6.5], ['Products, desktop', D, '/en/products/', 4.7], ['Process, desktop', D, '/en/process/', 4.2],
+  ]) { const v = await len(vp, path); row(`${label} length`, `${v.toFixed(1)} screens`, `≤ ${max}`, v <= max); }
+  const c = await b.newContext({ viewport: { width: 390, height: 844 } });
+  await c.addInitScript(() => { try { sessionStorage.setItem('pk-noloader', '1'); } catch {} });
+  const p = await c.newPage();
+  let leaks = 0, titled = 0, pages = 0;
+  for (const l of ['th', 'en', 'vi']) for (const path of ['', 'products/', 'products/rice-vermicelli/', 'oem/', 'contact/']) {
+    await p.goto(`${SITE}/${l}/${path}`);
+    const m = await p.evaluate(() => ({ ld: [...document.querySelectorAll('script[type="application/ld+json"]')].map((s) => s.textContent).join(' '), title: document.title }));
+    pages++; if (/"@type":"(Organization|Product)"|PostalAddress|ContactPoint/.test(m.ld)) leaks++; if (/·/.test(m.title.split('|')[0])) titled++;
+  }
+  row('preview structured data free of unapproved business/product facts', `${pages - leaks}/${pages} pages`, `${pages}/${pages}`, leaks === 0);
+  row('preview titles start with "Preview"', `${titled}/${pages} pages`, `${pages}/${pages}`, titled === pages);
+  await p.goto(`${SITE}/en/oem/`);
+  await p.evaluate(() => window.scrollTo(0, 1400));
+  await p.waitForTimeout(400);
+  const fab = await p.evaluate(() => { const f = document.querySelector('[data-brief-fab]'); return f && !f.hidden ? Math.round(f.getBoundingClientRect().height) : 0; });
+  row('OEM: brief one action away after scrolling (phone)', fab ? `visible, ${fab} px tall` : 'not shown', 'visible, ≥ 44 px', fab >= 44);
+  await p.goto(`${SITE}/en/products/rice-stick-pad-thai/`);
+  const jumps = await p.evaluate(() => [...document.querySelectorAll('.jumps a')].map((a) => a.getAttribute('href')).filter((h) => document.querySelector(h)).length);
+  row('product page jump row (targets that exist)', jumps, '≥ 3', jumps >= 3);
+  await c.close();
+}
+
 // Opening: first open plays; a reload shows the page at once.
 {
   const c = await b.newContext({ viewport: { width: 1280, height: 800 } });

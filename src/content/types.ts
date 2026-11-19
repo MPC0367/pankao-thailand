@@ -160,6 +160,10 @@ export type Asset = {
   rasterText?: string;
   productionApproved: boolean;
   reviewOrExpiryDate: string;
+  /** Codex audit F18.1: actual is not the same as current. 'archival' = the company's own but old; 'current' = a current, dated photograph. */
+  currentness?: 'archival' | 'current' | 'illustrative';
+  /** When the picture was taken or published, as far as is known. */
+  era?: string;
 };
 
 export type Certificate = {

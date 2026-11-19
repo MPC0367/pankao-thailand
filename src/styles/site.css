@@ -514,12 +514,12 @@ h3, .h3 { font-size: var(--step-2); line-height: 1.2; letter-spacing: -0.006em; 
 .process { position: relative; }
 .process__thread { position: absolute; left: 23px; top: 0; bottom: 0; width: 2px; background: var(--line); }
 .process__thread i { position: absolute; inset: 0 0 auto 0; height: 100%; background: var(--gold-deep); transform-origin: top; transform: scaleY(var(--p, 0)); }
-.process-step { display: grid; grid-template-columns: 48px 1fr; gap: 16px; padding: 28px 0; }
+.process-step { display: grid; grid-template-columns: 48px 1fr; gap: 16px; padding: 12px 0; }
 .process-step__dot { width: 48px; height: 48px; display: grid; place-items: center; background: var(--cream); position: relative; z-index: 1; }
 .process-step__dot span { width: 22px; height: 12px; border-radius: 50%; background: var(--husk); transition: background var(--t-ui), transform var(--t-ui) var(--ease-out); }
 .process-step.is-reached .process-step__dot span { background: var(--gold-deep); transform: scaleY(1.6) scaleX(0.6); }
 .process-step__body { display: grid; gap: 16px; }
-@media (min-width: 900px) { .process-step__body { grid-template-columns: 7fr 4fr; gap: var(--gap); align-items: start; } }
+@media (min-width: 900px) { .process-step__body { grid-template-columns: minmax(0, 1fr) 190px; gap: 28px; align-items: center; max-width: 880px; } }
 .process-step figure { max-width: 186px; }
 .process-step figcaption { font-size: var(--step--2); color: var(--ink-2); margin-top: 6px; }
 
@@ -982,3 +982,56 @@ a.strip__v { text-decoration: underline; text-decoration-thickness: 1px; text-un
 /* figure captions share one system: what the picture is, then its source class */
 .pair figcaption, .process-step figcaption, .about-photo figcaption { display: grid; gap: 4px; margin-top: 8px; font-size: var(--step--1); }
 .hero__credit { text-align: center; margin-top: 10px; }
+
+/* ---------- Codex audit, 20 Nov 2026 ---------- */
+/* OEM: the brief is one action away after the proof, and from anywhere on a phone */
+.proof-next { margin-top: clamp(20px, 3vw, 32px); }
+.brief-fab { position: fixed; z-index: 30; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); display: inline-flex; align-items: center; min-height: 48px; padding: 0 20px;
+  border-radius: 999px; background: var(--accent); color: var(--on-accent); font-weight: 600; text-decoration: none; box-shadow: 0 16px 32px -14px rgba(43, 28, 17, 0.6); }
+.brief-fab[hidden] { display: none; }
+.brief-fab:hover { background: var(--accent-press); }
+@media (min-width: 900px) { .brief-fab { display: none !important; } }
+@media (max-width: 899px) { .page-oem main { padding-bottom: 72px; } }
+
+/* Products: an odd last card (the brand line) spans the row with its wide pack photo, so no half-row stands empty (F06.1) */
+@media (min-width: 640px) {
+  .formats--index > .format-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
+@media (min-width: 900px) {
+  .formats--index > .format-card:last-child:nth-child(odd) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--gap); align-content: start; }
+  .formats--index > .format-card:last-child:nth-child(odd) > * { grid-column: 2; }
+  .formats--index > .format-card:last-child:nth-child(odd) > .format-card__media { grid-column: 1; grid-row: 1 / span 6; aspect-ratio: 16 / 9; }
+  .formats--index > .format-card:last-child:nth-child(odd) > .view-toggle { justify-self: start; }
+}
+/* Product pages: the specification heading stays beside its table; a jump row to each part (F12.2, F07.2) */
+@media (min-width: 900px) { .spec-intro { position: sticky; top: calc(var(--header-h) + 40px); align-self: start; } }
+.jumps ul { list-style: none; margin: 0; padding: 4px 0 0; display: flex; flex-wrap: wrap; gap: 4px 6px; }
+.jumps a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: 999px; text-decoration: none; font-size: var(--step--1); font-weight: 600; color: var(--ink-2); box-shadow: inset 0 0 0 1px var(--line); background: rgba(255, 253, 248, 0.6); }
+.jumps a:hover { color: var(--ink); background: var(--cream-2); }
+/* Quality: three compact sample certificates after one full one (F14.3) */
+.cert--compact { padding-top: 12px; }
+.cert--compact h3 { font-size: var(--step-0); }
+.cert--compact .small { margin-top: 4px; }
+/* About: one card carries the slogan and the history */
+.about-slogan { margin: 4px 0 14px; font-size: var(--step-2); line-height: 1.3; color: var(--accent); }
+
+/* OEM on phones: square proof photographs, the formats in two columns, the sample terms folded (Codex F13.1) */
+.glance-fold > summary { gap: 10px; justify-content: flex-start; }
+.glance-fold > summary::after { margin-left: auto; }
+.glance-fold .spec { margin-bottom: 18px; }
+@media (max-width: 639px) {
+  .proof-grid .proof img { aspect-ratio: 1; }
+  .format-strip { grid-template-columns: 1fr 1fr; gap: 0 12px; }
+  .format-strip li { grid-template-columns: 36px 1fr; gap: 10px; }
+  .format-strip .strands { height: 32px; }
+  .format-strip a, .format-strip li > span:not(.strands) { font-size: var(--step-0); }
+  /* About: the plant at 4:3 and the field at 16:9 on phones (Codex F03.1) */
+  .about-photo img { aspect-ratio: 4 / 3; width: 100%; object-fit: cover; }
+  .story .illus img { aspect-ratio: 16 / 9; }
+}
+@media (max-width: 639px) {
+  .about-region { margin-top: 20px; }
+  .story { row-gap: 16px; }
+  .legacy-quote { padding: 20px; }
+}
+.range__promises .proof img { aspect-ratio: 2 / 1; }

@@ -206,7 +206,9 @@ function footer(ctx: Ctx): Raw {
 
 export function document(ctx: Ctx, assets: Assets, meta: PageMeta, main: Raw): string {
   const brand = canShow(brandName, ctx) ? String(val(brandName, ctx.locale)) : '';
-  const title = brand ? `${meta.title} | ${brand}` : meta.title;
+  const base = brand ? `${meta.title} | ${brand}` : meta.title;
+  // The public preview says so in tabs and link previews too (Codex audit F10.2).
+  const title = PUBLIC_PREVIEW ? `${t(ctx, 'preview.titlePrefix')} · ${base}` : base;
   const canonical = `${SITE_ORIGIN}${href(ctx.locale, meta.path)}`;
   const alternates = meta.alternates !== false
     ? [...LOCALES.map((l) => `<link rel="alternate" hreflang="${l}" href="${SITE_ORIGIN}${href(l, meta.path)}">`), `<link rel="alternate" hreflang="x-default" href="${SITE_ORIGIN}${href('th', meta.path)}">`].join('\n')

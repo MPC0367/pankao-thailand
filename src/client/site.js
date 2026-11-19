@@ -29,6 +29,18 @@
     window.addEventListener('keydown', endLoader, { once: true });
   }
 
+  /* ---------- OEM: a compact way into the brief once the opening has scrolled away, gone when the form is in view
+     (Codex audit F07.1). A plain link, so it works as an anchor; hidden until it can help. ---------- */
+  var fab = $('[data-brief-fab]');
+  var briefSec = $('#brief');
+  var oemHero = $('.page-oem .hero');
+  if (fab && briefSec && oemHero && 'IntersectionObserver' in window) {
+    var heroIn = true, briefIn = false;
+    var sync = function () { fab.hidden = heroIn || briefIn; };
+    new IntersectionObserver(function (es) { heroIn = es[0].isIntersecting; sync(); }).observe(oemHero);
+    new IntersectionObserver(function (es) { briefIn = es[0].isIntersecting; sync(); }, { rootMargin: '0px 0px -30% 0px' }).observe(briefSec);
+  }
+
   /* ---------- public preview strip: dismissible for the session (the footer keeps the note) ---------- */
   $$('[data-preview-dismiss]').forEach(function (b) {
     b.addEventListener('click', function () { store.set('pk-preview-hidden', '1', true); d.classList.add('preview-hidden'); var h = $('[data-header] .brand'); if (h) h.focus(); });

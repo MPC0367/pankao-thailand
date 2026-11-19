@@ -25,10 +25,11 @@ type Spec = {
   caption?: Localized;
 };
 
+/** "Archive" in every language: the company's own picture, but not current proof (Codex audit F18.1). */
 const LEGACY_CREDIT: Localized = {
-  th: 'ภาพจากเว็บไซต์เดิมของบริษัท (2557)',
-  en: 'Image from the company’s 2014 website',
-  vi: 'Ảnh từ trang web cũ của công ty (2014)',
+  th: 'ภาพเก่าจากเว็บไซต์ของบริษัท (2557)',
+  en: 'Archive photo from the company’s 2014 website',
+  vi: 'Ảnh lưu trữ từ website năm 2014 của công ty',
 };
 
 const legacy = (s: Spec): Asset => ({
@@ -50,6 +51,8 @@ const legacy = (s: Spec): Asset => ({
   rasterText: s.rasterText,
   productionApproved: false,
   reviewOrExpiryDate: REVIEW,
+  currentness: 'archival',
+  era: 'published on pankaothai.com by 2014; capture date unknown',
 });
 
 /**
@@ -86,6 +89,8 @@ const stock = (s: StockSpec): Asset => ({
   credit: { th: `ภาพ: ${s.author} / ${s.site}`, en: `Photo: ${s.author} / ${s.site}`, vi: `Ảnh: ${s.author} / ${s.site}` },
   productionApproved: false,
   reviewOrExpiryDate: REVIEW,
+  currentness: 'illustrative',
+  era: 'licensed stock, retrieved 2026-11-20',
 });
 const P = LICENCE.pexels, U = LICENCE.unsplash;
 const STOCK: Asset[] = [

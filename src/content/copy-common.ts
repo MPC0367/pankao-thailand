@@ -34,12 +34,20 @@ export const common: Record<string, CopyEntry> = {
   'cta.requestSpec': { th: 'ขอข้อมูลจำเพาะ', en: 'Request specifications', vi: 'Yêu cầu thông số' },
   'cta.process': { th: 'ดูขั้นตอนทั้งหมด', en: 'See the full process', vi: 'Xem toàn bộ quy trình' },
   'cta.brief': { th: 'ส่งรายละเอียดโครงการ', en: 'Send an OEM brief', vi: 'Gửi yêu cầu OEM' },
+  'product.jumps': { th: 'ในหน้านี้', en: 'On this page', vi: 'Trên trang này' },
+  'product.jump.overview': { th: 'ภาพรวม', en: 'Overview', vi: 'Tổng quan' },
+  'product.jump.spec': { th: 'ข้อมูลจำเพาะ', en: 'Specifications', vi: 'Thông số' },
+  'product.jump.docs': { th: 'เอกสาร', en: 'Documents', vi: 'Tài liệu' },
+  'product.jump.related': { th: 'รูปแบบอื่น', en: 'Related formats', vi: 'Loại sợi liên quan' },
+  'product.backToFormats': { th: 'กลับไปดูรูปแบบเส้นทั้งหมด', en: 'Back to all formats', vi: 'Quay lại tất cả loại sợi' },
+  'cta.startBrief': { th: 'เริ่มกรอกรายละเอียดโครงการ', en: 'Start your brief', vi: 'Bắt đầu điền yêu cầu' },
 
   'preview.text': {
     th: 'ตัวอย่างส่วนตัวโดย O2 Design Studio ยังไม่ใช่เว็บไซต์ที่บริษัทเผยแพร่ เนื้อหามาจากเว็บไซต์เดิมปี 2557 และบันทึกสาธารณะ และยังไม่ได้รับการยืนยันจากบริษัท',
     en: 'Private preview by O2 Design Studio, not the company’s published website. Content comes from its 2014 website and public records and is not yet confirmed by the company.',
     vi: 'Bản xem trước riêng của O2 Design Studio, chưa phải trang web chính thức của công ty. Nội dung lấy từ trang web năm 2014 và hồ sơ công khai, chưa được công ty xác nhận.',
   },
+  'preview.titlePrefix': { th: 'พรีวิว', en: 'Preview', vi: 'Bản xem trước' },
   'preview.short': { th: 'พรีวิวโดย O2 · ยังไม่ใช่เว็บไซต์ทางการของบริษัท', en: 'Preview by O2 · not yet the company’s official website', vi: 'Bản xem trước của O2 · chưa phải website chính thức' },
   'preview.dismiss': { th: 'ซ่อนแถบพรีวิว', en: 'Hide the preview notice', vi: 'Ẩn thông báo xem trước' },
   'preview.public': {
