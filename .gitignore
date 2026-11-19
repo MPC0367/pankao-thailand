@@ -1,0 +1,8 @@
+node_modules/
+dist/
+dist-production/
+.local/
+media-source/
+qa-output/
+*.log
+.DS_Store
