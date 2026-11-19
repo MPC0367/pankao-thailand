@@ -4,7 +4,7 @@
 
 A new website for the rice-noodle factory in Sai Noi, Nonthaburi (บริษัท สหปั้นข้าว จำกัด), built from scratch in Thai, English and Vietnamese. It is finished and tested **on O2's computer only**: nothing is online, nothing was sent to anyone, and the company has not yet confirmed any of the facts it shows. The preview marks every unconfirmed fact; the "production" version of the same site already removes them automatically, which is why it currently shows almost nothing about products. Twenty decisions from the company stand between this and publication; they are listed below in plain words.
 
-## Third round (20 Nov 2026) — committed `9d31e6f`, not yet on the public preview
+## Third round (20 Nov 2026) — on the public preview since 20 Nov 2026 (`gh-pages` `43724cc` from `f33ca0f`; the way back `d75a80b`)
 
 - **Clearer photos** ("make the images clearer"): the cooked-dish photos now use their whole 460×400 originals (they had been reduced to 186×210 and then stretched). The dry close-ups, the Mr. Noodles dish and the hero pack are enlarged once at build time with Lanczos and a light sharpen (`scripts/media.ts`); no generative upscaling. The dry close-ups stay softer than the dishes: their originals are 186 px, so new photography is still the real fix.
 - **Softer background** ("make the gradients on the background less abrupt"): band edges fade over up to 240 px and the dark sections over up to 150 px, both on a smoothstep curve. The drifting lights fall off on a bell curve.
