@@ -4,6 +4,25 @@
 
 A new website for the rice-noodle factory in Sai Noi, Nonthaburi (บริษัท สหปั้นข้าว จำกัด), built from scratch in Thai, English and Vietnamese. It is finished and tested **on O2's computer only**: nothing is online, nothing was sent to anyone, and the company has not yet confirmed any of the facts it shows. The preview marks every unconfirmed fact; the "production" version of the same site already removes them automatically, which is why it currently shows almost nothing about products. Twenty decisions from the company stand between this and publication; they are listed below in plain words.
 
+## Second round from O2's owner (19–20 Nov 2026) — built and committed, not yet on the public preview
+
+- **Background:** a fixed layer of soft gold and cream lights drifts as the page scrolls (`.aura`, site.js; still under reduced motion). The bands and the dark chapters fade into it at their edges instead of stopping square.
+- **Photographs fill their frames:** cards, product-page frames and the home hero panel are now the photograph itself, edge to edge and rounded. The owner's words: "make the picture larger we dont need a border image in the background". MED-04 is amended: up to 3.5× in those frames, native size elsewhere. The 2014 photos are small, so they look soft at that size until new photography arrives.
+- **Everything on pankaothai.com, in its own three languages** (`src/content/legacy.ts`), tagged "จากเว็บไซต์เดิม / From the current website" and shown in the preview only (`PANKAO_LEGACY=off` hides it; production never shows it; decision D23):
+  - Home: the welcome and the banner slogan, "BEST Quality", and the quality-certifications paragraph with the marks named. Their logos are not reproduced, and the note says current certificates are still to come.
+  - Products: the "ปั้นข้าวของเรา" range, including pumpkin noodles, with the product-page promises.
+  - Product pages: each product's own text.
+  - Process and About: the process intro with the three photo captions, and "ตำนานปั้นข้าว" (the history).
+  - Contact: the registered name with the tax ID (0-1255-50039-49-3).
+  - Left out: the second mobile number (it may be a person's).
+- **Language switch is a dropdown** (globe + current language, native `<details>`), in the header at every width and in the footer.
+- **Products submenu:** the header's Products item opens a list of every product, as the old sidebar's "ปั้นข้าวของเรา ▶" did. The drawer lists the products under Products.
+- **Loader:** the oval logo forms. The oval draws, the sprigs grow, PK is drawn then filled, then the arc lettering appears letter by letter (~2.4 s).
+  - By the owner's choice the arcs keep the 2014 wording, drawn as outlines so the old name is never text (`scripts/logo/make-logo-art.py`; record `../documents/Approvals/2026-11-19 Logo keeps the 2014 wording (O2 owner decision).md`; D21).
+  - The header mark is the same logo.
+- **Checks:** unit 27/27, crawl (preview, production, pages), e2e 35/35 in WebKit and Chromium, Pages smoke 7/7 locally.
+- **Not yet published:** run `npm run pages:deploy` on the owner's word, then `npm run pages:smoke -- --url=https://mpc0367.github.io/pankao-thailand`.
+
 ## Public preview on GitHub Pages (19 Nov 2026)
 
 On the owner's "publish live" the dressed preview went online at **https://mpc0367.github.io/pankao-thailand/** (repo `MPC0367/pankao-thailand`, branch `gh-pages`, built by `npm run build:pages` with the site under `/pankao-thailand`). It is a **labelled preview, not the launch**: every page `noindex`, a strict meta CSP, no review notes or review toggle, the Sample tags kept, and the enquiry form honest about having no backend (it offers Copy brief, Download, Email and Call). pankaothai.com is untouched; moving the site there needs domain access and the company's decisions (D18 and the rest below). The built output includes the 2014 site's photographs (Pankao's own, already public on the old site; rights not confirmed in writing). Republish: `npm run pages:deploy` (refuses an uncommitted tree, builds, crawls, force-pushes `gh-pages`); check: `npm run pages:smoke -- --url=https://mpc0367.github.io/pankao-thailand`. The way back: push an earlier build, or turn Pages off (repo Settings → Pages).
