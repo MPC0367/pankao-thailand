@@ -4,6 +4,20 @@
 
 A new website for the rice-noodle factory in Sai Noi, Nonthaburi (บริษัท สหปั้นข้าว จำกัด), built from scratch in Thai, English and Vietnamese. It is finished and tested **on O2's computer only**: nothing is online, nothing was sent to anyone, and the company has not yet confirmed any of the facts it shows. The preview marks every unconfirmed fact; the "production" version of the same site already removes them automatically, which is why it currently shows almost nothing about products. Twenty decisions from the company stand between this and publication; they are listed below in plain words.
 
+## Fourth round (20 Nov 2026) — committed `e96d41d` and `2b3089d`, not yet on the public preview
+
+- **Loading animation fixed** ("where is my loading animation"):
+  - **What was wrong:** it never played when arriving through the root link. The language redirect made the referrer this site, and on github.io every other project shares that origin. It also played only once per tab.
+  - **Now:** it plays on every fresh open and reload, through the root too; not between the site's own pages, not on back/forward, never under reduced motion.
+  - **Tests:** they now require it to appear, not merely to be gone.
+- **Dry close-ups clearer:** deblocked, lightly denoised, enlarged to 632×714 in two Lanczos steps with contrast-adaptive sharpening (`scripts/media.ts`). Not generative.
+- **Illustrative photographs on every main page** ("use the internet … add what is appropriate for each page"):
+  - **What:** nine images under Pexels, Unsplash or CC0 licences, each tagged "ภาพประกอบ / Illustrative photo", captioned and credited with a link, preview only.
+  - **Where:** Home rice fields; Products dry vermicelli ("not a Pankao product"); a serving idea on each product page; Process jasmine rice; Quality paddies; About a canal in Nonthaburi (Bang Khu Rat, named as such).
+  - **Left out:** sun-drying racks, since Pankao bakes its noodles dry.
+  - **Record:** `../documents/photos/illustrative-2026-11-20/README.md`.
+- **Checks:** unit 27/27, crawls, e2e 35/35, Pages smoke 7/7 locally.
+
 ## Third round (20 Nov 2026) — on the public preview since 20 Nov 2026 (`gh-pages` `43724cc` from `f33ca0f`; the way back `d75a80b`)
 
 - **Clearer photos** ("make the images clearer"): the cooked-dish photos now use their whole 460×400 originals (they had been reduced to 186×210 and then stretched). The dry close-ups, the Mr. Noodles dish and the hero pack are enlarged once at build time with Lanczos and a light sharpen (`scripts/media.ts`); no generative upscaling. The dry close-ups stay softer than the dishes: their originals are 186 px, so new photography is still the real fix.
