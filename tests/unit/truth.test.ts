@@ -118,7 +118,9 @@ test('PRD-07 / AC-PRD-04: unknown SKU fields say "Not yet published", never zero
  */
 const untagged = (html: string) => html
   .replace(/<figure class="legacy-quote[^"]*">[\s\S]*?<\/figure>/g, '')
-  .replace(/<section class="section (?:welcome|band best|band range)"[\s\S]*?<\/section>/g, '')
+  .replace(/<section class="section (?:welcome|band best|band range|heritage-place)"[\s\S]*?<\/section>/g, '')
+  .replace(/<section class="section section--tight" aria-labelledby="best-h">[\s\S]*?<\/section>/g, '')
+  .replace(/<div class="pq-best">[\s\S]*?<\/div>/g, '')
   .replace(/<div>\s*<h2 class="h3">[^<]*<span class="legacy-tag">[\s\S]*?<\/div>/g, '')
   .replace(/<span class="step-cap">[\s\S]*?<\/span><\/span>/g, '');
 

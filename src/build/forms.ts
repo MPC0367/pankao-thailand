@@ -32,11 +32,12 @@ function input(kind: FormKind, name: string, type: string, opts: { required?: bo
   })}>`;
 }
 
-function select(ctx: Ctx, kind: FormKind, name: string, options: [string, string][], required: boolean): Raw {
+/** `labels` gives literal option text (e.g. product names) where a copy key is not used. */
+function select(ctx: Ctx, kind: FormKind, name: string, options: [string, string][], required: boolean, labels: Record<string, string> = {}): Raw {
   const id = `${kind}-${name}`;
   return html`<select id="${id}" name="${name}"${attrs({ required })}>
     <option value="">${t(ctx, 'form.choose')}</option>
-    ${options.map(([v, k]) => html`<option value="${v}">${t(ctx, k)}</option>`)}
+    ${options.map(([v, k]) => html`<option value="${v}">${labels[v] ?? t(ctx, k)}</option>`)}
   </select>`;
 }
 
@@ -52,17 +53,22 @@ export function enquiryForm(ctx: Ctx, kind: FormKind): Raw {
       ${kind === 'oem' ? field(ctx, kind, 'company', 'form.company', input(kind, 'company', 'text', { required: true, autocomplete: 'organization', max: MAX.short })) : field(ctx, kind, 'company', 'form.company', input(kind, 'company', 'text', { autocomplete: 'organization', max: MAX.short }), { optional: true })}
       ${field(ctx, kind, 'name', 'form.name', input(kind, 'name', 'text', { required: true, autocomplete: 'name', max: MAX.short }))}
     </div>
-    ${kind === 'oem' ? field(ctx, kind, 'role', 'form.role', input(kind, 'role', 'text', { autocomplete: 'organization-title', max: MAX.short }), { optional: true }) : ''}
     <div class="form-row form-row--2">
       ${field(ctx, kind, 'email', 'form.email', input(kind, 'email', 'email', { required: true, autocomplete: 'email', max: MAX.email }))}
-      ${field(ctx, kind, 'phone', 'form.phone', input(kind, 'phone', 'tel', { autocomplete: 'tel', max: 40, hint: true, inputmode: 'tel' }), { optional: true, hintKey: 'form.phone.hint' })}
+      ${kind === 'oem'
+        ? field(ctx, kind, 'country', 'form.country', input(kind, 'country', 'text', { required: true, autocomplete: 'country-name', max: MAX.short }))
+        : field(ctx, kind, 'phone', 'form.phone', input(kind, 'phone', 'tel', { autocomplete: 'tel', max: 40, hint: true, inputmode: 'tel' }), { optional: true, hintKey: 'form.phone.hint' })}
     </div>
-    ${field(ctx, kind, 'country', 'form.country', input(kind, 'country', 'text', { required: kind === 'oem', autocomplete: 'country-name', max: MAX.short }), { optional: kind !== 'oem' })}
+    ${kind === 'oem' ? '' : field(ctx, kind, 'country', 'form.country', input(kind, 'country', 'text', { autocomplete: 'country-name', max: MAX.short }), { optional: true })}
     ${kind === 'oem'
-      ? field(ctx, kind, 'buyerType', 'form.buyerType', select(ctx, kind, 'buyerType', [
-          ['importer', 'form.buyer.importer'], ['retail', 'form.buyer.retail'], ['foodservice', 'form.buyer.foodservice'],
-          ['brand', 'form.buyer.brand'], ['manufacturer', 'form.buyer.manufacturer'], ['other', 'form.buyer.other'],
-        ], true))
+      ? html`<div class="form-row form-row--2">
+      ${field(ctx, kind, 'format', 'form.format', select(ctx, kind, 'format', [
+        ...formats.map((p) => [p.id, ''] as [string, string]), ['several', 'form.format.several'], ['unsure', 'form.formats.unsure'],
+      ], true, Object.fromEntries(formats.map((p) => [p.id, String(val(p.name, ctx.locale))]))))}
+      ${field(ctx, kind, 'volume', 'form.volume', select(ctx, kind, 'volume', [
+        ['unsure', 'form.volume.unsure'], ['trial', 'form.volume.trial'], ['pallet', 'form.volume.pallet'], ['container', 'form.volume.container'], ['regular', 'form.volume.regular'],
+      ], false), { optional: true })}
+    </div>`
       : field(ctx, kind, 'subject', 'form.subject', select(ctx, kind, 'subject', [
           ['product', 'form.subject.product'], ['documents', 'form.subject.documents'], ['oem', 'form.subject.oem'],
           ['supplier', 'form.subject.supplier'], ['other', 'form.subject.other'],
@@ -70,14 +76,22 @@ export function enquiryForm(ctx: Ctx, kind: FormKind): Raw {
   </fieldset>`;
 
   const product = kind === 'oem'
-    ? html`<fieldset>
-    <legend>${t(ctx, 'form.legend.product')}</legend>
+    ? html`<details class="form-more" data-form-more>
+    <summary>${t(ctx, 'form.more')}</summary>
+    <p class="hint">${t(ctx, 'form.more.hint')}</p>
+    <div class="form-row form-row--2">
+      ${field(ctx, kind, 'role', 'form.role', input(kind, 'role', 'text', { autocomplete: 'organization-title', max: MAX.short }), { optional: true })}
+      ${field(ctx, kind, 'phone', 'form.phone', input(kind, 'phone', 'tel', { autocomplete: 'tel', max: 40, hint: true, inputmode: 'tel' }), { optional: true, hintKey: 'form.phone.hint' })}
+    </div>
+    ${field(ctx, kind, 'buyerType', 'form.buyerType', select(ctx, kind, 'buyerType', [
+      ['importer', 'form.buyer.importer'], ['retail', 'form.buyer.retail'], ['foodservice', 'form.buyer.foodservice'],
+      ['brand', 'form.buyer.brand'], ['manufacturer', 'form.buyer.manufacturer'], ['other', 'form.buyer.other'],
+    ], false), { optional: true })}
     <fieldset class="field" data-field="formats">
       <legend class="label">${t(ctx, 'form.formats')} <span class="req">${t(ctx, 'form.optional')}</span></legend>
       <div class="choice-group choice-group--2">
         ${formats.map((p) => html`<label class="choice"><input type="checkbox" name="formats" value="${p.id}"><span>${String(val(p.name, ctx.locale))}</span></label>`)}
         ${canShow(diprom2024, ctx) ? html`<label class="choice"><input type="checkbox" name="formats" value="dried-pasta"><span>${t(ctx, 'form.formats.pasta')}</span></label>` : ''}
-        <label class="choice"><input type="checkbox" name="formats" value="unsure"><span>${t(ctx, 'form.formats.unsure')}</span></label>
       </div>
     </fieldset>
     ${field(ctx, kind, 'application', 'form.application', input(kind, 'application', 'text', { max: MAX.medium, hint: true }), { optional: true, hintKey: 'form.application.hint' })}
@@ -90,16 +104,11 @@ export function enquiryForm(ctx: Ctx, kind: FormKind): Raw {
       </div>
     </fieldset>
     ${field(ctx, kind, 'packaging', 'form.packaging', input(kind, 'packaging', 'text', { max: MAX.medium, hint: true }), { optional: true, hintKey: 'form.packaging.hint' })}
-    <div class="form-row form-row--2">
-      ${field(ctx, kind, 'volume', 'form.volume', select(ctx, kind, 'volume', [
-        ['unsure', 'form.volume.unsure'], ['trial', 'form.volume.trial'], ['pallet', 'form.volume.pallet'], ['container', 'form.volume.container'], ['regular', 'form.volume.regular'],
-      ], false), { optional: true })}
-      ${field(ctx, kind, 'timeline', 'form.timeline', select(ctx, kind, 'timeline', [
-        ['exploring', 'form.timeline.exploring'], ['3m', 'form.timeline.3m'], ['6m', 'form.timeline.6m'], ['later', 'form.timeline.later'],
-      ], false), { optional: true })}
-    </div>
+    ${field(ctx, kind, 'timeline', 'form.timeline', select(ctx, kind, 'timeline', [
+      ['exploring', 'form.timeline.exploring'], ['3m', 'form.timeline.3m'], ['6m', 'form.timeline.6m'], ['later', 'form.timeline.later'],
+    ], false), { optional: true })}
     ${field(ctx, kind, 'documents', 'form.documents', input(kind, 'documents', 'text', { max: MAX.medium, hint: true }), { optional: true, hintKey: 'form.documents.hint' })}
-  </fieldset>`
+  </details>`
     : raw('');
 
   const id = `${kind}-message`;
@@ -124,7 +133,7 @@ export function enquiryForm(ctx: Ctx, kind: FormKind): Raw {
   const strings = {
     errSummaryOne: t(ctx, 'err.summary.one'), errSummaryOther: t(ctx, 'err.summary.other'),
     company: t(ctx, 'err.company'), name: t(ctx, 'err.name'), emailRequired: t(ctx, 'err.email.required'), emailInvalid: t(ctx, 'err.email.invalid'),
-    country: t(ctx, 'err.country'), buyerType: t(ctx, 'err.buyerType'), subject: t(ctx, 'err.subject'), message: t(ctx, 'err.message'), consent: t(ctx, 'err.consent'),
+    country: t(ctx, 'err.country'), buyerType: t(ctx, 'err.buyerType'), format: t(ctx, 'err.format'), subject: t(ctx, 'err.subject'), message: t(ctx, 'err.message'), consent: t(ctx, 'err.consent'),
     tooLong: t(ctx, 'err.tooLong'), sending: t(ctx, 'form.sending'), slow: t(ctx, 'state.slow'),
     okH: t(ctx, 'state.ok.h'), okBody: t(ctx, 'state.ok.body'), dupH: t(ctx, 'state.dup.h'), dupBody: t(ctx, 'state.dup.body'),
     failH: t(ctx, 'state.fail.h'), failBody: t(ctx, 'state.fail.body'), rateH: t(ctx, 'state.rate.h'), rateBody: t(ctx, 'state.rate.body'),
@@ -143,9 +152,9 @@ export function enquiryForm(ctx: Ctx, kind: FormKind): Raw {
   <input type="hidden" name="kind" value="${kind}">
   <input type="hidden" name="locale" value="${ctx.locale}">
   ${you}
-  ${product}
   ${message}
-  <div class="btn-row js-only"><button class="btn btn--primary" type="submit" data-submit>${t(ctx, kind === 'oem' ? 'form.submit.oem' : 'form.submit.general')}</button></div>
+  ${product}
+  <div class="btn-row js-only"><button class="btn btn--primary" type="submit" data-submit>${t(ctx, backend === 'mock' ? (kind === 'oem' ? 'form.submit.oem' : 'form.submit.general') : (kind === 'oem' ? 'form.submit.prepare.oem' : 'form.submit.prepare.general'))}</button></div>
   <div class="form-status" data-form-status role="status" aria-live="polite" hidden></div>
   <script type="application/json" data-form-strings>${raw(JSON.stringify(strings).replace(/</g, '\\u003c'))}</script>
 </form>`;

@@ -67,7 +67,7 @@ for (const [engine, type] of [['webkit', webkit], ['chromium', chromium]]) {
     page.on('request', (r) => { if (r.method() === 'POST') posts.push(r.url()); });
     await page.goto(`${SITE}/en/oem/`);
     await page.fill('#oem-company', 'Test'); await page.fill('#oem-name', 'Test'); await page.fill('#oem-email', 'test@example.com');
-    await page.fill('#oem-country', 'TH'); await page.selectOption('#oem-buyerType', 'other'); await page.fill('#oem-message', 'Smoke test, not sent.'); await page.check('#oem-consent');
+    await page.fill('#oem-country', 'TH'); await page.selectOption('#oem-format', 'unsure'); await page.fill('#oem-message', 'Smoke test, not sent.'); await page.check('#oem-consent');
     await page.click('[data-submit]');
     await page.waitForSelector('[data-form-status][data-tone="bad"]');
     const btns = await page.locator('[data-form-status] .btn').allInnerTexts();

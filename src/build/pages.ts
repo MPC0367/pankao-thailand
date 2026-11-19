@@ -43,7 +43,26 @@ function illus(ctx: Ctx, assets: Assets, id: string, cls = ''): Raw {
   const img = assetImg(ctx, assets, id, {});
   if (!img) return raw('');
   const a = assetById.get(id)!;
-  return html`<figure class="illus${cls ? ` ${cls}` : ''}">${img}<figcaption><span class="illus-tag">${t(ctx, 'illus.tag')}</span><span>${a.caption ? loc(a.caption, ctx.locale) : ''}</span><a class="illus-credit" href="${a.sourceUrl}" rel="noopener" target="_blank">${credit(ctx, id)}<span class="sr-only"> ${t(ctx, 'contact.newTab')}</span></a></figcaption></figure>`;
+  return html`<figure class="illus${cls ? ` ${cls}` : ''}">${img}<figcaption><span>${a.caption ? loc(a.caption, ctx.locale) : ''}</span>${srcCap(ctx, id)}<a class="illus-credit" href="${a.sourceUrl}" rel="noopener" target="_blank">${credit(ctx, id)}<span class="sr-only"> ${t(ctx, 'contact.newTab')}</span></a></figcaption></figure>`;
+}
+
+/**
+ * The caption system (premium audit: "a quiet but consistent caption system with source-class iconography"):
+ * A, the company's own photograph from its 2014 website (a filled dot); B, an illustrative licensed photograph
+ * (an open ring, tagged in words). Production shows only approved images, so these captions are preview-only too.
+ */
+function srcCap(ctx: Ctx, id: string): Raw {
+  const a = assetById.get(id);
+  if (!a) return raw('');
+  if (a.rightsBasis === 'licensed-stock') return html`<span class="src src--b"><i aria-hidden="true"></i>${t(ctx, 'illus.tag')}</span>`;
+  return html`<span class="src src--a"><i aria-hidden="true"></i>${credit(ctx, id)}</span>`;
+}
+
+/** Proof from the company's own archive: a captioned figure (class A). */
+function proof(ctx: Ctx, assets: Assets, id: string, captionKey: string): Raw {
+  const img = assetImg(ctx, assets, id, {});
+  if (!img) return raw('');
+  return html`<figure class="proof">${img}<figcaption><span>${t(ctx, captionKey)}</span>${srcCap(ctx, id)}</figcaption></figure>`;
 }
 
 /** Words beside a photograph; either may be absent. */
@@ -139,20 +158,6 @@ function meta(ctx: Ctx, key: string, path: string, extra: Partial<PageMeta> = {}
 
 /* ---------- home ---------- */
 
-function homeWelcome(ctx: Ctx, assets: Assets): Raw {
-  if (!legacyOn(ctx)) return raw('');
-  const w = legacy.welcome;
-  return html`<section class="section welcome" aria-labelledby="welcome-h"><div class="wrap grid">
-    <div class="welcome__words">
-      <h2 id="welcome-h" class="eyebrow welcome__h">${loc(w.h, ctx.locale)} ${legacyTag(ctx)}</h2>
-      <p class="welcome__lines display">${loc(w.slogan, ctx.locale).map((l) => html`<span class="arrive">${ph(ctx, l)}</span>`)}</p>
-    </div>
-    <div class="welcome__body">
-      <p class="lede">${loc(w.body, ctx.locale)}</p>
-      ${linkArrow(href(ctx.locale, ROUTES.about), loc(legacy.history.h, ctx.locale))}
-    </div>
-  </div><div class="wrap welcome__photo">${illus(ctx, assets, 'illus.ricefield', 'illus--wide')}</div></section>`;
-}
 
 function certsLegacy(ctx: Ctx): Raw {
   const c = legacy.certs;
@@ -165,14 +170,30 @@ function certsLegacy(ctx: Ctx): Raw {
   </div>`;
 }
 
-function homeBest(ctx: Ctx): Raw {
-  return html`<section class="section band best" aria-labelledby="best-h"><div class="wrap">
-    ${sectionHead(html`${t(ctx, 'nav.quality')} ${legacyTag(ctx)}`, html`<span id="best-h">${loc(legacy.best.h, ctx.locale)}</span>`, null)}
-    <ul class="promises" role="list">${loc(legacy.best.items, ctx.locale).map((it, i) => html`<li class="arrive"><span class="promises__n" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span><span>${ph(ctx, it)}</span></li>`)}</ul>
-    ${certsLegacy(ctx)}
-    <p class="section-link">${linkArrow(href(ctx.locale, ROUTES.quality), t(ctx, 'cta.quality'))}</p>
-  </div></section>`;
+/** Proof strip under the hero (premium audit: location, formats, OEM, verified documents in half a screen). */
+function homeStrip(ctx: Ctx): Raw {
+  const place = fact(ctx, location);
+  const n = formatProducts.filter((p) => canShow(p.name, ctx)).length;
+  const record = canShow(diprom2024, ctx) ? sourceById.get('S03') : null;
+  const items: Raw[] = [];
+  if (place) items.push(html`<li><span class="strip__h">${t(ctx, 'home.strip.place')}</span><span class="strip__v">${place}</span></li>`);
+  if (n) items.push(html`<li><span class="strip__h">${t(ctx, 'home.strip.formats')}</span><span class="strip__v">${ph(ctx, t(ctx, 'home.strip.formats.v', { n }))}</span></li>`);
+  if (canShow(diprom2024, ctx)) items.push(html`<li><span class="strip__h">${t(ctx, 'home.strip.oem')}</span><span class="strip__v">${ph(ctx, t(ctx, 'home.strip.oem.v'))}</span></li>`);
+  if (record) items.push(html`<li><span class="strip__h">${t(ctx, 'home.strip.record')}</span><a class="strip__v" href="${record.url}" rel="noopener" target="_blank">${t(ctx, 'home.strip.record.v')}<span class="sr-only"> ${t(ctx, 'contact.newTab')}</span></a></li>`);
+  if (!items.length) return raw('');
+  return html`<section class="strip" aria-label="${t(ctx, 'home.strip.label')}"><div class="wrap"><ul class="strip__list" role="list">${items}</ul></div></section>`;
 }
+
+/** Heritage and place in one story: the 2014 history beside the plant itself (premium audit). */
+function homeStory(ctx: Ctx, assets: Assets): Raw {
+  if (!legacyOn(ctx)) return homeHeritage(ctx);
+  const text = html`<p class="eyebrow">${loc(legacy.history.h, ctx.locale)} ${legacyTag(ctx)}</p>
+    <p class="heritage__line display">${ph(ctx, loc(legacy.welcome.slogan, ctx.locale)[0]!)}</p>
+    <p class="lede">${loc(legacy.history.body, ctx.locale)}</p>
+    ${linkArrow(href(ctx.locale, ROUTES.about), t(ctx, 'home.heritage.cta'))}`;
+  return html`<section class="section heritage-place" aria-label="${loc(legacy.history.h, ctx.locale)}"><div class="wrap">${story(text, proof(ctx, assets, 'legacy.contact.building', 'oem.proof.plant'))}</div></section>`;
+}
+
 
 function homeQuality(ctx: Ctx): Raw {
   const shown = [...certificates, ...sampleCertificates].filter((c) => certCard(ctx, c, ctx.buildDate));
@@ -221,12 +242,12 @@ export function home(ctx: Ctx, assets: Assets): Built {
       <figure class="grain-panel" data-grain>
         <div class="aperture" data-aperture>${heroImg ?? strandPlate({ strand: 'hair' }, '')}</div>
       </figure>
-      ${heroImg ? html`<p class="hero__credit small muted">${credit(ctx, 'legacy.hero.pack')}</p>` : ''}
+      ${heroImg ? html`<p class="hero__credit">${srcCap(ctx, 'legacy.hero.pack')}</p>` : ''}
     </div>
   </div>
 </section>
 
-${homeWelcome(ctx, assets)}
+${homeStrip(ctx)}
 
 ${formats.length ? html`<section class="section section--tight" aria-labelledby="formats-h">
   <div class="wrap">
@@ -240,7 +261,7 @@ ${formats.length ? html`<section class="section section--tight" aria-labelledby=
   <div class="wrap">
     ${sectionHead(t(ctx, 'home.ways.eyebrow'), html`<span id="oem-h">${hd(ctx, 'home.ways.h2')}</span>`, tx(ctx, 'home.ways.body'))}
     <div class="ways grid">
-      ${own ? html`<div class="way arrive"><h3>${t(ctx, 'home.ways.own.h')}</h3><p>${own}</p>${linkArrow(href(ctx.locale, productPath('mr-noodles')), t(ctx, 'products.details'))}</div>` : ''}
+      ${own ? html`<div class="way arrive">${proof(ctx, assets, 'legacy.mrnoodles.pack', 'oem.proof.packs')}<h3>${t(ctx, 'home.ways.own.h')}</h3><p>${own}</p>${linkArrow(href(ctx.locale, productPath('mr-noodles')), t(ctx, 'products.details'))}</div>` : ''}
       ${oem ? html`<div class="way arrive"><h3>${t(ctx, 'home.ways.oem.h')}</h3><p>${oem}</p>${linkArrow(href(ctx.locale, ROUTES.oem), t(ctx, 'cta.oem'))}</div>` : ''}
       <div class="way way--proof arrive">${dipromQuote(ctx)}${linkArrow(href(ctx.locale, ROUTES.quality), t(ctx, 'home.ways.quality'))}</div>
     </div>
@@ -254,20 +275,21 @@ ${steps.length ? html`<section class="section" aria-labelledby="process-h">
       const v = val(s, ctx.locale) as { title: Record<Locale, string>; body: Record<Locale, string> };
       return html`<li class="arrive"><div><h3>${v.title[ctx.locale]}</h3><p>${marked(v.body[ctx.locale], [s], ctx)}</p></div></li>`;
     })}</ol>
-    <p class="section-link">${linkArrow(href(ctx.locale, ROUTES.process), t(ctx, 'cta.process'))}</p>
+    ${legacyOn(ctx) ? html`<div class="pq-best"><p class="eyebrow">${loc(legacy.best.h, ctx.locale)} ${legacyTag(ctx)}</p><ul class="best-line" role="list">${loc(legacy.best.items, ctx.locale).map((it) => html`<li>${ph(ctx, it)}</li>`)}</ul></div>` : ''}
+    <p class="section-link section-link--pair">${linkArrow(href(ctx.locale, ROUTES.process), t(ctx, 'cta.process'))}${linkArrow(href(ctx.locale, ROUTES.quality), t(ctx, 'cta.quality'))}</p>
   </div>
 </section>` : ''}
 
-${legacyOn(ctx) ? homeBest(ctx) : homeQuality(ctx)}
-${homeHeritage(ctx)}
+${legacyOn(ctx) ? '' : homeQuality(ctx)}
+${homeStory(ctx, assets)}
 
-<section class="section section--tight">
+${ctx.mode === 'preview' && !PUBLIC_PREVIEW ? html`<section class="section section--tight">
   <div class="wrap review-grid">
     ${reviewNote(ctx, 'quality module', ['Omitted on purpose: no certificate has been checked, and “documents are being prepared” wording needs the owner’s approval (brief 7.1 §5). The Quality link above is the route.'])}
     ${reviewNote(ctx, 'heritage pause', heritageCandidates.map((f) => `${String(val(f, 'en'))} — ${f.status}. ${f.note ?? ''}`))}
     ${reviewNote(ctx, 'markets', [factNote(marketsRegions)])}
   </div>
-</section>
+</section>` : ''}
 
 <section class="section band close" aria-labelledby="close-h">
   <div class="wrap">
@@ -290,7 +312,7 @@ function legacyRange(ctx: Ctx, assets: Assets): Raw {
   return html`<section class="section band range" aria-labelledby="range-h"><div class="wrap grid">
     <div class="range__names"><p class="eyebrow">${legacyTag(ctx)}</p><h2 id="range-h">${loc(r.h, ctx.locale)}</h2>
       <ul class="range-list" role="list">${loc(r.items, ctx.locale).map((n) => html`<li class="arrive">${n}</li>`)}</ul></div>
-    <div class="range__promises">${illus(ctx, assets, 'illus.dried')}<ul class="checklist" role="list">${loc(r.promises, ctx.locale).map((x) => html`<li>${x}</li>`)}</ul></div>
+    <div class="range__promises">${proof(ctx, assets, 'legacy.mrnoodles.pack', 'oem.proof.packs')}<ul class="checklist" role="list">${loc(r.promises, ctx.locale).map((x) => html`<li>${x}</li>`)}</ul></div>
   </div></section>`;
 }
 
@@ -395,15 +417,13 @@ ${crumbs(ctx, [{ label: t(ctx, 'nav.home'), path: '' }, { label: t(ctx, 'nav.pro
     <div class="product-hero__media tone-${p.tone}">
       ${dry
         ? html`<div class="pair${isBrand ? ' pair--wide' : ''}">
-            <figure><div class="frame">${dry}</div><figcaption>${t(ctx, isBrand ? 'nav.products' : 'product.dry')} · ${credit(ctx, isBrand ? 'legacy.mrnoodles.pack' : p.media.pack!)}</figcaption></figure>
-            ${dish ? html`<figure><div class="frame">${dish}</div><figcaption>${t(ctx, 'product.cooked')}</figcaption></figure>` : ''}
+            <figure><div class="frame">${dry}</div><figcaption><span>${t(ctx, isBrand ? 'nav.products' : 'product.dry')}</span>${srcCap(ctx, isBrand ? 'legacy.mrnoodles.pack' : p.media.pack!)}</figcaption></figure>
+            ${dish ? html`<figure><div class="frame">${dish}</div><figcaption><span>${t(ctx, 'product.cooked')}</span>${srcCap(ctx, p.media.dish!)}</figcaption></figure>` : ''}
           </div>`
         : html`<div class="format-card__media plate-large">${strandPlate(p, plain)}</div>`}
     </div>
   </div>
 </section>
-
-${legacyProduct(ctx, assets, p)}
 
 ${isBrand && brandFormats.length ? html`<section class="section section--tight band"><div class="wrap">
   <h2 class="h3">${t(ctx, 'product.brandFormats')}</h2>
@@ -437,6 +457,8 @@ ${isBrand && brandFormats.length ? html`<section class="section section--tight b
     </div>
   </div>
 </section>
+
+${legacyProduct(ctx, assets, p)}
 
 ${relatedList.length ? html`<section class="section section--tight band" aria-labelledby="related-h"><div class="wrap">
   <h2 id="related-h" class="h3">${t(ctx, 'product.related')}</h2>
@@ -481,6 +503,16 @@ export function oemPage(ctx: Ctx, assets: Assets): Built {
   </div>
 </section>
 
+<section class="section section--tight" aria-labelledby="oem-proof-h"><div class="wrap">
+  ${sectionHead(null, html`<span id="oem-proof-h">${hd(ctx, 'oem.proof.h')}</span>`, t(ctx, 'oem.proof.lede'))}
+  <div class="proof-grid">
+    ${proof(ctx, assets, 'legacy.hero.pack', 'oem.proof.packs')}
+    ${proof(ctx, assets, 'legacy.process.factory', 'oem.proof.line')}
+    ${proof(ctx, assets, 'legacy.process.drying', 'oem.proof.drying')}
+    ${proof(ctx, assets, 'legacy.contact.building', 'oem.proof.plant')}
+  </div>
+</div></section>
+
 ${formats.length ? html`<section class="section section--tight band" aria-labelledby="oem-formats-h"><div class="wrap">
   ${sectionHead(null, html`<span id="oem-formats-h">${hd(ctx, 'oem.formats.h')}</span>`, t(ctx, 'oem.formats.lede'))}
   <ul class="format-strip" role="list">
@@ -518,7 +550,7 @@ ${sampleOemTerms.some((f) => canShow(f, ctx)) ? html`<section class="section sec
 </div></section>
 
 <section class="section" id="brief" aria-labelledby="oem-form-h" tabindex="-1"><div class="wrap grid">
-  <div class="form-intro"><h2 id="oem-form-h">${hd(ctx, 'oem.form.h')}</h2><ul class="contact-mini" role="list">${join(contactLines(ctx))}</ul></div>
+  <div class="form-intro"><h2 id="oem-form-h">${hd(ctx, 'oem.form.h')}</h2><ul class="contact-mini" role="list">${join(contactLines(ctx, { fax: false }))}</ul></div>
   <div class="form-col">${enquiryForm(ctx, 'oem')}</div>
 </div></section>`;
   return page(ctx, assets, {
@@ -556,7 +588,7 @@ export function processPage(ctx: Ctx, assets: Assets): Built {
         <span class="process-step__dot" aria-hidden="true"><span></span></span>
         <div class="process-step__body">
           <div><p class="eyebrow">${t(ctx, 'process.step', { n: i + 1 })}</p><h2 class="h3">${v.title[ctx.locale]}</h2><p class="body">${marked(v.body[ctx.locale], [s], ctx)}</p></div>
-          ${img ? html`<figure>${img}<figcaption>${legacyOn(ctx) && legacy.process.captions[s.id] ? html`<span class="step-cap">${loc(legacy.process.captions[s.id]!, ctx.locale)} ${legacyTag(ctx)}</span>` : ''}${credit(ctx, STEP_IMAGES[s.id]!)}</figcaption></figure>` : ''}
+          ${img ? html`<figure>${img}<figcaption>${legacyOn(ctx) && legacy.process.captions[s.id] ? html`<span class="step-cap">${loc(legacy.process.captions[s.id]!, ctx.locale)} ${legacyTag(ctx)}</span>` : ''}${srcCap(ctx, STEP_IMAGES[s.id]!)}</figcaption></figure>` : ''}
         </div>
       </li>`;
     })}
@@ -604,7 +636,6 @@ export function qualityPage(ctx: Ctx, assets: Assets): Built {
   const main = html`
 <section class="section section--tight page-head"><div class="wrap">
   ${sectionHead(t(ctx, 'quality.eyebrow'), hd(ctx, 'quality.h1'), t(ctx, 'quality.lede'), 'h1')}
-  ${illus(ctx, assets, 'illus.paddies', 'illus--wide quality-photo')}
 </div></section>
 <section class="section section--tight" aria-labelledby="register-h"><div class="wrap">
   <h2 id="register-h" class="h3">${t(ctx, 'quality.register.h')}</h2>
@@ -620,8 +651,13 @@ export function qualityPage(ctx: Ctx, assets: Assets): Built {
   <div class="quality-col"><h2 id="claims-h" class="h3">${t(ctx, 'quality.claims.h')}</h2><p>${t(ctx, 'quality.claims.body')}</p>
     ${reviewNote(ctx, 'claims register (none public)', claims.map((c) => `[${c.level}${c.productId ? `: ${c.productId}` : ''}] ${c.text.en} — needs: ${c.evidenceNeeded}`))}
   </div>
-  <div class="quality-col"><h2 class="h3">${t(ctx, 'quality.control.h')}</h2>${checkV ? html`<p>${marked(checkV, [check], ctx)}</p>` : ''}${linkArrow(href(ctx.locale, ROUTES.process), t(ctx, 'cta.process'))}</div>
+  <div class="quality-col"><h2 class="h3">${t(ctx, 'quality.control.h')}</h2>${checkV ? html`<p>${marked(checkV, [check], ctx)}</p>` : ''}${proof(ctx, assets, 'legacy.process.lab', 'quality.proof.lab')}${linkArrow(href(ctx.locale, ROUTES.process), t(ctx, 'cta.process'))}</div>
 </div></section>
+${legacyOn(ctx) ? html`<section class="section section--tight" aria-labelledby="best-h"><div class="wrap">
+  ${sectionHead(html`${legacyTag(ctx)}`, html`<span id="best-h">${loc(legacy.best.h, ctx.locale)}</span>`, null)}
+  <ul class="promises" role="list">${loc(legacy.best.items, ctx.locale).map((it, i) => html`<li class="arrive"><span class="promises__n" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span><span>${ph(ctx, it)}</span></li>`)}</ul>
+  ${certsLegacy(ctx)}
+</div></section>` : ''}
 <section class="section section--tight" aria-labelledby="docs-h"><div class="wrap">
   <h2 id="docs-h" class="h3">${t(ctx, 'quality.docs.h')}</h2>
   ${docList(ctx, [...documents, ...sampleDocuments]) ?? html`<p>${t(ctx, 'quality.docs.none')}</p>`}
@@ -658,7 +694,8 @@ export function aboutPage(ctx: Ctx, assets: Assets): Built {
 </div></section>
 <section class="section band" aria-labelledby="history-h"><div class="wrap">
   <h2 id="history-h" class="h3">${t(ctx, 'about.history.h')}</h2>
-  ${legacyOn(ctx) ? html`<figure class="legacy-quote"><p class="eyebrow">${loc(legacy.history.h, ctx.locale)} ${legacyTag(ctx)}</p><blockquote><p>${loc(legacy.history.body, ctx.locale)}</p></blockquote></figure>` : ''}
+  ${legacyOn(ctx) ? story(html`<figure class="legacy-quote"><p class="eyebrow">${loc(legacy.welcome.h, ctx.locale)} ${legacyTag(ctx)}</p><p class="welcome__lines display">${loc(legacy.welcome.slogan, ctx.locale).map((l) => html`<span>${ph(ctx, l)}</span>`)}</p></figure>`, illus(ctx, assets, 'illus.ricefield')) : ''}
+  ${legacyOn(ctx) ? html`<figure class="legacy-quote about-history"><p class="eyebrow">${loc(legacy.history.h, ctx.locale)} ${legacyTag(ctx)}</p><blockquote><p>${loc(legacy.history.body, ctx.locale)}</p></blockquote></figure>` : ''}
   ${timeline(ctx) ?? (tx(ctx, 'about.history.body') ? html`<p class="prose">${tx(ctx, 'about.history.body')}</p>` : '')}
   ${reviewNote(ctx, 'heritage timeline candidates (D04) — the timeline renders here once dated evidence is approved', heritageCandidates.map((f) => `${String(val(f, 'en'))} — ${f.status}. ${f.note ?? ''}`))}
   ${reviewNote(ctx, 'legal identity (shown only here until D02)', [
@@ -672,7 +709,7 @@ export function aboutPage(ctx: Ctx, assets: Assets): Built {
     ${addr ? html`<address class="address">${marked(raw(addr.map(esc).join('<br>')), [address], ctx)}</address>` : ''}
     ${linkArrow(href(ctx.locale, ROUTES.contact), t(ctx, 'cta.directions'))}
   </div>
-  ${building ? html`<figure class="about-photo">${building}<figcaption class="small muted">${credit(ctx, 'legacy.contact.building')}</figcaption></figure>` : ''}
+  ${building ? html`<figure class="about-photo">${building}<figcaption>${srcCap(ctx, 'legacy.contact.building')}</figcaption></figure>` : ''}
 </div><div class="wrap about-region">${illus(ctx, assets, 'illus.nonthaburi', 'illus--wide')}</div></section>`;
   return page(ctx, assets, {
     ...meta(ctx, 'about', ROUTES.about),

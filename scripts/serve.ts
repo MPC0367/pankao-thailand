@@ -101,7 +101,7 @@ export function startServer(opts: Options): Promise<{ server: Server; url: strin
     if (String(data.website ?? '').trim() !== '' || (typeof data.elapsedMs === 'number' && data.elapsedMs < 1500)) return json(res, 400, { error: 'validation_error' });
 
     const kind = data.kind === 'oem' ? 'oem' : 'general';
-    const required = kind === 'oem' ? ['company', 'name', 'email', 'country', 'buyerType', 'message', 'consent'] : ['name', 'email', 'subject', 'message', 'consent'];
+    const required = kind === 'oem' ? ['company', 'name', 'email', 'country', 'format', 'message', 'consent'] : ['name', 'email', 'subject', 'message', 'consent'];
     const fields: Record<string, string> = {};
     for (const k of required) if (!String(data[k] ?? '').trim()) fields[k] = 'required';
     if (data.email && !EMAIL.test(String(data.email))) fields.email = 'invalid';
@@ -112,7 +112,7 @@ export function startServer(opts: Options): Promise<{ server: Server; url: strin
     if (key && seen.has(key)) return json(res, 409, { error: 'duplicate', ...seen.get(key) });
 
     const record = { enquiryId: `PK-${randomUUID().slice(0, 8).toUpperCase()}`, receivedAt: new Date().toISOString() };
-    const allowed = ['kind', 'locale', 'company', 'name', 'role', 'email', 'phone', 'country', 'buyerType', 'subject', 'formats', 'application', 'need', 'packaging', 'volume', 'timeline', 'documents', 'message', 'consent'];
+    const allowed = ['kind', 'locale', 'company', 'name', 'role', 'email', 'phone', 'country', 'buyerType', 'format', 'subject', 'formats', 'application', 'need', 'packaging', 'volume', 'timeline', 'documents', 'message', 'consent'];
     const clean = Object.fromEntries(allowed.filter((k) => k in data).map((k) => [k, data[k]]));
     appendFileSync(store, JSON.stringify({ ...record, adapter: 'LOCAL TEST — NOT PRODUCTION', idempotencyKey: key || null, data: clean }) + '\n'); // durable first
     if (key) seen.set(key, record);

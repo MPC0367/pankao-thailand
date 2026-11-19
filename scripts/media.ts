@@ -21,27 +21,35 @@ if (!existsSync(research)) {
   process.exit(1);
 }
 
-type Job = { from: string; to: string; vf?: string; dir?: string };
+type Job = { from: string; to: string; vf?: string; fc?: string; dir?: string };
 /** The 186x210 close-ups (owner, 20 Nov 2026: "make the dry noodle photos clearer too"): deblock and lightly
  * denoise the 2014 JPEG, enlarge in two Lanczos steps with contrast-adaptive sharpening (AMD CAS) after
  * each, to 632x714 so the browser barely scales them. Not generative: no detail is invented. */
+/** The 102x107 process details: the same cleaning, enlarged 3x to 306x321. */
+const CLEAN_SMALL = 'deblock=filter=strong:block=8,nlmeans=s=1.2:p=3:r=7,scale=204:214:flags=lanczos+accurate_rnd+full_chroma_int,cas=strength=0.45,scale=306:321:flags=lanczos+accurate_rnd+full_chroma_int,cas=strength=0.55';
+/** The real Mr. Noodles pack re-staged (premium audit: "replace or re-stage the pack image"): the flat lime backdrop of the
+ * 2014 photo is keyed out and the pack set on cream, its cut-off lower edge faded into the cream. Background only:
+ * the pack, its print and the noodles are not altered (audit, AI guardrails: green). */
+const HERO_STAGED = '[0:v]crop=210:262:15:0,scale=630:786:flags=lanczos+accurate_rnd+full_chroma_int,cas=strength=0.45,format=rgba,colorkey=0xCBCB4F:similarity=0.13:blend=0.08[k];color=c=0xF6EEDF:s=630x786,format=rgba[bg];[bg][k]overlay=0:0[o];color=c=0xF6EEDF:s=630x786,format=rgba,geq=r=246:g=238:b=223:a=\'if(gt(Y,H*0.8),255*pow((Y-H*0.8)/(H*0.2),1.4),0)\'[fade];[o][fade]overlay=0:0,format=rgb24';
+/** Both packs re-staged the same way (lime backdrop to cream, the cut-off lower edge faded); background only. */
+const PACKS_STAGED = '[0:v]crop=460:262:0:0,scale=920:524:flags=lanczos+accurate_rnd+full_chroma_int,cas=strength=0.4,format=rgba,colorkey=0xCBCB4F:similarity=0.13:blend=0.08[k];color=c=0xF6EEDF:s=920x524,format=rgba[bg];[bg][k]overlay=0:0[o];color=c=0xF6EEDF:s=920x524,format=rgba,geq=r=246:g=238:b=223:a=\'if(gt(Y,H*0.76),255*pow((Y-H*0.76)/(H*0.24),1.4),0)\'[fade];[o][fade]overlay=0:0,format=rgb24';
 const CLEAN = 'deblock=filter=strong:block=8,nlmeans=s=1.4:p=5:r=9,scale=344:388:flags=lanczos+accurate_rnd+full_chroma_int,cas=strength=0.5,scale=632:714:flags=lanczos+accurate_rnd+full_chroma_int,cas=strength=0.65';
 const jobs: Job[] = [
   { from: 'pankao_logo.gif', to: 'logo.png' },
-  { from: 'mr_noodles_package.jpg', to: 'hero-pack.jpg', vf: 'crop=190:258:25:5,scale=418:568:flags=lanczos+accurate_rnd+full_chroma_int,cas=strength=0.55' },
-  { from: 'mr_noodles_package.jpg', to: 'mrnoodles-packs.jpg', vf: 'crop=460:262:0:0' },
+  { from: 'mr_noodles_package.jpg', to: 'hero-pack.jpg', fc: HERO_STAGED },
+  { from: 'mr_noodles_package.jpg', to: 'mrnoodles-packs.jpg', fc: PACKS_STAGED },
   { from: 'product_noodle_dish.jpg', to: 'dish-thin-noodles.jpg', vf: CLEAN },
-  { from: 'process_rice.jpg', to: 'process-rice.jpg' },
-  { from: 'process_factory.jpg', to: 'process-factory.jpg' },
-  { from: 'history_img01.jpg', to: 'process-drying.jpg' },
-  { from: 'process_lab.jpg', to: 'process-lab.jpg' },
-  { from: 'process_noodle.jpg', to: 'process-noodle.jpg' },
-  { from: 'contact_img01.jpg', to: 'contact-building.jpg' },
+  { from: 'process_rice.jpg', to: 'process-rice.jpg', vf: CLEAN_SMALL },
+  { from: 'process_factory.jpg', to: 'process-factory.jpg', vf: CLEAN },
+  { from: 'history_img01.jpg', to: 'process-drying.jpg', vf: CLEAN },
+  { from: 'process_lab.jpg', to: 'process-lab.jpg', vf: CLEAN_SMALL },
+  { from: 'process_noodle.jpg', to: 'process-noodle.jpg', vf: CLEAN_SMALL },
+  { from: 'contact_img01.jpg', to: 'contact-building.jpg', vf: CLEAN },
 ];
 for (const [key, stem] of [['vermicelli', 'rice_vermicelli'], ['ricestick', 'rice_stick'], ['flake', 'rice_flake'], ['brown', 'rice_brown']] as const) {
   jobs.push({ from: `${stem}.jpg`, to: `${key}-dry.jpg`, vf: CLEAN });
-  // The dish photographs are 460x400 page backgrounds: used whole, at their own size.
-  jobs.push({ from: `${stem}_bg.jpg`, to: `${key}-dish.jpg` });
+  // The dish photographs are 460x400 page backgrounds: used whole, enlarged once to the widest card (624 px) so no slot stretches them.
+  jobs.push({ from: `${stem}_bg.jpg`, to: `${key}-dish.jpg`, vf: 'deblock=filter=weak:block=8,scale=632:550:flags=lanczos+accurate_rnd+full_chroma_int,cas=strength=0.4' });
 }
 
 /* Illustrative photographs with free commercial licences (owner, 20 Nov 2026: "with photos to add to the website
@@ -49,7 +57,7 @@ for (const [key, stem] of [['vermicelli', 'rice_vermicelli'], ['ricestick', 'ric
    ../documents/photos/illustrative-2026-11-20/README.md. Resized to 1600 px wide; never shown as Pankao's own. */
 const ILLUS = resolve(root, '../documents/photos/illustrative-2026-11-20');
 if (existsSync(ILLUS)) {
-  for (const name of ['ricefield-thailand', 'paddies', 'jasmine-rice', 'dried-vermicelli', 'dish-vermicelli', 'dish-padthai', 'dish-guayjub', 'brown-rice', 'nonthaburi-canal']) {
+  for (const name of ['ricefield-thailand', 'jasmine-rice', 'dish-vermicelli', 'dish-padthai', 'dish-guayjub', 'brown-rice', 'nonthaburi-canal']) {
     jobs.push({ dir: ILLUS, from: `${name}.jpg`, to: `../illus/${name}.jpg`, vf: 'scale=1600:-2:flags=lanczos+accurate_rnd+full_chroma_int' });
   }
 }
@@ -60,6 +68,7 @@ for (const j of jobs) {
   const dst = join(out, j.to);
   const args = ['-v', 'error', '-y', '-i', src, '-frames:v', '1', '-update', '1'];
   if (j.vf) args.push('-vf', j.vf);
+  if (j.fc) args.push('-filter_complex', j.fc);
   if (dst.endsWith('.jpg')) args.push('-q:v', '2');
   args.push(dst);
   execFileSync('ffmpeg', args);

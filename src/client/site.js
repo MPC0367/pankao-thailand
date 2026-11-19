@@ -19,6 +19,7 @@
     var endLoader = function () {
       if (ended) return;
       ended = true;
+      store.set('pk-seen', '1', true);
       d.classList.add('loaded', 'reveal');
       setTimeout(function () { d.classList.remove('loading', 'loaded'); }, 480);
       setTimeout(function () { d.classList.remove('reveal'); }, 1500);
@@ -27,6 +28,11 @@
     if (ldr) ldr.addEventListener('click', endLoader);
     window.addEventListener('keydown', endLoader, { once: true });
   }
+
+  /* ---------- public preview strip: dismissible for the session (the footer keeps the note) ---------- */
+  $$('[data-preview-dismiss]').forEach(function (b) {
+    b.addEventListener('click', function () { store.set('pk-preview-hidden', '1', true); d.classList.add('preview-hidden'); var h = $('[data-header] .brand'); if (h) h.focus(); });
+  });
 
   /* ---------- liquid glass header (Glisse), after first paint ---------- */
   var glassSrc = d.getAttribute('data-glass-src');
@@ -283,7 +289,7 @@
     var inFlight = false;
     var EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     var REQUIRED = kind === 'oem'
-      ? { company: S.company, name: S.name, email: S.emailRequired, country: S.country, buyerType: S.buyerType, message: S.message, consent: S.consent }
+      ? { company: S.company, name: S.name, email: S.emailRequired, country: S.country, format: S.format, message: S.message, consent: S.consent }
       : { name: S.name, email: S.emailRequired, subject: S.subject, message: S.message, consent: S.consent };
 
     var key = function () {
@@ -311,6 +317,9 @@
         else if (el.type === 'radio') el.checked = o[el.name] === el.value;
         else el.value = o[el.name];
       });
+      // A restored draft with answers in the optional step shows them.
+      var more = form.querySelector('[data-form-more]');
+      if (more && Array.prototype.some.call(more.querySelectorAll('input, select, textarea'), function (el) { return el.type === 'checkbox' || el.type === 'radio' ? el.checked : !!el.value; })) more.open = true;
     }
     function hasContent(o) {
       return Object.keys(o).some(function (k) { return k !== 'kind' && k !== 'locale' && (Array.isArray(o[k]) ? o[k].length : o[k]); });
@@ -363,6 +372,7 @@
         if (!fieldEl(n)) return;
         var m = (serverErrors && serverErrors[n]) || errorFor(n);
         show(n, m);
+        if (m) { var more = fieldEl(n).closest && fieldEl(n).closest('[data-form-more]'); if (more) more.open = true; }
         if (m) errs.push({ id: fieldEl(n).id, msg: m });
       });
       return errs;

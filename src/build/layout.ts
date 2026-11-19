@@ -134,10 +134,15 @@ function loader(ctx: Ctx): Raw {
 
 function previewBar(ctx: Ctx): Raw {
   if (ctx.mode !== 'preview') return raw('');
-  if (PUBLIC_PREVIEW) return html`<div class="preview-bar" role="region" aria-label="O2 preview"><div class="wrap"><p>${t(ctx, 'preview.public')}</p></div></div>`;
+  /* Public preview: one short line on phones (the full sentence from 640 px), dismissible for the session (premium audit, P1
+     mobile chrome). The footer keeps the preview note, so the site never stops being labelled. */
+  if (PUBLIC_PREVIEW) return html`<div class="preview-bar preview-bar--public" role="region" aria-label="O2 preview" data-preview-bar><div class="wrap">
+    <p><span class="preview-bar__short">${t(ctx, 'preview.short')}</span><span class="preview-bar__full">${t(ctx, 'preview.public')}</span></p>
+    <button type="button" class="preview-bar__close js-only" data-preview-dismiss aria-label="${t(ctx, 'preview.dismiss')}"><svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button>
+  </div></div>`;
   return html`<div class="preview-bar" role="region" aria-label="O2 preview">
   <div class="wrap">
-    <p>${t(ctx, 'preview.text')}</p>
+    <p><span class="preview-bar__short">${t(ctx, 'preview.short')}</span><span class="preview-bar__full">${t(ctx, 'preview.text')}</span></p>
     <button type="button" aria-pressed="false" data-review-toggle>${t(ctx, 'preview.toggle')}</button>
   </div>
 </div>`;
@@ -145,13 +150,14 @@ function previewBar(ctx: Ctx): Raw {
 
 export const O2_CREDIT = raw(readFileSync(new URL('./o2-credit.html', import.meta.url), 'utf8').trim());
 
-export function contactLines(ctx: Ctx): Raw[] {
+/** Contact lines; `fax: false` leaves the fax out where it distracts (premium audit: de-emphasise the fax). */
+export function contactLines(ctx: Ctx, opts: { fax?: boolean } = {}): Raw[] {
   const out: Raw[] = [];
   if (canShow(phone, ctx)) {
     const p = val(phone, ctx.locale) as { display: Record<Locale, string>; tel: string };
     out.push(html`<li><a href="tel:${p.tel}">${t(ctx, 'footer.phone')} ${fact(ctx, { ...phone, value: p.display[ctx.locale] })}</a></li>`);
   }
-  if (canShow(fax, ctx)) {
+  if (opts.fax !== false && canShow(fax, ctx)) {
     const p = val(fax, ctx.locale) as { display: Record<Locale, string>; tel: string };
     out.push(html`<li><span class="footer-plain">${t(ctx, 'footer.fax')} ${fact(ctx, { ...fax, value: p.display[ctx.locale] })}</span></li>`);
   }
@@ -189,6 +195,7 @@ function footer(ctx: Ctx): Raw {
         <li><a href="${href(ctx.locale, ROUTES.privacy)}">${t(ctx, 'footer.privacy')}</a></li>
         <li><a href="${href(ctx.locale, ROUTES.accessibility)}">${t(ctx, 'footer.accessibility')}</a></li>
         <li><span>${t(ctx, 'footer.reviewed', { date: formatDate(ctx.buildDate, ctx.locale) })}</span></li>
+        ${PUBLIC_PREVIEW ? html`<li><span>${t(ctx, 'preview.short')}</span></li>` : ''}
       </ul>
       ${langSwitch(ctx, ctx.path, 'lang-menu--up')}
       ${O2_CREDIT}

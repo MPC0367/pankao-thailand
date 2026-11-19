@@ -61,8 +61,7 @@ async function fillOem(page, { locale = 'en' } = {}) {
   await page.fill('#oem-name', 'Test Buyer');
   await page.fill('#oem-email', 'buyer@example.com');
   await page.fill('#oem-country', 'Vietnam');
-  await page.selectOption('#oem-buyerType', 'importer');
-  await page.check('input[name="formats"][value="rice-vermicelli"]');
+  await page.selectOption('#oem-format', 'rice-vermicelli');
   await page.fill('#oem-message', 'We need 400 g retail bags of rice vermicelli for a private label. (automated local test)');
   await page.check('#oem-consent');
   void locale;
@@ -306,7 +305,7 @@ await check('chromium: map loads only after "Show map"; address copy works (AC-C
   await ctx.close();
 });
 
-await check('chromium: loader plays on every open, reload and root entry; ends by ~4.6 s; not between pages; a click skips it (owner request)', async () => {
+await check('chromium: loader plays in full once per session (fresh open or root entry), ends by ~4.6 s; not on reload or between pages; a click skips it (owner request)', async () => {
   const ctx = await C.newContext(ctxOpts({ withLoader: true }));
   const page = await ctx.newPage();
   await page.goto(`${BASE}/en/`, { waitUntil: 'commit' });
@@ -319,7 +318,8 @@ await check('chromium: loader plays on every open, reload and root entry; ends b
   await page.waitForURL('**/en/about/');
   const again = await page.evaluate(() => document.documentElement.classList.contains('loading'));
   await page.reload({ waitUntil: 'commit' });
-  const onReload = await page.waitForSelector('div.loader', { state: 'visible', timeout: 3000 }).then(() => true, () => false);
+  await page.waitForLoadState('domcontentloaded');
+  const onReload = await page.evaluate(() => document.documentElement.classList.contains('loading'));
   await ctx.close();
   const ctx3 = await C.newContext(ctxOpts({ withLoader: true }));
   const p3 = await ctx3.newPage();
@@ -337,7 +337,7 @@ await check('chromium: loader plays on every open, reload and root entry; ends b
   assert(took <= 4600, `loader gone in ${took} ms`);
   assert(h1, 'page underneath is rendered');
   assert(!again, 'moving to another page of the site: no loader');
-  assert(onReload, 'a reload plays the loader again');
+  assert(!onReload, 'a reload in the same session shows the page at once');
   assert(viaRoot, 'arriving through the root language chooser plays the loader');
   return `cleared ${took} ms after it appeared; click skips`;
 });
@@ -419,7 +419,7 @@ await check('chromium: no sideways scroll at 320–1920 px in all locales (UX-01
   return `${widths.length} widths × ${LOCALES.length} locales × ${Object.keys(TEMPLATES).length} templates`;
 });
 
-// MED-04 as amended by the owner (19 Nov 2026): photographs fill cards, product frames and the hero panel,
+// MED-04 as amended by the owner (19 Nov 2026): photographs fill cards, product frames, proof frames and the hero panel,
 // so there they may be enlarged up to 3.5x; everywhere else an image still never renders past its native pixels.
 await check('chromium: images stay at native size except in filled photo frames, at most 3.5x (MED-04 amended)', async () => {
   const ctx = await C.newContext(ctxOpts());
@@ -431,7 +431,7 @@ await check('chromium: images stay at native size except in filled photo frames,
     for (const p of ['', 'products/', 'products/rice-stick-pad-thai/', 'products/mr-noodles/', 'process/', 'about/']) {
       await page.goto(`${BASE}/en/${p}`);
       await page.evaluate(async () => { document.querySelectorAll('img').forEach((i) => { i.loading = 'eager'; }); await Promise.all([...document.images].map((i) => (i.complete ? 0 : new Promise((r) => { i.onload = i.onerror = r; })))); });
-      const r = await page.evaluate(() => [...document.images].filter((i) => i.offsetParent !== null && i.naturalWidth).map((i) => { const b = i.getBoundingClientRect(); return [i.dataset.asset, Math.round(b.width), Math.round(b.height), i.naturalWidth, i.naturalHeight, !!i.closest('.format-card__media, .frame, .aperture')]; }));
+      const r = await page.evaluate(() => [...document.images].filter((i) => i.offsetParent !== null && i.naturalWidth).map((i) => { const b = i.getBoundingClientRect(); return [i.dataset.asset, Math.round(b.width), Math.round(b.height), i.naturalWidth, i.naturalHeight, !!i.closest('.format-card__media, .frame, .aperture, .proof')]; }));
       for (const [id, rw, rh, nw, nh, filled] of r) { n++; const k = filled ? 3.5 : 1; if (rw > nw * k + 1 || rh > nh * k + 1) bad.push(`${w} /${p} ${id} ${rw}×${rh} > ${k}× ${nw}×${nh}`); }
     }
   }

@@ -47,8 +47,8 @@ writeFileSync(join(OUT, 'CERTIFICATE_REGISTER.md'), header('Certificate and docu
   `\n\n## Documents (${documents.length})\n\n` + (documents.length ? table(['ID', 'Title', 'Version', 'Date', 'Type/size', 'Status'], documents.map((d) => [d.id, d.title.en, d.version, d.date, `${d.fileType} ${d.bytes} B`, d.status])) : 'None approved (company profile, specification sheets and certificates are on the request list).'));
 
 writeFileSync(join(OUT, 'ASSET_LEDGER.md'), header('Asset ledger', 'Every rendered image. Production renders only `productionApproved` entries (none yet).') +
-  table(['asset_id', 'file', 'source', 'owner', 'retrieved', 'rights basis', 'permission', 'subject', 'actual/generic', 'px', 'max display', 'crop', 'alt (EN)', 'raster text', 'production approved', 'review by'],
-    assets.map((a) => [a.id, a.file, a.sourceUrl, a.sourceOwner, a.retrievedAt, a.rightsBasis, a.permissionReference ?? '—', a.subject, a.actualPankaoOrGeneric, `${a.width}×${a.height}`, `${a.maxDisplayWidth}px`, a.cropLimits ?? '', a.alt.en || '(decorative)', a.rasterText ?? '', a.productionApproved, a.reviewOrExpiryDate])));
+  table(['asset_id', 'file', 'source', 'owner', 'retrieved', 'rights basis', 'permission', 'subject', 'actual/generic', 'px', 'max display', 'crop and edit log', 'alt (EN)', 'raster text', 'production approved', 'review by'],
+    assets.map((a) => [a.id, a.file, a.sourceUrl, a.sourceOwner, a.retrievedAt, a.rightsBasis, a.permissionReference ?? '—', a.subject, a.actualPankaoOrGeneric, `${a.width}×${a.height}`, `${a.maxDisplayWidth}px`, a.cropLimits ?? 'none: the original, re-encoded', a.alt.en || '(decorative)', a.rasterText ?? '', a.productionApproved, a.reviewOrExpiryDate])));
 
 writeFileSync(join(OUT, 'OWNER_DECISIONS.md'), header('Owner decision register', 'A decision is resolved only from a written owner instruction.') +
   table(['ID', 'Gate', 'Decision', 'Why it matters', 'Safe default now', 'Options', 'Evidence needed', 'Release consequence', 'Status'],
