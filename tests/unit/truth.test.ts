@@ -210,14 +210,20 @@ test('heading copy and form strings exist for every locale', () => {
   }
 });
 
-test('F19.2: no tracked file carries a blocked identity string as plain text (only encoded)', () => {
+test('F19.2: no tracked file carries a blocked identity string as plain or link-encoded text (only base64)', () => {
   const files = execFileSync('git', ['ls-files'], { encoding: 'utf8' }).split('\n')
     .filter((f) => /\.(ts|mjs|js|json|md|css|html|py|yml|yaml|txt|svg)$/.test(f) && existsSync(f));
   const hits: string[] = [];
   for (const f of files) {
     const text = readFileSync(f, 'utf8');
     // The schema-type entries ("@type":"Restaurant") are markup, not identity, and the guard test names them.
-    rejectedEntities[0]!.forbiddenStrings.forEach((s, i) => { if (!s.includes('@type') && text.includes(s)) hits.push(`${f}: blocked string #${i}`); });
+    rejectedEntities[0]!.forbiddenStrings.forEach((s, i) => {
+      if (s.includes('@type')) return;
+      // Plain, and percent-encoded as a link would carry it (a slug with -, + or %20 between words, either case).
+      const enc = encodeURIComponent(s);
+      const forms = enc === s ? [s] : [s, ...['-', '+', '%20'].flatMap((sep) => { const e = enc.replace(/%20/g, sep); return [e, e.toLowerCase()]; })];
+      if (forms.some((v) => text.includes(v))) hits.push(`${f}: blocked string #${i}`);
+    });
   }
   assert.deepEqual(hits, []);
 });

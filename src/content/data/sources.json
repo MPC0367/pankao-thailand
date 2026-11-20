@@ -59,7 +59,7 @@
     "claims_supported": [
       "Thai and English name, registration number and Bangkok address of the unrelated company. Identity details are kept in O2's private research (documents/research), not in this public repository."
     ],
-    "limitations": "Directors/shareholders/name history behind login (not read). No postal code on this page ([removed] per R01-C)."
+    "limitations": "Directors/shareholders/name history behind login (not read). No postal code on this page."
   },
   {
     "retrieved_at": "2026-11-19",
@@ -127,7 +127,7 @@
     "access_status": "read",
     "source_id": "S05",
     "title": "Thailand Yellow Pages - listing under the manufacturer's pre-2017 name",
-    "url": "https://www.yellowpages.co.th/profile/[removed]-92oYn7wIA",
+    "url": "https://www.yellowpages.co.th/",
     "publisher": "Teleinfo Media (Thailand Yellow Pages)",
     "source_type": "directory",
     "applies_to_entity": "manufacturer",
@@ -139,7 +139,7 @@
       "Products/services: เส้นหมี่, เส้นก๋วยเตี๋ยว, เส้นจันผัดไทย, เส้นข้าวกล้อง, เส้นฟักทอง, เส้นย่านาง, เส้นก๋วยจั๊บ, เส้นพาสต้า",
       "A website link on the page is an unrelated advertisement (crane rental), not this company"
     ],
-    "limitations": "Carries no registration number: tied to the manufacturer only by identical address, phone and fax (and by pankaothai.com's own tax ID, S12). The Thai name string is identical to the REJECTED restaurant's legal name. Hours are self-reported, undated."
+    "limitations": "Carries no registration number: tied to the manufacturer only by identical address, phone and fax (and by pankaothai.com's own tax ID, S12). The Thai name string is identical to the REJECTED restaurant's legal name. Hours are self-reported, undated. The listing's own address is kept in O2's private research (documents/research): its slug spells the pre-2017 name."
   },
   {
     "retrieved_at": "2026-11-19",
