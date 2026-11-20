@@ -31,8 +31,8 @@ writeFileSync(join(OUT, 'SOURCE_LEDGER.md'), header('Source ledger', 'Research o
   table(['ID', 'Title', 'Type', 'Applies to', 'Retrieved', 'Effective', 'Claims supported', 'Limitations', 'Rejected because'],
     sources.map((s) => [s.id, `[${s.title}](${s.url})`, s.sourceType, s.appliesToEntity, s.retrievedAt, s.publishedOrEffectiveAt ?? '', s.claimsSupported.join(' · '), s.limitations, s.rejectedReason ?? ''])));
 
-writeFileSync(join(OUT, 'REJECTED_ENTITY.md'), header('Rejected entity', 'The build fails if any of these strings reaches public output.') +
-  rejectedEntities.map((r) => `## ${r.id}\n\n${r.reason}\n\nSources: ${r.sourceIds.join(', ')}\n\nForbidden strings (exact): ${r.forbiddenStrings.map((s) => `\`${s}\``).join(', ')}\n\nDeliberately allowed: the stem ปั้นข้าว / Pankao, which is the manufacturer’s own brand. Identity is decided by registration 0125550039493 and the Sai Noi address.`).join('\n\n'));
+writeFileSync(join(OUT, 'REJECTED_ENTITY.md'), header('Rejected entity', 'The build fails if any of the blocked strings reaches public output.') +
+  rejectedEntities.map((r) => `## ${r.id}\n\n${r.reason}\n\nSources: ${r.sourceIds.join(', ')}\n\nBlocked strings: ${r.forbiddenStrings.length}, held encoded in \`src/content/data/blocked-strings.json\` so that this public repository does not carry the unrelated company's identity as searchable text.\n\nDeliberately allowed: the stem ปั้นข้าว / Pankao, which is the manufacturer’s own brand. Identity is decided by registration 0125550039493 and the Sai Noi address.`).join('\n\n'));
 
 writeFileSync(join(OUT, 'TRUTH_LEDGER.md'), header('Truth ledger', 'Every company and product fact the site can render.') +
   table(['Fact', 'Value (English)', 'Report label', 'Status', 'Sources', 'Visibility', 'Owner approved', 'Checked', 'Note'],

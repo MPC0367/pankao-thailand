@@ -14,13 +14,13 @@ Local research, design, build and verification only. No deployment, DNS, hosting
 
 | | Manufacturer (this project) | Rejected |
 |---|---|---|
-| Thai | บริษัท สหปั้นข้าว จำกัด | [removed] |
-| English | SAHA PANKAO COMPANY LIMITED | [removed] CO., LTD. |
-| Registration | 0125550039493 | [removed] |
+| Thai | บริษัท สหปั้นข้าว จำกัด | the pre-2017 name (not written in this public repository) |
+| English | SAHA PANKAO COMPANY LIMITED | its English form (not written here) |
+| Registration | 0125550039493 | in O2's private research |
 | Registered | 25 May 2007, capital THB 16 m, TSIC 10742, active | 19 Sep 2024, THB 1 m, TSIC 56101 (restaurant) |
-| Address | 45 หมู่ที่ 9 ซอยวัดสโมสร ถนนปทุมธานี-บางเลน ต.ไทรใหญ่ อ.ไทรน้อย จ.นนทบุรี 11150 | [removed], Bangkok [removed] |
+| Address | 45 หมู่ที่ 9 ซอยวัดสโมสร ถนนปทุมธานี-บางเลน ต.ไทรใหญ่ อ.ไทรน้อย จ.นนทบุรี 11150 | Bangkok (in O2's private research) |
 
-**Name collision (new finding):** the 2014 site and Yellow Pages still print the manufacturer's pre-2017 name *[removed] / [removed]* — which is now exactly the restaurant's legal Thai name. The new site therefore never prints that string; identity checks key on registration number and address, never on name. DataForThai answered every automated read with a Cloudflare challenge (not bypassed); the identity fields were read from two other DBD-derived records (TaeJing, Creden). Rejected record: `docs/generated/REJECTED_ENTITY.md`.
+**Name collision (new finding):** the 2014 site and Yellow Pages still print the manufacturer's pre-2017 name in Thai and English — which is now exactly the restaurant's legal Thai name. The new site therefore never prints that string; identity checks key on registration number and address, never on name. DataForThai answered every automated read with a Cloudflare challenge (not bypassed); the identity fields were read from two other DBD-derived records (TaeJing, Creden). Rejected record: `docs/generated/REJECTED_ENTITY.md`.
 
 ## 3. Evidence ledger
 

@@ -4,7 +4,7 @@
  * validated here so every fact's sourceIds must point at a real entry.
  */
 import raw from './data/sources.json' with { type: 'json' };
-import rejectedRaw from './data/rejected-entity.json' with { type: 'json' };
+import blockedRaw from './data/blocked-strings.json' with { type: 'json' };
 import type { RejectedEntity, Source, SourceType } from './types.ts';
 
 type RawSource = {
@@ -82,37 +82,18 @@ sources.push({
 
 export const sourceById = new Map(sources.map((s) => [s.id, s]));
 
-/** The 2024 [removed] restaurant company: kept only as a blocked record. */
-type RawRejected = typeof rejectedRaw;
-const r = rejectedRaw as RawRejected & Record<string, unknown>;
+/** The unrelated 2024 company: kept only as a blocked record. Its strings are decoded here so that the public
+ *  repository never carries them as searchable text (Codex audit, fourth edition, F19.2). */
+const blockedStrings = JSON.parse(Buffer.from(blockedRaw.strings, 'base64').toString('utf8')) as string[];
 
 export const rejectedEntities: RejectedEntity[] = [
   {
-    id: 'rejected-punkao-restaurant-2024',
+    id: 'rejected-restaurant-2024',
     reason:
-      'Separate company (restaurant/food service, TSIC 56101) registered 19 Sep 2024 in [removed], Bangkok. Its Thai name is identical to the manufacturer’s pre-2017 name, so identity is decided by registration number and address, never by name.',
+      'Separate company (restaurant/food service, TSIC 56101) registered in Bangkok in September 2024. Its Thai name is identical to the manufacturer’s pre-2017 name, so identity is decided by registration number and address, never by name.',
     sourceIds: ['R01', 'R01-B', 'R01-C'],
     // Deliberately NOT forbidden: the bare stem "ปั้นข้าว" / "Pankao", which is the manufacturer's own brand.
-    forbiddenStrings: [
-      r.registration,
-      '[removed]',
-      '[removed]',
-      '[removed]',
-      '[removed]',
-      '[removed]',
-      '[removed]',
-      // The manufacturer's former English name; now misleading because the Thai form belongs to the restaurant.
-      '[removed]',
-      '[removed]',
-      '[removed]',
-      '[removed]',
-      '[removed]',
-      '[removed]',
-      '[removed]',
-      '[removed]',
-      '"@type":"Restaurant"',
-      '"@type": "Restaurant"',
-    ],
+    forbiddenStrings: blockedStrings,
   },
 ];
 

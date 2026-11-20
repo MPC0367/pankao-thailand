@@ -1,5 +1,7 @@
 /** Truth model, identity guard, claims, certificates, media and locale rules (Part IV / Part V). */
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { existsSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { canShow, copy, tx, t } from '../../src/build/context.ts';
 import * as P from '../../src/build/pages.ts';
@@ -39,10 +41,8 @@ test('LOC-01/02, AC-IA-03: every copy key exists in th, en and vi; a missing one
 test('AC-ID-02 / GOV-02: rejected restaurant strings, unknown registrations and markers fail the guard', () => {
   const g = { mode: 'preview' as const, allowedMedia: new Set<string>() };
   const r = rejectedEntities[0]!;
-  assert.ok(r.forbiddenStrings.includes('[removed]'));
-  assert.ok(guardOutput('x.html', '<p>Reg [removed]</p>', g).length > 0);
-  assert.ok(guardOutput('x.html', '<p>[removed]</p>', g).length > 0);
-  assert.ok(guardOutput('x.html', '<p>[removed] CO., LTD.</p>', g).length > 0);
+  assert.ok(r.forbiddenStrings.length >= 15, 'the decoded block list is complete');
+  for (const s of r.forbiddenStrings) assert.ok(guardOutput('x.html', `<p>Reg ${s}</p>`, g).length > 0, 'a blocked string passes the guard');
   assert.ok(guardOutput('x.html', '<script type="application/ld+json">{"@type":"Restaurant"}</script>', g).length > 0);
   assert.ok(guardOutput('x.html', '<p>TODO check</p>', g).length > 0);
   assert.ok(guardOutput('x.html', '<p>[VERIFY WITH PANKAO]</p>', g).length > 0);
@@ -208,4 +208,16 @@ test('heading copy and form strings exist for every locale', () => {
     assert.ok(t({ locale: l }, 'cta.oem').length > 3);
     assert.ok(t({ locale: l }, 'state.fail.body').length > 10);
   }
+});
+
+test('F19.2: no tracked file carries a blocked identity string as plain text (only encoded)', () => {
+  const files = execFileSync('git', ['ls-files'], { encoding: 'utf8' }).split('\n')
+    .filter((f) => /\.(ts|mjs|js|json|md|css|html|py|yml|yaml|txt|svg)$/.test(f) && existsSync(f));
+  const hits: string[] = [];
+  for (const f of files) {
+    const text = readFileSync(f, 'utf8');
+    // The schema-type entries ("@type":"Restaurant") are markup, not identity, and the guard test names them.
+    rejectedEntities[0]!.forbiddenStrings.forEach((s, i) => { if (!s.includes('@type') && text.includes(s)) hits.push(`${f}: blocked string #${i}`); });
+  }
+  assert.deepEqual(hits, []);
 });

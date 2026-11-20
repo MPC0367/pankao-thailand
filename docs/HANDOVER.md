@@ -78,7 +78,7 @@ On the owner's word the preview now reads as a finished site: **sample values** 
 
 ## The one identity risk, handled
 
-A different company — a 2024 restaurant business in [removed], Bangkok, registration [removed] — has exactly the Thai name the factory used before 2017 ([removed]). The website never prints that name, and the build stops if that registration, name or address ever appears.
+A different company — a 2024 restaurant business in Bangkok — has exactly the Thai name the factory used before 2017. The website never prints that name, and the build stops if that company's registration, name or address ever appears. The strings the build checks are stored encoded in `src/content/data/blocked-strings.json`, so this public repository does not carry them as searchable text (Codex audit, fourth edition, F19.2), and the full record is in O2's private research. Notes here call it "the pre-2017 name".
 
 ## C. Content status (brief §16.1 C)
 

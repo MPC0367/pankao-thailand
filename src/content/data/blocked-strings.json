@@ -1,0 +1,5 @@
+{
+  "_note": "Strings the build must never publish: the name, registration and address of an unrelated 2024 company whose Thai name equals the manufacturer's pre-2017 name, and the manufacturer's former English name. Stored as base64 of a UTF-8 JSON array so this public repository does not carry them as searchable text (Codex audit, fourth edition, F19.2). The full research record is in O2's private documents/research/rejected-entity.json.",
+  "encoding": "base64-utf8-json",
+  "strings": "WyIwMTA1NTY3MTk0MTM2IiwgIjAtMTA1NS02NzE5NC0xMy02IiwgIuC4muC4o+C4tOC4qeC4seC4lyDguJvguLHguYnguJnguILguYnguLLguKcg4LiI4Liz4LiB4Lix4LiUIiwgIuC4muC4o+C4tOC4qeC4seC4lyDguJvguLHguYnguJnguILguYnguLLguKcg4LiI4LmN4Liy4LiB4Lix4LiUIiwgIuC4muC4iOC4gS4g4Lib4Lix4LmJ4LiZ4LiC4LmJ4Liy4LinIiwgIlBVTktBTyIsICJQdW5rYW8iLCAiUEFOIEtBTyBDby4sIEx0ZC4iLCAiUEFOIEtBTyBDTy4sTFRELiIsICJQYW4gS2hhbyBDbyIsICIyMC8yMjIiLCAi4LmA4LiU4Lit4Liw4LmA4Lih4LiX4LmC4LiX4LijIiwgIuC4luC4meC4meC4oeC4reC5gOC4leC4reC4o+C5jOC5gOC4p+C4ouC5jCIsICLguYHguILguKfguIfguJvguKPguLDguYDguKfguKgiLCAi4LmA4LiC4LiV4Lib4Lij4Liw4LmA4Lin4LioIiwgIlByYXdldCIsICJcIkB0eXBlXCI6XCJSZXN0YXVyYW50XCIiLCAiXCJAdHlwZVwiOiBcIlJlc3RhdXJhbnRcIiJd"
+}

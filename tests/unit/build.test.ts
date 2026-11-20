@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { before, test } from 'node:test';
 import { build, legacyRedirects, type BuildResult } from '../../src/build/build.ts';
+import { rejectedEntities } from '../../src/content/sources.ts';
 
 let pre: BuildResult;
 let prod: BuildResult;
@@ -84,7 +85,8 @@ test('production rehearsal: index, follow; sitemap of canonical pages only; no p
   assert.match(read(prod, 'robots.txt'), /Sitemap: https:\/\/www\.pankaothai\.com\/sitemap\.xml/);
   const sm = read(prod, 'sitemap.xml');
   assert.equal((sm.match(/<loc>/g) ?? []).length, prod.pages.length);
-  assert.doesNotMatch(sm, /404|preview|[removed]/);
+  assert.doesNotMatch(sm, /404|preview/);
+  for (const s of rejectedEntities[0]!.forbiddenStrings) assert.ok(!sm.includes(s));
   for (const page of prod.pages) {
     const html = read(prod, `${page.slice(1)}index.html`);
     assert.match(html, /<meta name="robots" content="index, follow">/, page);

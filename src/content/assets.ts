@@ -129,7 +129,7 @@ export const assets: Asset[] = [
     id: 'legacy.logo', from: 'pankao_logo.gif', file: 'legacy/logo.png', w: 88, h: 61,
     subject: 'PK oval mark from the 2014 header (shown cropped to the oval; never upscaled or redrawn).',
     alt: { th: '', en: '', vi: '' },
-    rasterText: '[removed] / [removed] (former company name, too small to read at display size)',
+    rasterText: 'The pre-2017 company name in Thai and English, in the 2014 artwork (not transcribed; too small to read at display size)',
     crop: 'Elliptical clip to the oval only; the brown page ground is outside the mark.',
   }),
   legacy({
@@ -151,7 +151,7 @@ export const assets: Asset[] = [
       en: 'Two Mr. Noodles bags: dried rice vermicelli with blue stripes and dried rice stick with green stripes',
       vi: 'Hai túi Mr. Noodles: bún gạo khô sọc xanh dương và bánh phở khô sọc xanh lá',
     },
-    rasterText: 'Pack print incl. [removed] and PRODUCT OF THAILAND (former company name on the pack)',
+    rasterText: 'Pack print incl. the former English company name and PRODUCT OF THAILAND (not transcribed)',
     crop: 'Edit log (20 Nov 2026): top 262 px of the 460×380 original (the generic food strip excluded); enlarged 2× (Lanczos) with contrast-adaptive sharpening; the flat lime backdrop keyed out and replaced with cream #F6EEDF; the cut-off lower 24% faded into the cream. Packs, print and noodles unaltered (background only).',
   }),
   legacy({
