@@ -7,6 +7,7 @@
   - Its forms send nothing.
   - After every Pages build, GitHub runs "Post-deploy checks".
 - **History rewritten 20 Nov 2026 (~14:55 Bangkok, the owner's "Yes, rewrite history"):** every commit of every source branch was rewritten so that none holds the unrelated company's name, registration or address, plain or link-encoded, and `rejected-entity.json` left history; the four branches were force-pushed (`gh-pages` untouched: it never held them). Commit ids before that date changed; these docs use the new ids. GitHub still serves the old commits by id until GitHub Support purges them.
+- **A redesign is built and NOT published (20 Nov 2026, evening):** local branch `o2/redesign-2026-11-20`, on the owner's "the website still looks very much AI slob … elevate the UI/UX design" and "look on the internet to find pictures of their product". It brings a new type scale and layout, the current green Mr. Noodles pack and other shop photographs (preview only, captioned with their source), and sharper format close-ups. The owner's palette, gradient ground, glass bar and opening animation are kept. Record: `docs/REDESIGN_2026-11-20.md`. All suites pass. Publishing it is the owner's word.
 - **Production is not launched.** pankaothai.com is untouched, and `npm run gate` blocks a production release until the owner decisions below are made.
 - **Unconfirmed facts:** the company has not confirmed any fact the site shows.
 

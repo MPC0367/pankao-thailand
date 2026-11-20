@@ -19,6 +19,17 @@
 | Mark | Their PK oval redrawn as vector and recoloured: cream oval, double gold ring, natural-gold rice ears, espresso PK in Trirong. The arched old company name is left out (it is now another company's legal name). Preview only until approved (D21). |
 | Loader | On the first open in a browser tab: the oval draws itself, rice grains appear one by one, PK and the wordmark rise, seven gold threads fall (grain to thread), then it lifts at ≈ 1.85 s and the hero's grain window opens. A click or key skips it; not on internal page changes, back/forward or reduced motion; never without JavaScript; a CSS failsafe hides it at 3.2 s if scripts fail. |
 
+## Redesign of 20 Nov 2026 (evening): what changed inside this direction
+
+The owner said the site "still looks very much AI slob". The palette, gradient ground, glass bar, opening and mark above stay by the owner's choice.
+- The type is one large Trirong scale (opening 88 px).
+- Small tracked capital labels, index numbers, pill clusters and resting shadows are gone.
+- Surfaces are flat, and photographs are large and square-edged.
+- The current Mr. Noodles pack opens the home page, on a warm field.
+- The format cards are specimens.
+
+Record: `docs/REDESIGN_2026-11-20.md`. The "hairlines and quiet space" line below now reads: space and tone steps, almost no hairlines.
+
 ## Kept from the first direction
 
 Trirong (Cadson Demak) for display in Thai, Latin and Vietnamese; system sans for body; Thai headings break only between phrases; hairlines and quiet space; specimens of the 2014 photographs at native size; motion families M1–M10 plus the loader; the strand plates as honest image fallbacks.

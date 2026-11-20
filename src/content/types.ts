@@ -133,6 +133,8 @@ export type AssetRights =
   | 'first-party-legacy-unconfirmed'
   | 'commissioned'
   | 'licensed-stock'
+  /** A photograph of the company's own product published by a shop or importer; no permission recorded (owner, 20 Nov 2026). */
+  | 'third-party-web-unconfirmed'
   | 'generated'
   | 'research-only';
 
@@ -161,7 +163,7 @@ export type Asset = {
   productionApproved: boolean;
   reviewOrExpiryDate: string;
   /** Codex audit F18.1: actual is not the same as current. 'archival' = the company's own but old; 'current' = a current, dated photograph. */
-  currentness?: 'archival' | 'current' | 'illustrative';
+  currentness?: 'archival' | 'current' | 'illustrative' | 'retail';
   /** When the picture was taken or published, as far as is known. */
   era?: string;
 };

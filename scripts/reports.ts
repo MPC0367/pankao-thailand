@@ -54,6 +54,7 @@ const originalOf = (a: (typeof assets)[number]) => {
   const name = a.sourceUrl.match(/images\/([^/?#]+)$/)?.[1];
   if (a.rightsBasis === 'first-party-legacy-unconfirmed' && name) return join(SITE, '../documents/research/legacy-site/images', name);
   if (a.rightsBasis === 'licensed-stock') return join(SITE, '../documents/photos/illustrative-2026-11-20', a.file.split('/').pop()!);
+  if (a.rightsBasis === 'third-party-web-unconfirmed') return join(SITE, '../documents/photos/web-2026-11-20', a.permissionReference?.match(/web-2026-11-20\/([^)]+)\)/)?.[1] ?? '');
   return '';
 };
 const reviewOf = (a: (typeof assets)[number]) => (a.cropLimits?.startsWith('Edit log')

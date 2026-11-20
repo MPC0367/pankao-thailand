@@ -13,7 +13,7 @@ import { canShow, fact, formatDate, href, loc, marked, phrases, productPath, ROU
 import { enquiryForm } from './forms.ts';
 import { esc, html, join, raw, type Raw } from './html.ts';
 import { ARROW, contactLines, document, PIN, type PageMeta } from './layout.ts';
-import { assetImg, credit, packDish, strandPlate } from './media.ts';
+import { assetAllowed, assetImg, credit, packDish, strandPlate } from './media.ts';
 import { assetById } from '../content/assets.ts';
 import { breadcrumbs, organization, productLd } from './seo.ts';
 import { BASE, PUBLIC_PREVIEW, SHOW_LEGACY, SHOW_SAMPLES, SHOW_SAMPLE_TAGS } from '../content/presentation.ts';
@@ -56,7 +56,22 @@ function srcCap(ctx: Ctx, id: string): Raw {
   const a = assetById.get(id);
   if (!a) return raw('');
   if (a.rightsBasis === 'licensed-stock') return html`<span class="src src--b"><i aria-hidden="true"></i>${t(ctx, 'illus.tag')}</span>`;
+  // C, the company's own product photographed by a shop or importer (owner, 20 Nov 2026): named, linked to its page.
+  if (a.rightsBasis === 'third-party-web-unconfirmed') return html`<span class="src src--c"><i aria-hidden="true"></i><a href="${a.sourceUrl}" rel="noopener" target="_blank">${credit(ctx, id)}<span class="sr-only"> ${t(ctx, 'contact.newTab')}</span></a></span>`;
   return html`<span class="src src--a"><i aria-hidden="true"></i>${credit(ctx, id)}</span>`;
+}
+
+/** The photographer's credit for an illustrative photograph, linked to its source (CC BY-SA asks for it beside the picture). */
+function stockCredit(ctx: Ctx, id: string): Raw {
+  const a = assetById.get(id);
+  if (!a || a.rightsBasis !== 'licensed-stock' || !assetAllowed(ctx, id)) return raw('');
+  return html`<a class="illus-credit" href="${a.sourceUrl}" rel="noopener" target="_blank">${credit(ctx, id)}<span class="sr-only"> ${t(ctx, 'contact.newTab')}</span></a>`;
+}
+
+/** A format card's picture is not the company's own archive: say what it is, under the card. */
+function cardSource(ctx: Ctx, id: string | undefined): Raw {
+  if (!id || !assetAllowed(ctx, id) || assetById.get(id)?.rightsBasis === 'first-party-legacy-unconfirmed') return raw('');
+  return html`<p class="format-card__src">${srcCap(ctx, id)}${stockCredit(ctx, id)}</p>`;
 }
 
 /** Proof from the company's own archive: a captioned figure (class A). */
@@ -90,9 +105,14 @@ function factNote(f: Fact<unknown>): string {
   return `${f.id}: ${f.status}${f.ownerApproved ? ', owner-approved' : ', not owner-approved'}. Sources: ${src}.${f.note ? ` ${f.note}` : ''}`;
 }
 
+/**
+ * A chapter's title and its sentence. A plain-text label above the title is no longer drawn (redesign, 20 Nov 2026:
+ * the title says what the section is); a label that carries a tag (the 2014 words, a sample) still shows, because the
+ * tag is a statement about the content, not decoration.
+ */
 function sectionHead(eyebrow: string | Raw | null, h: Raw | string | null, lede: Raw | string | null, level: 'h1' | 'h2' = 'h2'): Raw {
   return html`<div class="chapter-head">
-    <div>${eyebrow ? html`<p class="eyebrow">${eyebrow}</p>` : ''}${h ? (level === 'h1' ? html`<h1>${h}</h1>` : html`<h2>${h}</h2>`) : ''}</div>
+    <div>${eyebrow && typeof eyebrow !== 'string' ? html`<p class="eyebrow">${eyebrow}</p>` : ''}${h ? (level === 'h1' ? html`<h1>${h}</h1>` : html`<h2>${h}</h2>`) : ''}</div>
     ${lede ? html`<p class="lede">${lede}</p>` : html`<span></span>`}
   </div>`;
 }
@@ -119,6 +139,7 @@ function formatCard(ctx: Ctx, assets: Assets, p: Product, idSuffix: string, leve
     ${heading}
     ${alt.length ? html`<p class="format-card__alt">${alt.join(' · ')}</p>` : ''}
     ${summary ? html`<p class="format-card__meta">${summary}</p>` : ''}
+    ${cardSource(ctx, p.media.pack)}
   </article>`;
 }
 
@@ -217,20 +238,37 @@ function homeHeritage(ctx: Ctx): Raw {
   </div></section>`;
 }
 
+/**
+ * The pack on the opening's stage (redesign, 20 Nov 2026: "find pictures of their product and replace any subpar
+ * images"). The first set whose ids all exist in the ledger wins, so the 2014 photograph stays as the way back.
+ */
+const HERO_PACKS: string[][] = [['web.pack.green'], ['legacy.hero.pack']];
+const heroPacks = (): string[] => HERO_PACKS.find((ids) => ids.every((id) => assetById.has(id))) ?? [];
+/** The own-brand photograph in the dark chapter: the current packs when found, else the 2014 pair. */
+const OWN_PACKS = ['web.packs.pair', 'legacy.mrnoodles.pack'];
+
+/** What a stage photograph shows and where it comes from, in the caption system's words. */
+function stageCaption(ctx: Ctx, ids: string[]): Raw {
+  const a = assetById.get(ids[0]!);
+  if (!a) return raw('');
+  return html`<figcaption class="stage-cap"><span>${a.caption ? loc(a.caption, ctx.locale) : t(ctx, 'oem.proof.packs')}</span>${ids.map((id) => srcCap(ctx, id))}</figcaption>`;
+}
+
 export function home(ctx: Ctx, assets: Assets): Built {
   const h1 = tx(ctx, 'home.h1', {}, { phrases: true }) ?? html`${t(ctx, 'nav.products')}`;
-  const heroImg = assetImg(ctx, assets, 'legacy.hero.pack', { eager: true, extra: { fetchpriority: 'high', 'data-hero-img': '' } });
+  const packIds = heroPacks();
+  const packs = packIds.map((id, i) => assetImg(ctx, assets, id, { eager: true, sizes: '(min-width: 900px) 30vw, 70vw', extra: i === 0 ? { fetchpriority: 'high', 'data-hero-img': '' } : {} })).filter(Boolean) as Raw[];
   const formats = formatProducts.filter((p) => canShow(p.name, ctx));
   const steps = processSteps.filter((s) => canShow(s, ctx));
   const own = tx(ctx, 'home.ways.own.body');
   const oem = tx(ctx, 'home.ways.oem.body');
   const loc_ = fact(ctx, location);
+  const ownPack = OWN_PACKS.find((id) => assetById.has(id))!;
 
   const main = html`
 <section class="hero" aria-labelledby="hero-h">
-  <div class="wrap grid">
-    <div class="hero__text">
-      ${tx(ctx, 'home.eyebrow') ? html`<p class="eyebrow">${tx(ctx, 'home.eyebrow')}</p>` : ''}
+  <div class="hero-home">
+    <div class="hero-home__text">
       <h1 id="hero-h">${h1}</h1>
       ${tx(ctx, 'home.lede') ? html`<p class="lede">${tx(ctx, 'home.lede')}</p>` : ''}
       <div class="btn-row">
@@ -239,31 +277,30 @@ export function home(ctx: Ctx, assets: Assets): Built {
       </div>
       ${loc_ ? html`<p class="hero__place">${PIN}<span>${loc_}</span></p>` : ''}
     </div>
-    <div class="hero__visual">
-      <figure class="grain-panel" data-grain>
-        <div class="aperture" data-aperture>${heroImg ?? strandPlate({ strand: 'hair' }, '')}</div>
-      </figure>
-      ${heroImg ? html`<p class="hero__credit">${srcCap(ctx, 'legacy.hero.pack')}</p>` : ''}
-    </div>
+    <figure class="hero-home__stage" data-grain>
+      <div class="stage-field"><div class="stage-packs aperture" data-aperture>${packs.length
+        ? packs.map((img, i) => html`<div class="stage-pack ${packs.length === 1 ? 'stage-pack--solo' : i === 0 ? 'stage-pack--a' : 'stage-pack--b'}">${img}</div>`)
+        : strandPlate({ strand: 'hair' }, '')}</div></div>
+      ${packs.length ? stageCaption(ctx, packIds) : ''}
+    </figure>
   </div>
 </section>
 
 ${homeStrip(ctx)}
 
-${formats.length ? html`<section class="section section--tight" aria-labelledby="formats-h">
+${formats.length ? html`<section class="section" aria-labelledby="formats-h">
   <div class="wrap">
-    ${sectionHead(t(ctx, 'home.formats.eyebrow'), html`<span id="formats-h">${hd(ctx, 'home.formats.h2')}</span>`, t(ctx, 'home.formats.lede'))}
+    ${sectionHead(null, html`<span id="formats-h">${hd(ctx, 'home.formats.h2')}</span>`, t(ctx, 'home.formats.lede'))}
     <div class="formats formats--four">${formats.map((p) => formatCard(ctx, assets, p, 'home'))}</div>
-    <p class="section-link">${linkArrow(href(ctx.locale, ROUTES.products), t(ctx, 'cta.products'))}</p>
   </div>
 </section>` : ''}
 
 <section class="section on-deep" aria-labelledby="oem-h">
   <div class="wrap">
-    ${sectionHead(t(ctx, 'home.ways.eyebrow'), html`<span id="oem-h">${hd(ctx, 'home.ways.h2')}</span>`, tx(ctx, 'home.ways.body'))}
+    ${sectionHead(null, html`<span id="oem-h">${hd(ctx, 'home.ways.h2')}</span>`, tx(ctx, 'home.ways.body'))}
     <div class="ways grid">
-      ${own ? html`<div class="way arrive">${proof(ctx, assets, 'legacy.mrnoodles.pack', 'oem.proof.packs')}<h3>${t(ctx, 'home.ways.own.h')}</h3><p>${own}</p>${linkArrow(href(ctx.locale, productPath('mr-noodles')), t(ctx, 'products.details'))}</div>` : ''}
-      ${oem ? html`<div class="way arrive"><h3>${t(ctx, 'home.ways.oem.h')}</h3><p>${oem}</p>${linkArrow(href(ctx.locale, ROUTES.oem), t(ctx, 'cta.oem'))}</div>` : ''}
+      ${own ? html`<div class="way way--pack arrive">${proof(ctx, assets, ownPack, 'oem.proof.packs')}<h3>${t(ctx, 'home.ways.own.h')}</h3><p>${own}</p>${linkArrow(href(ctx.locale, productPath('mr-noodles')), t(ctx, 'products.details'))}</div>` : ''}
+      ${oem ? html`<div class="way way--oem arrive"><h3>${t(ctx, 'home.ways.oem.h')}</h3><p>${oem}</p>${linkArrow(href(ctx.locale, ROUTES.oem), t(ctx, 'cta.oem'))}</div>` : ''}
       <div class="way way--proof arrive">${dipromQuote(ctx)}${linkArrow(href(ctx.locale, ROUTES.quality), t(ctx, 'home.ways.quality'))}</div>
     </div>
   </div>
@@ -271,10 +308,10 @@ ${formats.length ? html`<section class="section section--tight" aria-labelledby=
 
 ${steps.length ? html`<section class="section" aria-labelledby="process-h">
   <div class="wrap">
-    ${sectionHead(t(ctx, 'home.process.eyebrow'), html`<span id="process-h">${hd(ctx, 'home.process.h2')}</span>`, tx(ctx, 'home.process.lede'))}
+    ${sectionHead(null, html`<span id="process-h">${hd(ctx, 'home.process.h2')}</span>`, tx(ctx, 'home.process.lede'))}
     <ol class="steps steps--row" role="list">${steps.map((s) => {
       const v = val(s, ctx.locale) as { title: Record<Locale, string>; body: Record<Locale, string> };
-      return html`<li class="arrive"><div><h3>${v.title[ctx.locale]}</h3><p>${marked(v.body[ctx.locale], [s], ctx)}</p></div></li>`;
+      return html`<li class="arrive"><h3>${v.title[ctx.locale]}</h3><p>${marked(v.body[ctx.locale], [s], ctx)}</p></li>`;
     })}</ol>
     ${legacyOn(ctx) ? html`<div class="pq-best"><p class="eyebrow">${loc(legacy.best.h, ctx.locale)} ${legacyTag(ctx)}</p><ul class="best-line" role="list">${loc(legacy.best.items, ctx.locale).map((it) => html`<li>${ph(ctx, it)}</li>`)}</ul></div>` : ''}
     <p class="section-link section-link--pair">${linkArrow(href(ctx.locale, ROUTES.process), t(ctx, 'cta.process'))}${linkArrow(href(ctx.locale, ROUTES.quality), t(ctx, 'cta.quality'))}</p>
@@ -292,7 +329,7 @@ ${ctx.mode === 'preview' && !PUBLIC_PREVIEW ? html`<section class="section secti
   </div>
 </section>` : ''}
 
-<section class="section band close" aria-labelledby="close-h">
+<section class="section close" aria-labelledby="close-h">
   <div class="wrap">
     <h2 id="close-h">${hd(ctx, 'home.close.h2')}</h2>
     <div class="close-grid">
@@ -378,7 +415,7 @@ function legacyProduct(ctx: Ctx, assets: Assets, p: Product): Raw {
       ${x.lead ? html`<p class="legacy-quote__lead">${loc(x.lead, ctx.locale)}</p>` : ''}
       <blockquote><p>${loc(x.body, ctx.locale)}</p></blockquote>
     </figure>` : raw('');
-  const photo = SERVING[p.id] ? illus(ctx, assets, SERVING[p.id]!) : raw('');
+  const photo = SERVING[p.id] && SERVING[p.id] !== p.media.dish ? illus(ctx, assets, SERVING[p.id]!) : raw(''); // never the same dish twice on a page
   const inner = story(quote, photo);
   if (!String(inner)) return raw('');
   return html`<section class="section section--tight" aria-label="${t(ctx, 'legacy.tag')}"><div class="wrap">${inner}</div></section>`;
@@ -393,8 +430,15 @@ export function productDetail(ctx: Ctx, assets: Assets, p: Product): Built {
   const uses = canShow(p.uses, ctx) ? (val(p.uses, ctx.locale) as string[]) : [];
   const alt = loc(p.altNames, ctx.locale);
   const isBrand = p.format === 'brand';
-  const dry = p.media.pack ? assetImg(ctx, assets, isBrand ? 'legacy.mrnoodles.pack' : p.media.pack, { eager: true, extra: { fetchpriority: 'high' } }) : null; // the first screen's photo (Codex F17.5)
-  const dish = p.media.dish ? assetImg(ctx, assets, p.media.dish, {}) : null;
+  // The brand shows the current pack's front and back when the shop photographs exist (redesign, 20 Nov 2026), else the 2014 pair.
+  const brandPair = isBrand && assetById.has('web.pack.studio') && assetById.has('web.pack.back') ? ['web.pack.studio', 'web.pack.back'] as const : null;
+  const dryId = brandPair ? brandPair[0] : isBrand ? 'legacy.mrnoodles.pack' : p.media.pack;
+  const dishId = brandPair ? brandPair[1] : p.media.dish;
+  // Each frame is a quarter of a wide page and half a phone: ask for the 800 px copies, never the 1600 px originals.
+  const pairSizes = '(min-width: 900px) 25vw, 50vw';
+  const dry = dryId ? assetImg(ctx, assets, dryId, { eager: true, sizes: pairSizes, extra: { fetchpriority: 'high' } }) : null; // the first screen's photo (Codex F17.5)
+  const dish = dishId ? assetImg(ctx, assets, dishId, { sizes: pairSizes }) : null;
+  const capOf = (id: string, key: string) => (brandPair ? loc(assetById.get(id)!.caption!, ctx.locale) : t(ctx, key));
   const relatedList = p.related.map((id) => productById.get(id)!).filter((r) => canShow(r.name, ctx));
   const brandFormats = isBrand ? formatProducts.filter((x) => x.brand && String(val(x.brand, 'en')).includes('Mr. Noodles') && canShow(x.name, ctx)) : [];
   const productClaims = claims.filter((c) => c.level === 'product' && c.productId === p.id);
@@ -420,9 +464,9 @@ ${crumbs(ctx, [{ label: t(ctx, 'nav.home'), path: '' }, { label: t(ctx, 'nav.pro
     </div>
     <div class="product-hero__media tone-${p.tone}">
       ${dry
-        ? html`<div class="pair${isBrand ? ' pair--wide' : ''}">
-            <figure><div class="frame">${dry}</div><figcaption><span>${t(ctx, isBrand ? 'nav.products' : 'product.dry')}</span>${srcCap(ctx, isBrand ? 'legacy.mrnoodles.pack' : p.media.pack!)}</figcaption></figure>
-            ${dish ? html`<figure><div class="frame">${dish}</div><figcaption><span>${t(ctx, 'product.cooked')}</span>${srcCap(ctx, p.media.dish!)}</figcaption></figure>` : ''}
+        ? html`<div class="pair${isBrand && !brandPair ? ' pair--wide' : ''}">
+            <figure><div class="frame">${dry}</div><figcaption><span>${capOf(dryId!, isBrand ? 'nav.products' : 'product.dry')}</span>${srcCap(ctx, dryId!)}${stockCredit(ctx, dryId!)}</figcaption></figure>
+            ${dish ? html`<figure><div class="frame${brandPair ? ' frame--label' : ''}">${dish}</div><figcaption><span>${capOf(dishId!, 'product.cooked')}</span>${srcCap(ctx, dishId!)}${stockCredit(ctx, dishId!)}</figcaption></figure>` : ''}
           </div>`
         : html`<div class="format-card__media plate-large">${strandPlate(p, plain)}</div>`}
     </div>
@@ -499,7 +543,6 @@ export function oemPage(ctx: Ctx, assets: Assets): Built {
 <section class="hero hero--page" aria-labelledby="oem-h1">
   <div class="wrap grid">
     <div class="hero__text">
-      <p class="eyebrow">${t(ctx, 'oem.eyebrow')}</p>
       <h1 id="oem-h1">${tx(ctx, 'oem.h1', {}, { phrases: true }) ?? hd(ctx, 'oem.form.h')}</h1>
       ${tx(ctx, 'oem.lede') ? html`<p class="lede">${tx(ctx, 'oem.lede')}</p>` : ''}
       <div class="btn-row"><a class="btn btn--primary" href="#brief">${t(ctx, 'cta.brief')}</a><a class="btn btn--line" href="${href(ctx.locale, ROUTES.products)}">${t(ctx, 'cta.products')}</a></div>
@@ -594,13 +637,13 @@ export function processPage(ctx: Ctx, assets: Assets): Built {
 <section class="section section--tight" aria-label="${hd(ctx, 'process.h1')}"><div class="wrap">
   ${steps.length ? html`<ol class="process" role="list" data-process>
     <span class="process__thread" aria-hidden="true"><i data-process-thread></i></span>
-    ${steps.map((s, i) => {
+    ${steps.map((s) => {
       const v = val(s, ctx.locale) as { title: Record<Locale, string>; body: Record<Locale, string> };
       const img = STEP_IMAGES[s.id] ? assetImg(ctx, assets, STEP_IMAGES[s.id]!, {}) : null;
       return html`<li class="process-step" data-step>
         <span class="process-step__dot" aria-hidden="true"><span></span></span>
         <div class="process-step__body">
-          <div><p class="eyebrow">${t(ctx, 'process.step', { n: i + 1 })}</p><h2 class="h3">${v.title[ctx.locale]}</h2><p class="body">${marked(v.body[ctx.locale], [s], ctx)}</p></div>
+          <div><h2 class="h3">${v.title[ctx.locale]}</h2><p class="body">${marked(v.body[ctx.locale], [s], ctx)}</p></div>
           ${img ? html`<figure>${img}<figcaption>${legacyOn(ctx) && legacy.process.captions[s.id] ? html`<span class="step-cap">${loc(legacy.process.captions[s.id]!, ctx.locale)} ${legacyTag(ctx)}</span>` : ''}${srcCap(ctx, STEP_IMAGES[s.id]!)}</figcaption></figure>` : ''}
         </div>
       </li>`;

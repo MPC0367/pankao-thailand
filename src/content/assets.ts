@@ -70,6 +70,8 @@ const LICENCE = {
   pexels: ['Pexels License', 'https://www.pexels.com/license/'],
   unsplash: ['Unsplash License', 'https://unsplash.com/license'],
   cc0: ['CC0 1.0', 'https://creativecommons.org/publicdomain/zero/1.0/'],
+  bysa3: ['CC BY-SA 3.0', 'https://creativecommons.org/licenses/by-sa/3.0/'],
+  bysa4: ['CC BY-SA 4.0', 'https://creativecommons.org/licenses/by-sa/4.0/'],
 } as const;
 const stock = (s: StockSpec): Asset => ({
   id: s.id,
@@ -86,7 +88,10 @@ const stock = (s: StockSpec): Asset => ({
   maxDisplayWidth: s.w,
   alt: s.alt,
   caption: s.caption,
-  credit: { th: `ภาพ: ${s.author} / ${s.site}`, en: `Photo: ${s.author} / ${s.site}`, vi: `Ảnh: ${s.author} / ${s.site}` },
+  // CC BY-SA asks for the licence beside the name; the free licences that do not are left as they were.
+  credit: s.licence.startsWith('CC BY')
+    ? { th: `ภาพ: ${s.author} / ${s.site}, ${s.licence}`, en: `Photo: ${s.author} / ${s.site}, ${s.licence}`, vi: `Ảnh: ${s.author} / ${s.site}, ${s.licence}` }
+    : { th: `ภาพ: ${s.author} / ${s.site}`, en: `Photo: ${s.author} / ${s.site}`, vi: `Ảnh: ${s.author} / ${s.site}` },
   productionApproved: false,
   reviewOrExpiryDate: REVIEW,
   currentness: 'illustrative',
@@ -122,6 +127,74 @@ const STOCK: Asset[] = [
     subject: 'A canal in Bang Khu Rat, Nonthaburi (not Sai Noi).',
     alt: { th: 'คลองกว้าง ริมฝั่งหญ้าเขียว ใต้ท้องฟ้าโปร่ง', en: 'A wide canal with green banks under an open sky', vi: 'Một con kênh rộng, bờ cỏ xanh dưới bầu trời rộng' },
     caption: { th: 'คลองในจังหวัดนนทบุรี (บางคูรัด)', en: 'A canal in Nonthaburi (Bang Khu Rat)', vi: 'Một con kênh ở Nonthaburi (Bang Khu Rat)' } }),
+  /* Close-ups for the format specimens (redesign, 20 Nov 2026): crisper than the 2014 crops; not Pankao's own noodles. */
+  stock({ id: 'illus.dry.vermicelli', file: 'illus/dry-vermicelli-commons.jpg', w: 720, h: 900, page: 'https://commons.wikimedia.org/wiki/File:Rice_vermicelli.jpg', author: 'Popo le Chien', site: 'Wikimedia Commons', licence: LICENCE.bysa3[0], licenceUrl: LICENCE.bysa3[1],
+    subject: 'Dry rice vermicelli, full frame (4:5 crop of the 3840×2160 original).',
+    alt: { th: 'เส้นหมี่ข้าวแห้งระยะใกล้', en: 'Dry rice vermicelli, close up', vi: 'Bún gạo khô, cận cảnh' },
+    caption: { th: 'เส้นหมี่ข้าวแห้ง', en: 'Dry rice vermicelli', vi: 'Bún gạo khô' } }),
+  stock({ id: 'illus.dry.ricestick', file: 'illus/dry-ricestick-commons.jpg', w: 666, h: 834, page: 'https://commons.wikimedia.org/wiki/File:Vietnamsk%C3%A9_%C5%A1irok%C3%A9_r%C3%BD%C5%BEov%C3%A9_nudle_b%C3%A1nh_ph%E1%BB%9F_01.JPG', author: 'Horakvlado', site: 'Wikimedia Commons', licence: LICENCE.bysa4[0], licenceUrl: LICENCE.bysa4[1],
+    subject: 'Dry flat rice noodles (bánh phở), stacked on a dark ground (4:5 crop of the 1248×834 original).',
+    alt: { th: 'เส้นข้าวแบนแห้ง วางซ้อนกัน', en: 'Dry flat rice noodles, stacked', vi: 'Bánh phở khô sợi dẹt, xếp chồng' },
+    caption: { th: 'เส้นข้าวแบนแห้ง', en: 'Dry flat rice noodles', vi: 'Bánh phở khô sợi dẹt' } }),
+];
+
+/**
+ * The company's own current packs as photographed by shops and importers (owner, 20 Nov 2026: "you dont have to use
+ * stock photos from just the old website … look on the internet to find picutres of their product and replace any
+ * subpar images"). They show the real product, so they are not illustrative; they carry no recorded permission, so each
+ * is captioned with its publisher and a link to the page it came from, appears in the preview only, and never in a
+ * production build until Pankao supplies its own pack shots or confirms these. Record: ../documents/photos/web-2026-11-20/.
+ */
+type WebSpec = { id: string; file: string; w: number; h: number; from: string; page: string; publisher: string; subject: string; alt: Localized; caption: Localized; rasterText?: string };
+const web = (s: WebSpec): Asset => ({
+  id: s.id,
+  file: s.file,
+  sourceUrl: s.page,
+  sourceOwner: `${s.publisher} (published the photograph; photographer and licence not stated)`,
+  retrievedAt: '2026-11-20',
+  rightsBasis: 'third-party-web-unconfirmed',
+  permissionReference: `None recorded; gathered on the owner's request for the labelled preview (../documents/photos/web-2026-11-20/${s.from})`,
+  subject: s.subject,
+  actualPankaoOrGeneric: 'actual-pankao',
+  width: s.w,
+  height: s.h,
+  maxDisplayWidth: s.w,
+  cropLimits: `Cropped to the pack from the retailer's file ${s.from}; nothing in the picture changed.`,
+  alt: s.alt,
+  caption: s.caption,
+  credit: { th: `ภาพสินค้าจาก ${s.publisher}`, en: `Product photo: ${s.publisher}`, vi: `Ảnh sản phẩm: ${s.publisher}` },
+  rasterText: s.rasterText,
+  productionApproved: false,
+  reviewOrExpiryDate: REVIEW,
+  currentness: 'retail',
+  era: 'the current pack (printed with the company name SAHA PAN KAO), photographed by a retailer; retrieved 2026-11-20',
+});
+const PACK_ALT: Localized = {
+  th: 'ถุงใสมิสเตอร์นู้ดเดิ้ล แถบสีเขียว บรรจุเส้นจันทร์อบแห้ง 454 กรัม',
+  en: 'A clear Mr. Noodles bag with green stripes, holding 454 g of dried rice stick',
+  vi: 'Túi Mr. Noodles trong suốt sọc xanh lá, đựng 454 g bánh phở khô',
+};
+const PACK_TEXT = 'Pack print: Mr.NOODLES, BEST QUALITY, มิสเตอร์นู้ดเดิ้ลส์, 尖竹汶粿條, เส้นจันท์อบแห้ง, RICE STICK NOODLES, the company name SAHA PAN KAO, the Sai Noi address, GMP, HACCP and halal marks, 454 g, PRODUCT OF THAILAND';
+const WEB: Asset[] = [
+  web({ id: 'web.pack.green', file: 'web/pack-green-front.jpg', w: 602, h: 1112, from: 'mrnoodles-ricestick-green-454g-front-white-daraz-3.jpg',
+    page: 'https://www.daraz.com.bd/products/pan-kao-rice-stick-noodles-500-gm-i132162096.html', publisher: 'Daraz Bangladesh',
+    subject: 'The current green Mr. Noodles rice-stick pack, 454 g, front, on white.', alt: PACK_ALT, rasterText: PACK_TEXT,
+    caption: { th: 'เส้นจันทร์อบแห้งมิสเตอร์นู้ดเดิ้ล ถุง 454 ก. ในปัจจุบัน', en: 'Mr. Noodles rice stick, the current 454 g pack', vi: 'Bánh phở khô Mr. Noodles, túi 454 g hiện nay' } }),
+  web({ id: 'web.packs.pair', file: 'web/packs-green-pair.jpg', w: 928, h: 994, from: 'mrnoodles-ricestick-green-454g-two-packs-daraz.jpg',
+    page: 'https://www.daraz.com.bd/products/mr-noodles-rice-stick-saha-pan-kao-noodles-454gm-i131708115.html', publisher: 'Daraz Bangladesh',
+    subject: 'Two current green Mr. Noodles rice-stick packs laid at an angle, on white.', rasterText: PACK_TEXT,
+    alt: { th: 'ถุงเส้นจันทร์อบแห้งมิสเตอร์นู้ดเดิ้ล แถบสีเขียว สองถุงวางเอียง', en: 'Two Mr. Noodles bags of dried rice stick with green stripes, laid at an angle', vi: 'Hai túi bánh phở khô Mr. Noodles sọc xanh lá, đặt nghiêng' },
+    caption: { th: 'ถุงเส้นจันทร์มิสเตอร์นู้ดเดิ้ล 454 ก.', en: 'Mr. Noodles rice-stick packs, 454 g', vi: 'Túi bánh phở Mr. Noodles 454 g' } }),
+  web({ id: 'web.pack.studio', file: 'web/pack-green-studio.jpg', w: 960, h: 1200, from: 'mrnoodles-ricestick-green-454g-front-grey-daraz.jpg',
+    page: 'https://www.daraz.com.bd/products/pan-kao-rice-stick-noodles-500-gm-i132162096.html', publisher: 'Daraz Bangladesh',
+    subject: 'The current green Mr. Noodles rice-stick pack, front, on a soft grey studio ground (4:5 crop).', alt: PACK_ALT, rasterText: PACK_TEXT,
+    caption: { th: 'ด้านหน้าถุง 454 ก.', en: 'Front of the 454 g pack', vi: 'Mặt trước túi 454 g' } }),
+  web({ id: 'web.pack.back', file: 'web/pack-green-back.jpg', w: 600, h: 600, from: 'mrnoodles-ricestick-green-454g-back-label-bacchakaccha.jpg',
+    page: 'https://bacchakaccha.com/product/mr-noodles-rice-stick-noodles-454g-ak630', publisher: 'BacchaKaccha (Bangladesh)',
+    subject: 'The back of the current pack: the English description and the ingredients panel.',
+    rasterText: 'RICE STICK NOODLES; a description of the product (white rice, machine-made, dried by baking instead of in the sun); INGREDIENTS: WHITE RICE 90%, Tapioca starch 10%; Manufacturing License Number 12-2-02151',
+    alt: { th: 'ด้านหลังถุงเส้นจันทร์ ส่วนผสม: ข้าวขาว 90% แป้งมันสำปะหลัง 10%', en: 'The back of the rice-stick pack. Ingredients: white rice 90%, tapioca starch 10%', vi: 'Mặt sau túi bánh phở. Thành phần: gạo trắng 90%, tinh bột sắn 10%' },
+    caption: { th: 'ด้านหลังถุง: คำอธิบายและส่วนผสม', en: 'Back of the pack: description and ingredients', vi: 'Mặt sau túi: mô tả và thành phần' } }),
 ];
 
 export const assets: Asset[] = [
@@ -214,6 +287,7 @@ export const assets: Asset[] = [
     alt: { th: 'อาคารโรงงานสีขาวหลังทุ่งนา', en: 'A white factory building behind a rice field', vi: 'Tòa nhà nhà máy màu trắng phía sau cánh đồng lúa' },
   }),
   ...STOCK,
+  ...WEB,
 ];
 
 export const assetById = new Map(assets.map((a) => [a.id, a]));

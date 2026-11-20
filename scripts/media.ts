@@ -62,6 +62,26 @@ if (existsSync(ILLUS)) {
   }
 }
 mkdirSync(join(root, 'media-source/illus'), { recursive: true });
+/* Two more close-ups for the format specimens (redesign, 20 Nov 2026), Wikimedia Commons, CC BY-SA; cropped to 4:5. */
+if (existsSync(ILLUS)) {
+  jobs.push({ dir: ILLUS, from: 'dry-vermicelli-commons.jpg', to: '../illus/dry-vermicelli-commons.jpg', vf: 'crop=1728:2160:1056:0,scale=720:900:flags=lanczos+accurate_rnd+full_chroma_int' });
+  jobs.push({ dir: ILLUS, from: 'dry-ricestick-commons.jpg', to: '../illus/dry-ricestick-commons.jpg', vf: 'crop=667:834:290:0' });
+}
+
+/* The company's own packs as photographed by shops and importers (owner, 20 Nov 2026: "look on the internet to find pictures
+   of their product and replace any subpar images"). Third-party pictures with no permission recorded: preview only, each
+   captioned with its publisher and linked to the page it came from. Sources: ../documents/photos/web-2026-11-20/SOURCES.md.
+   Cropped to the pack's edges; nothing in the pictures is changed. */
+const WEB = resolve(root, '../documents/photos/web-2026-11-20');
+if (existsSync(WEB)) {
+  mkdirSync(join(root, 'media-source/web'), { recursive: true });
+  for (const [from, to, vf] of [
+    ['mrnoodles-ricestick-green-454g-front-white-daraz-3.jpg', 'pack-green-front.jpg', 'crop=602:1112:320:74'],
+    ['mrnoodles-ricestick-green-454g-two-packs-daraz.jpg', 'packs-green-pair.jpg', 'crop=928:994:146:88'],
+    ['mrnoodles-ricestick-green-454g-front-grey-daraz.jpg', 'pack-green-studio.jpg', 'crop=960:1200:120:0'],
+    ['mrnoodles-ricestick-green-454g-back-label-bacchakaccha.jpg', 'pack-green-back.jpg', 'null'],
+  ] as const) jobs.push({ dir: WEB, from, to: `../web/${to}`, vf });
+}
 
 for (const j of jobs) {
   const src = join(j.dir ?? research, j.from);

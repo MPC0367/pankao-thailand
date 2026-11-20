@@ -54,9 +54,14 @@ export function strandPlate(product: Pick<Product, 'strand'>, label: string): Ra
  * every device, instant under reduced motion. Falls back to the strand plate.
  */
 /** `eager`: the card's pack photograph can be in the first screen, so it is not lazy (Codex F17.5); the dish view stays lazy. */
+/** A card is at most a quarter of the page on wide screens and half a phone (the brand line spans more), so phones and
+ *  laptops fetch the 800 px copies, never the 1600 px originals (redesign, 20 Nov 2026: home weight). */
+const CARD_SIZES = '(min-width: 1100px) 320px, (min-width: 640px) 46vw, 50vw';
+const WIDE_CARD_SIZES = '(min-width: 1100px) 760px, 100vw';
 export function packDish(ctx: Ctx, assets: Assets, product: Product, label: string, idSuffix: string, eager = false): Raw {
-  const dry = product.media.pack ? assetImg(ctx, assets, product.media.pack, { cls: 'view-dry', eager }) : null;
-  const dish = product.media.dish ? assetImg(ctx, assets, product.media.dish, { cls: 'view-dish' }) : null;
+  const sizes = product.format === 'brand' ? WIDE_CARD_SIZES : CARD_SIZES;
+  const dry = product.media.pack ? assetImg(ctx, assets, product.media.pack, { cls: 'view-dry', eager, sizes }) : null;
+  const dish = product.media.dish ? assetImg(ctx, assets, product.media.dish, { cls: 'view-dish', sizes }) : null;
   const plate = strandPlate(product, dry ? '' : label);
   if (!dry) return html`<div class="format-card__media tone-${product.tone}">${plate}</div>`;
   const mediaId = `media-${product.id}-${idSuffix}`;

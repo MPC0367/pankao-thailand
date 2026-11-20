@@ -18,6 +18,9 @@ const L = (th: string, en: string, vi: string): Localized => ({ th, en, vi });
 const LA = (th: string[], en: string[], vi: string[]): Localized<string[]> => ({ th, en, vi });
 
 const RICE = L('ข้าวเจ้า น้ำ', 'Rice, water', 'Gạo, nước');
+/** What the back of the current 454 g Mr. Noodles rice-stick pack prints (shop photograph, 20 Nov 2026,
+ *  ../documents/photos/web-2026-11-20/): still a sample until the company confirms it for each product. */
+const RICE_TAPIOCA = L('ข้าวขาว 90% แป้งมันสำปะหลัง 10% (ตามฉลากถุง 454 ก.)', 'White rice 90%, tapioca starch 10% (as printed on the 454 g pack)', 'Gạo trắng 90%, tinh bột sắn 10% (theo nhãn túi 454 g)');
 const ALLERGEN = L('ไม่มีสารก่อภูมิแพ้ที่ต้องแจ้งบนฉลาก', 'No declared allergens', 'Không có chất gây dị ứng phải khai báo');
 const STORAGE = L('เก็บในที่แห้งและเย็น หลีกเลี่ยงแสงแดด ปิดถุงให้สนิทหลังเปิด', 'Keep in a cool, dry place away from sunlight; reseal after opening', 'Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng; đóng kín sau khi mở');
 const ORIGIN = L('ประเทศไทย', 'Thailand', 'Thái Lan');
@@ -43,6 +46,7 @@ export function sampleTechnical(id: string): Product['technical'] {
         cooking: s(`sx.${id}.cooking`, L('แช่น้ำอุณหภูมิห้อง 10 นาที หรือลวกในน้ำเดือด 1–2 นาที แล้วสะเด็ดน้ำ', 'Soak in room-temperature water for 10 minutes, or blanch in boiling water for 1–2 minutes, then drain.', 'Ngâm nước ở nhiệt độ phòng 10 phút, hoặc trụng nước sôi 1–2 phút rồi để ráo.')) };
     case 'rice-stick-pad-thai':
       return { ...base,
+        ingredients: s(`sx.${id}.ingredients`, RICE_TAPIOCA),
         widthMm: s(`sx.${id}.width`, L('3 มม. (เส้นเล็ก) · 5 มม. (เส้นผัดไทย) · 10 มม. (เส้นใหญ่)', '3 mm (small) · 5 mm (Pad Thai) · 10 mm (large)', '3 mm (nhỏ) · 5 mm (Pad Thai) · 10 mm (lớn)')),
         cooking: s(`sx.${id}.cooking`, L('แช่น้ำอุ่น 15–20 นาทีจนนิ่ม หรือลวก 2–3 นาที', 'Soak in warm water for 15–20 minutes until soft, or blanch for 2–3 minutes.', 'Ngâm nước ấm 15–20 phút đến khi mềm, hoặc trụng 2–3 phút.')) };
     case 'rice-flake-guay-jub':
@@ -60,6 +64,7 @@ export function sampleTechnical(id: string): Product['technical'] {
         cooking: s(`sx.${id}.cooking`, L('ลวกในน้ำเดือด 3–5 นาที แล้วสะเด็ดน้ำ', 'Blanch in boiling water for 3–5 minutes, then drain.', 'Trụng nước sôi 3–5 phút rồi để ráo.')) };
     default: // mr-noodles
       return { ...base,
+        ingredients: s(`sx.${id}.ingredients`, RICE_TAPIOCA),
         packWeights: s<string[]>(`sx.${id}.packs`, LA(['400 ก.', '454 ก.'], ['400 g', '454 g'], ['400 g', '454 g'])),
         widthMm: s(`sx.${id}.width`, L('เส้นหมี่ประมาณ 0.8 มม. · เส้นจันทร์ 3–5 มม.', 'Vermicelli about 0.8 mm · rice stick 3–5 mm', 'Bún khoảng 0,8 mm · bánh phở 3–5 mm')),
         cooking: s(`sx.${id}.cooking`, L('ดูวิธีปรุงบนหน้าของเส้นแต่ละแบบ', 'See each format’s page for preparation.', 'Xem cách chế biến ở trang của từng loại.')) };

@@ -170,7 +170,8 @@ await check('chromium: product pages — every jump lands on its section (Codex 
 await check('caching and first-screen weight (recorded, not enforced: GitHub Pages sets its own cache)', async () => {
   const head = async (path) => { const r = await fetch(`${SITE}/${path}`, { method: 'HEAD' }); return { cc: r.headers.get('cache-control') ?? '—', len: Number(r.headers.get('content-length') ?? 0) }; };
   const html = await (await fetch(`${SITE}/en/`)).text();
-  const hero = html.match(/<source type="image\/webp" srcset="[^"]*?\/(media\/legacy-hero-pack[^" ]+\.webp)"/)?.[1];
+  // The opening's photograph is whichever image carries data-hero-img (the redesign of 20 Nov 2026 moved it to the current pack).
+  const hero = html.match(/<source type="image\/webp" srcset="[^"]*?\/(media\/[^" ]+\.webp)[^"]*"[^>]*>\s*<img[^>]*data-hero-img/)?.[1];
   const css = html.match(/href="[^"]*\/(assets\/site\.[^"]+\.css)"/)?.[1];
   const h = await head('en/'), c = await head(css), i = hero ? await head(hero) : { cc: '—', len: 0 };
   return `HTML ${h.cc}; CSS ${c.cc}; hero WebP ${Math.round(i.len / 1024)} KB, ${i.cc}`;
