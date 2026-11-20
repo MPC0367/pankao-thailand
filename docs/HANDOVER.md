@@ -2,11 +2,11 @@
 
 ## Current state (read this first)
 
-- **The labelled public preview is online:** https://mpc0367.github.io/pankao-thailand/. It is GitHub Pages `gh-pages` `785148b`, built from `4ca94ac` and published 20 Nov 2026 on the owner's word. The way back is `gh-pages` `8c0c623`.
+- **The labelled public preview is online:** https://mpc0367.github.io/pankao-thailand/. It is GitHub Pages `gh-pages` `5077ab8`, built from `b6be3c7` (the fourth-edition Codex audit's fixes, `docs/CODEX_AUDIT_4_2026-11-20.md`) and published 20 Nov 2026 about 14:25 Bangkok on the owner's "Yes, publish". The way back is `gh-pages` `785148b` (from `4ca94ac`), then `8c0c623`.
   - It is `noindex`, with a preview strip, "Preview ·" titles and Sample tags.
   - Its forms send nothing.
   - After every Pages build, GitHub runs "Post-deploy checks".
-- **Built, not published:** the fourth-edition Codex audit's fixes, on local branch `o2/codex-audit-4-2026-11-20` (record `docs/CODEX_AUDIT_4_2026-11-20.md`). They go online only on the owner's word.
+- **Old git history:** commits before `d6b2b0a` still hold the unrelated company's identity as plain text. Removing it needs a history rewrite and force push: the owner's call.
 - **Production is not launched.** pankaothai.com is untouched, and `npm run gate` blocks a production release until the owner decisions below are made.
 - **Unconfirmed facts:** the company has not confirmed any fact the site shows.
 

@@ -1,6 +1,8 @@
 # Codex audit, fourth edition: what was built (20 Nov 2026, afternoon)
 
-**The request.** The owner asked: "Run another Codex audit on the live site". After reading the report they said: "Yes, build them". The build ran on localhost first, and nothing was pushed or deployed.
+**The request.** The owner asked: "Run another Codex audit on the live site". After reading the report they said: "Yes, build them". The build ran on localhost first; after reviewing it the owner said "Yes, publish".
+
+**Published 20 Nov 2026, about 14:25 Bangkok:** `o2/pankao-greenfield-build` fast-forwarded to `b6be3c7` and pushed, GitHub Pages `gh-pages` `5077ab8` from `b6be3c7`. Live checks: `pages-smoke --url` 13/13 (42 pages × WebKit and Chromium, the three unknown-page 404s, the OEM link, 60 product jumps; HTML, CSS and the 63 KB hero WebP all `max-age=600`), `audit:metrics --url` all targets met, and the hosted "Post-deploy checks" run on `b6be3c7` passed. The way back is `gh-pages` `785148b`.
 
 **The audit.** Codex audited the live build `785148b` (from `4ca94ac`) and scored it 7.9/10, up from 7.8. It estimated that O2 alone could reach about 8.2.
 - Report: `../documents/audits/Pankao_Codex_Website_Audit_2026-11-20_fourth_edition.md`.
@@ -49,10 +51,11 @@ Audit-metric figures:
 | Unknown page, for the 404 language | e.g. http://localhost:4532/pankao-thailand/vi/khong-co/ |
 | `pankao` (review build) | http://localhost:4530 |
 
-## To publish (only on the owner's word)
+## How it was published
 
-1. Fast-forward `o2/pankao-greenfield-build` to this branch and push. The fourth-edition `pages-smoke` then becomes the post-deploy workflow.
-2. Run the ship check, then `npm run pages:deploy`.
-3. Run `pages-smoke` and `audit:metrics` against the live address.
+1. Ship check: Ready (the checks above; no pricing, secrets or private files in the diff; `noindex`; the O2 credit last).
+2. Fast-forwarded `o2/pankao-greenfield-build` to this branch and pushed it, so the fourth-edition `pages-smoke` is now what the post-deploy workflow runs.
+3. `npm run pages:deploy` → `gh-pages` `5077ab8`.
+4. `pages-smoke` and `audit:metrics` against the live address; the hosted workflow passed too.
 
 The way back is `gh-pages` `785148b`.
