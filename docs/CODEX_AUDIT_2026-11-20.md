@@ -46,7 +46,7 @@ The owned enquiry operation (recipient, SLA, privacy, retention); current photog
 ## Published (20 Nov 2026, on the owner's "Yes, publish")
 
 - **Before publishing:** ship check Ready (unit, crawls, e2e 35/35; no private data; 43/43 pages noindex; the O2 credit last).
-- **Publish:** `o2/pankao-greenfield-build` fast-forwarded to `4ca94ac` and pushed; `npm run pages:deploy` gave `gh-pages` `785148b`.
+- **Publish:** `o2/pankao-greenfield-build` fast-forwarded to `3b75089` and pushed; `npm run pages:deploy` gave `gh-pages` `785148b`.
 - **On the live address:** `pages-smoke` 7/7 (WebKit and Chromium) and `audit:metrics` 18/18.
 - **Since then:** "Post-deploy checks" runs on GitHub after every Pages build. Its first run (44678567809, on the `785148b` build) passed: smoke and metrics in Chromium and WebKit, with the results kept as the artifact `live-checks`.
 - **The way back:** `gh-pages` `8c0c623`.

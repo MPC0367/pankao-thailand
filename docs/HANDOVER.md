@@ -2,11 +2,11 @@
 
 ## Current state (read this first)
 
-- **The labelled public preview is online:** https://mpc0367.github.io/pankao-thailand/. It is GitHub Pages `gh-pages` `5077ab8`, built from `b6be3c7` (the fourth-edition Codex audit's fixes, `docs/CODEX_AUDIT_4_2026-11-20.md`) and published 20 Nov 2026 about 14:25 Bangkok on the owner's "Yes, publish". The way back is `gh-pages` `785148b` (from `4ca94ac`), then `8c0c623`.
+- **The labelled public preview is online:** https://mpc0367.github.io/pankao-thailand/. It is GitHub Pages `gh-pages` `5077ab8`, built from `69d787f` (the fourth-edition Codex audit's fixes, `docs/CODEX_AUDIT_4_2026-11-20.md`) and published 20 Nov 2026 about 14:25 Bangkok on the owner's "Yes, publish". The way back is `gh-pages` `785148b` (from `3b75089`), then `8c0c623`.
   - It is `noindex`, with a preview strip, "Preview ·" titles and Sample tags.
   - Its forms send nothing.
   - After every Pages build, GitHub runs "Post-deploy checks".
-- **Old git history:** commits before `d6b2b0a` still hold the unrelated company's identity as plain text. Removing it needs a history rewrite and force push: the owner's call.
+- **History rewritten 20 Nov 2026 (~14:55 Bangkok, the owner's "Yes, rewrite history"):** every commit of every source branch was rewritten so that none holds the unrelated company's name, registration or address, plain or link-encoded, and `rejected-entity.json` left history; the four branches were force-pushed (`gh-pages` untouched: it never held them). Commit ids before that date changed; these docs use the new ids. GitHub still serves the old commits by id until GitHub Support purges them.
 - **Production is not launched.** pankaothai.com is untouched, and `npm run gate` blocks a production release until the owner decisions below are made.
 - **Unconfirmed facts:** the company has not confirmed any fact the site shows.
 
@@ -14,7 +14,7 @@
 
 A new website for the rice-noodle factory in Sai Noi, Nonthaburi (บริษัท สหปั้นข้าว จำกัด), built from scratch in Thai, English and Vietnamese. It was built and tested on O2's computer first; since 19 Nov 2026 a labelled preview is public (above). Nothing has been sent to anyone, and the company has not yet confirmed any of the facts it shows. The preview marks every unconfirmed fact; the "production" version of the same site already removes them automatically, which is why it currently shows almost nothing about products. Twenty decisions from the company stand between this and publication; they are listed below in plain words.
 
-## Premium audit (20 Nov 2026): on the public preview since 20 Nov 2026 (`gh-pages` `8c0c623` from `395fd00`; `o2/pankao-greenfield-build` fast-forwarded to the audit branch; the way back `eb5971e`)
+## Premium audit (20 Nov 2026): on the public preview since 20 Nov 2026 (`gh-pages` `8c0c623` from `f32a2b5`; `o2/pankao-greenfield-build` fast-forwarded to the audit branch; the way back `eb5971e`)
 
 The owner sent `Pankao_Thailand_Live_UI_UX_Premium_Audit.pdf` (31 pages) with no words. Every buildable item is built; the record, item by item, is `docs/PREMIUM_AUDIT_2026-11-20.md`. The headlines:
 - **Phones:** one-row header and a one-line dismissible preview strip, 106 px at worst (audit: ≤ 112).
@@ -29,7 +29,7 @@ The owner sent `Pankao_Thailand_Live_UI_UX_Premium_Audit.pdf` (31 pages) with no
 
 **Published** on the owner's "Yes, publish" after the ship check (Ready).
 
-## Fourth round (20 Nov 2026) — on the public preview since 20 Nov 2026 (`gh-pages` `eb5971e` from `3da9420`; the way back `43724cc`)
+## Fourth round (20 Nov 2026) — on the public preview since 20 Nov 2026 (`gh-pages` `eb5971e` from `5b3266d`; the way back `43724cc`)
 
 - **Loading animation fixed** ("where is my loading animation"):
   - **What was wrong:** it never played when arriving through the root link. The language redirect made the referrer this site, and on github.io every other project shares that origin. It also played only once per tab.
@@ -43,14 +43,14 @@ The owner sent `Pankao_Thailand_Live_UI_UX_Premium_Audit.pdf` (31 pages) with no
   - **Record:** `../documents/photos/illustrative-2026-11-20/README.md`.
 - **Checks:** unit 27/27, crawls, e2e 35/35, Pages smoke 7/7 locally.
 
-## Third round (20 Nov 2026) — on the public preview since 20 Nov 2026 (`gh-pages` `43724cc` from `f33ca0f`; the way back `d75a80b`)
+## Third round (20 Nov 2026) — on the public preview since 20 Nov 2026 (`gh-pages` `43724cc` from `e67b321`; the way back `d75a80b`)
 
 - **Clearer photos** ("make the images clearer"): the cooked-dish photos now use their whole 460×400 originals (they had been reduced to 186×210 and then stretched). The dry close-ups, the Mr. Noodles dish and the hero pack are enlarged once at build time with Lanczos and a light sharpen (`scripts/media.ts`); no generative upscaling. The dry close-ups stay softer than the dishes: their originals are 186 px, so new photography is still the real fix.
 - **Softer background** ("make the gradients on the background less abrupt"): band edges fade over up to 240 px and the dark sections over up to 150 px, both on a smoothstep curve. The drifting lights fall off on a bell curve.
 - **Slower loader** ("too fast slow it down"): about 1.7× slower. The logo forms over ~3.7 s and the loader clears at ~4.1 s; it still skips on a click.
 - **Checks:** unit 27/27, crawls, e2e 35/35, Pages smoke 7/7 locally.
 
-## Second round from O2's owner (19–20 Nov 2026) — on the public preview since 20 Nov 2026 (`gh-pages` `d75a80b` from `0e34b75`; the way back `dddf471`)
+## Second round from O2's owner (19–20 Nov 2026) — on the public preview since 20 Nov 2026 (`gh-pages` `d75a80b` from `0a19d23`; the way back `dddf471`)
 
 - **Background:** a fixed layer of soft gold and cream lights drifts as the page scrolls (`.aura`, site.js; still under reduced motion). The bands and the dark chapters fade into it at their edges instead of stopping square.
 - **Photographs fill their frames:** cards, product-page frames and the home hero panel are now the photograph itself, edge to edge and rounded. The owner's words: "make the picture larger we dont need a border image in the background". MED-04 is amended: up to 3.5× in those frames, native size elsewhere. The 2014 photos are small, so they look soft at that size until new photography arrives.
@@ -67,7 +67,7 @@ The owner sent `Pankao_Thailand_Live_UI_UX_Premium_Audit.pdf` (31 pages) with no
   - By the owner's choice the arcs keep the 2014 wording, drawn as outlines so the old name is never text (`scripts/logo/make-logo-art.py`; record `../documents/Approvals/2026-11-19 Logo keeps the 2014 wording (O2 owner decision).md`; D21).
   - The header mark is the same logo.
 - **Checks:** unit 27/27, crawl (preview, production, pages), e2e 35/35 in WebKit and Chromium, Pages smoke 7/7 locally.
-- **Published 20 Nov 2026** on the owner's "Yes, publish" after the ship check (Ready): `npm run pages:deploy` → `gh-pages` `d75a80b`. To go back, push the earlier build (`dddf471`, from `56d92cc`) the same way.
+- **Published 20 Nov 2026** on the owner's "Yes, publish" after the ship check (Ready): `npm run pages:deploy` → `gh-pages` `d75a80b`. To go back, push the earlier build (`dddf471`, from `4f35698`) the same way.
 
 ## Public preview on GitHub Pages (19 Nov 2026)
 

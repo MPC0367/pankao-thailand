@@ -31,4 +31,4 @@ The owner sent `Pankao_Thailand_Live_UI_UX_Premium_Audit.pdf` (31 pages, audited
 
 ## The way back
 
-Published 20 Nov 2026 as `gh-pages` `8c0c623` (source `395fd00`). The live preview before it is `gh-pages` `eb5971e` (source `3da9420`).
+Published 20 Nov 2026 as `gh-pages` `8c0c623` (source `f32a2b5`). The live preview before it is `gh-pages` `eb5971e` (source `5b3266d`).
