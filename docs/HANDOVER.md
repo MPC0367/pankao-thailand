@@ -1,8 +1,18 @@
-# Handover — Pankao Thailand website (19 Nov 2026)
+# Handover — Pankao Thailand website (started 19 Nov 2026; current state below)
+
+## Current state (read this first)
+
+- **The labelled public preview is online:** https://mpc0367.github.io/pankao-thailand/. It is GitHub Pages `gh-pages` `785148b`, built from `4ca94ac` and published 20 Nov 2026 on the owner's word. The way back is `gh-pages` `8c0c623`.
+  - It is `noindex`, with a preview strip, "Preview ·" titles and Sample tags.
+  - Its forms send nothing.
+  - After every Pages build, GitHub runs "Post-deploy checks".
+- **Built, not published:** the fourth-edition Codex audit's fixes, on local branch `o2/codex-audit-4-2026-11-20` (record `docs/CODEX_AUDIT_4_2026-11-20.md`). They go online only on the owner's word.
+- **Production is not launched.** pankaothai.com is untouched, and `npm run gate` blocks a production release until the owner decisions below are made.
+- **Unconfirmed facts:** the company has not confirmed any fact the site shows.
 
 ## In one paragraph
 
-A new website for the rice-noodle factory in Sai Noi, Nonthaburi (บริษัท สหปั้นข้าว จำกัด), built from scratch in Thai, English and Vietnamese. It is finished and tested **on O2's computer only**: nothing is online, nothing was sent to anyone, and the company has not yet confirmed any of the facts it shows. The preview marks every unconfirmed fact; the "production" version of the same site already removes them automatically, which is why it currently shows almost nothing about products. Twenty decisions from the company stand between this and publication; they are listed below in plain words.
+A new website for the rice-noodle factory in Sai Noi, Nonthaburi (บริษัท สหปั้นข้าว จำกัด), built from scratch in Thai, English and Vietnamese. It was built and tested on O2's computer first; since 19 Nov 2026 a labelled preview is public (above). Nothing has been sent to anyone, and the company has not yet confirmed any of the facts it shows. The preview marks every unconfirmed fact; the "production" version of the same site already removes them automatically, which is why it currently shows almost nothing about products. Twenty decisions from the company stand between this and publication; they are listed below in plain words.
 
 ## Premium audit (20 Nov 2026): on the public preview since 20 Nov 2026 (`gh-pages` `8c0c623` from `395fd00`; `o2/pankao-greenfield-build` fast-forwarded to the audit branch; the way back `eb5971e`)
 

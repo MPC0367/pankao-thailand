@@ -40,7 +40,8 @@ const ph = (ctx: Ctx, s: string): Raw | string => (ctx.locale === 'th' ? raw(phr
  * its source; preview only (assetImg returns nothing in production until the company approves it).
  */
 function illus(ctx: Ctx, assets: Assets, id: string, cls = ''): Raw {
-  const img = assetImg(ctx, assets, id, {});
+  // A wide illustration fills the column (up to ~1200 px); others sit beside text at about half the page.
+  const img = assetImg(ctx, assets, id, cls.includes('illus--wide') ? { sizes: '(min-width: 1360px) 1280px, 100vw' } : {});
   if (!img) return raw('');
   const a = assetById.get(id)!;
   return html`<figure class="illus${cls ? ` ${cls}` : ''}">${img}<figcaption><span>${a.caption ? loc(a.caption, ctx.locale) : ''}</span>${srcCap(ctx, id)}<a class="illus-credit" href="${a.sourceUrl}" rel="noopener" target="_blank">${credit(ctx, id)}<span class="sr-only"> ${t(ctx, 'contact.newTab')}</span></a></figcaption></figure>`;
@@ -107,14 +108,14 @@ function namesForSearch(p: Product): string {
   return [n.th, n.en, n.vi, ...p.altNames.th, ...p.altNames.en, ...p.altNames.vi].join(' | ').toLowerCase();
 }
 
-function formatCard(ctx: Ctx, assets: Assets, p: Product, idSuffix: string, level: 'h2' | 'h3' = 'h3'): Raw {
+function formatCard(ctx: Ctx, assets: Assets, p: Product, idSuffix: string, level: 'h2' | 'h3' = 'h3', eager = false): Raw {
   const name = fact(ctx, p.name)!;
   const plain = String(val(p.name, ctx.locale));
   const alt = loc(p.altNames, ctx.locale);
   const summary = fact(ctx, p.summary);
   const heading = level === 'h2' ? html`<h2 class="h3"><a href="${href(ctx.locale, productPath(p.slug))}">${name}</a></h2>` : html`<h3><a href="${href(ctx.locale, productPath(p.slug))}">${name}</a></h3>`;
   return html`<article class="format-card tone-${p.tone} arrive" id="${idSuffix}-${p.id}" data-product data-format="${p.format}" data-names="${namesForSearch(p)}">
-    ${packDish(ctx, assets, p, plain, idSuffix)}
+    ${packDish(ctx, assets, p, plain, idSuffix, eager)}
     ${heading}
     ${alt.length ? html`<p class="format-card__alt">${alt.join(' · ')}</p>` : ''}
     ${summary ? html`<p class="format-card__meta">${summary}</p>` : ''}
@@ -312,7 +313,7 @@ function legacyRange(ctx: Ctx, assets: Assets): Raw {
   return html`<section class="section band range" aria-labelledby="range-h"><div class="wrap grid">
     <div class="range__names"><p class="eyebrow">${legacyTag(ctx)}</p><h2 id="range-h">${loc(r.h, ctx.locale)}</h2>
       <ul class="range-list" role="list">${loc(r.items, ctx.locale).map((n) => html`<li class="arrive">${n}</li>`)}</ul></div>
-    <div class="range__promises">${proof(ctx, assets, 'legacy.mrnoodles.pack', 'oem.proof.packs')}<ul class="checklist" role="list">${loc(r.promises, ctx.locale).map((x) => html`<li>${x}</li>`)}</ul></div>
+    <div class="range__promises"><ul class="checklist" role="list">${loc(r.promises, ctx.locale).map((x) => html`<li>${x}</li>`)}</ul></div>
   </div></section>`;
 }
 
@@ -342,15 +343,15 @@ export function productsIndex(ctx: Ctx, assets: Assets): Built {
       <p data-result-count aria-live="polite" data-one="${t(ctx, 'products.count.one')}" data-other="${t(ctx, 'products.count.other')}">${t(ctx, 'products.count.other', { n: list.length })}</p>
       <button type="button" data-filter-reset hidden>${t(ctx, 'products.reset')}</button>
     </div>
-    <div class="formats formats--index" data-product-list>${list.map((p) => formatCard(ctx, assets, p, 'list', 'h2'))}</div>
+    <div class="formats formats--index" data-product-list>${list.map((p, i) => formatCard(ctx, assets, p, 'list', 'h2', i < 2))}</div>
     <div class="empty" data-filter-empty hidden>
       <h2 class="h3">${hd(ctx, 'products.empty.h')}</h2>
       <p>${t(ctx, 'products.empty.body')}</p>
       <div class="btn-row"><button class="btn btn--line" type="button" data-filter-reset>${t(ctx, 'products.reset')}</button><a class="btn btn--primary" href="${href(ctx.locale, ROUTES.oem)}#brief">${t(ctx, 'cta.oem')}</a></div>
     </div>` : html`<p class="register-empty">${t(ctx, 'products.none')}</p>`}
-    <div class="review-grid section--tight">
+    ${ctx.mode === 'preview' && !PUBLIC_PREVIEW ? html`<div class="review-grid section--tight">
       ${reviewNote(ctx, 'formats awaiting confirmation (not public)', productSlots.map((s) => `${s.name.en} / ${s.name.th}: ${s.note}`))}
-    </div>
+    </div>` : ''}
   </div>
 </section>
 ${legacyRange(ctx, assets)}
@@ -392,7 +393,7 @@ export function productDetail(ctx: Ctx, assets: Assets, p: Product): Built {
   const uses = canShow(p.uses, ctx) ? (val(p.uses, ctx.locale) as string[]) : [];
   const alt = loc(p.altNames, ctx.locale);
   const isBrand = p.format === 'brand';
-  const dry = p.media.pack ? assetImg(ctx, assets, isBrand ? 'legacy.mrnoodles.pack' : p.media.pack, {}) : null;
+  const dry = p.media.pack ? assetImg(ctx, assets, isBrand ? 'legacy.mrnoodles.pack' : p.media.pack, { eager: true, extra: { fetchpriority: 'high' } }) : null; // the first screen's photo (Codex F17.5)
   const dish = p.media.dish ? assetImg(ctx, assets, p.media.dish, {}) : null;
   const relatedList = p.related.map((id) => productById.get(id)!).filter((r) => canShow(r.name, ctx));
   const brandFormats = isBrand ? formatProducts.filter((x) => x.brand && String(val(x.brand, 'en')).includes('Mr. Noodles') && canShow(x.name, ctx)) : [];
@@ -517,6 +518,7 @@ export function oemPage(ctx: Ctx, assets: Assets): Built {
   </div>
   <p class="section-link proof-next"><a class="btn btn--primary" href="#brief">${t(ctx, 'cta.startBrief')}</a></p>
 </div></section>
+<a class="brief-fab js-only" href="#brief" data-brief-fab hidden>${t(ctx, 'cta.startBrief')}</a>
 
 ${formats.length ? html`<section class="section section--tight band" aria-labelledby="oem-formats-h"><div class="wrap">
   ${sectionHead(null, html`<span id="oem-formats-h">${hd(ctx, 'oem.formats.h')}</span>`, t(ctx, 'oem.formats.lede'))}
@@ -562,8 +564,7 @@ ${sampleOemTerms.some((f) => canShow(f, ctx)) ? html`<section class="section sec
       return html`<div><dt>${v.label[ctx.locale]}</dt><dd>${marked(v.value[ctx.locale], [f], ctx)}</dd></div>`;
     })}</dl>
   </details>
-</div></section>` : ''}
-<a class="brief-fab js-only" href="#brief" data-brief-fab hidden>${t(ctx, 'cta.startBrief')}</a>`;
+</div></section>` : ''}`;
   return page(ctx, assets, {
     ...meta(ctx, 'oem', ROUTES.oem),
     bodyClass: 'page-oem',

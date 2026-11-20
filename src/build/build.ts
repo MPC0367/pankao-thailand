@@ -89,6 +89,9 @@ function buildAssets(outDir: string, mode: Mode): Assets {
   const glisseCss = readFileSync(join(ROOT, 'node_modules/glisse/dist/styles.css'), 'utf8');
   const glisseName = `assets/glisse.${hash(glisseCss)}.css`;
   write(outDir, glisseName, glisseCss);
+  const nfJs = readFileSync(join(ROOT, 'src/client/notfound.js'), 'utf8');
+  const nfName = `assets/notfound.${hash(nfJs)}.js`;
+  write(outDir, nfName, nfJs);
   const root = readFileSync(join(ROOT, 'src/client/root.js'), 'utf8');
   write(outDir, `assets/root.${hash(root)}.js`, root);
 
@@ -110,9 +113,36 @@ function buildAssets(outDir: string, mode: Mode): Assets {
     execFileSync('cwebp', ['-quiet', ...(ext === '.png' ? ['-lossless'] : ['-q', '82']), src, '-o', join(outDir, webpName)]);
     const webpSmaller = statSync(join(outDir, webpName)).size < buf.length;
     if (!webpSmaller) rmSync(join(outDir, webpName));
-    media.set(a.id, { src: `${BASE}/${name}`, webp: webpSmaller ? `${BASE}/${webpName}` : undefined, width: a.width, height: a.height });
+    // Wide photographs also get an 800 px WebP, so phones and laptops at 1–2× do not fetch the 1600 px one (Codex F17.5).
+    let webpSmall: string | undefined;
+    if (webpSmaller && a.width > 1000) {
+      const smallName = `media/${base}.${h}.800.webp`;
+      execFileSync('cwebp', ['-quiet', '-resize', '800', '0', '-q', '82', src, '-o', join(outDir, smallName)]);
+      webpSmall = `${BASE}/${smallName}`;
+    }
+    media.set(a.id, { src: `${BASE}/${name}`, webp: webpSmaller ? `${BASE}/${webpName}` : undefined, webpSmall, width: a.width, height: a.height });
   }
-  return { css: `${BASE}/${cssName}`, headJs: `${BASE}/${headName}`, siteJs: `${BASE}/${siteName}`, glassJs: `${BASE}/${glassName}`, glisseCss: `${BASE}/${glisseName}`, media };
+  return { css: `${BASE}/${cssName}`, headJs: `${BASE}/${headName}`, siteJs: `${BASE}/${siteName}`, notFoundJs: `${BASE}/${nfName}`, glassJs: `${BASE}/${glassName}`, glisseCss: `${BASE}/${glisseName}`, media };
+}
+
+/** The root 404: the Thai page, carrying the English and Vietnamese pages in <template>s that notfound.js swaps in
+ *  when the address is under /en/ or /vi/ (GitHub Pages serves this one file for every unknown path; Codex F17.4). */
+function rootNotFound(built: { path: string; html: string }[], assets: Assets): string {
+  const page = (l: string) => built.find((b) => b.path === `${l}/404.html`)?.html;
+  const th = page('th')!;
+  const attr = (s: string) => s.replace(/"/g, '&quot;');
+  const tpl = (['en', 'vi'] as const).flatMap((l) => {
+    const h = page(l);
+    if (!h) return [];
+    const lang = h.match(/<html lang="([^"]+)"/)![1]!;
+    const title = h.match(/<title>([^<]*)<\/title>/)![1]!;
+    const desc = h.match(/<meta name="description" content="([^"]*)">/)![1]!;
+    const body = h.slice(h.indexOf('>', h.indexOf('<body')) + 1, h.lastIndexOf('</body>'));
+    return [`<template data-404="${l}" data-lang="${lang}" data-title="${attr(title)}" data-desc="${desc}">${body}</template>`];
+  });
+  const siteTag = `<script src="${assets.siteJs}" defer></script>`;
+  if (!th.includes(siteTag) || !assets.notFoundJs) throw new BuildError('root 404: script tag not found');
+  return th.replace(siteTag, `<script src="${assets.notFoundJs}" defer></script>\n${siteTag}`).replace(/<\/body>(?![\s\S]*<\/body>)/, `${tpl.join('\n')}\n</body>`);
 }
 
 function rootPage(mode: Mode, assets: Assets, rootJs: string): string {
@@ -201,7 +231,7 @@ export function build(mode: Mode, opts: { outDir?: string; buildDate?: string; q
     if (!b.status) pagesList.push(`/${b.path}`);
   }
   write(outDir, 'index.html', rootPage(mode, assets, rootJs));
-  write(outDir, '404.html', built.find((b) => b.path === 'th/404.html')!.html);
+  write(outDir, '404.html', rootNotFound(built, assets));
 
   // Redirects: legacy pages → modern locale routes (one hop, 301). Host/protocol variants are zone rules (docs/RUNBOOK.md).
   if (PUBLIC_PREVIEW) {

@@ -162,7 +162,9 @@ export function contactLines(ctx: Ctx, opts: { fax?: boolean } = {}): Raw[] {
     out.push(html`<li><span class="footer-plain">${t(ctx, 'footer.fax')} ${fact(ctx, { ...fax, value: p.display[ctx.locale] })}</span></li>`);
   }
   if (canShow(email, ctx)) {
-    out.push(html`<li><a href="mailto:${String(val(email, ctx.locale))}">${fact(ctx, email)}</a></li>`);
+    // A break opportunity after the @ (Codex F15.5): the address wraps as "name@ / host", never with one letter left over.
+    const shown = fact(ctx, email)!;
+    out.push(html`<li><a href="mailto:${String(val(email, ctx.locale))}">${raw(shown.html.replace('@', '@<wbr>'))}</a></li>`);
   }
   return out;
 }

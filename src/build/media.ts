@@ -32,7 +32,11 @@ export function assetImg(ctx: Ctx, assets: Assets, id: string, opts: ImgOpts = {
     ...(opts.extra ?? {}),
   })}>`;
   if (!out.webp) return img;
-  return html`<picture${opts.cls ? '' : ''}><source type="image/webp" srcset="${out.webp}">${img}</picture>`;
+  if (out.webpSmall) {
+    const sizes = opts.sizes ?? '(min-width: 900px) 50vw, 100vw';
+    return html`<picture><source type="image/webp" srcset="${out.webpSmall} 800w, ${out.webp} ${out.width}w" sizes="${sizes}">${img}</picture>`;
+  }
+  return html`<picture><source type="image/webp" srcset="${out.webp}">${img}</picture>`;
 }
 
 export function credit(ctx: Ctx, id: string): string {
@@ -49,8 +53,9 @@ export function strandPlate(product: Pick<Product, 'strand'>, label: string): Ra
  * Pack ↔ prepared-dish media (M6). Hover/focus on fine pointers, a labelled toggle on
  * every device, instant under reduced motion. Falls back to the strand plate.
  */
-export function packDish(ctx: Ctx, assets: Assets, product: Product, label: string, idSuffix: string): Raw {
-  const dry = product.media.pack ? assetImg(ctx, assets, product.media.pack, { cls: 'view-dry' }) : null;
+/** `eager`: the card's pack photograph can be in the first screen, so it is not lazy (Codex F17.5); the dish view stays lazy. */
+export function packDish(ctx: Ctx, assets: Assets, product: Product, label: string, idSuffix: string, eager = false): Raw {
+  const dry = product.media.pack ? assetImg(ctx, assets, product.media.pack, { cls: 'view-dry', eager }) : null;
   const dish = product.media.dish ? assetImg(ctx, assets, product.media.dish, { cls: 'view-dish' }) : null;
   const plate = strandPlate(product, dry ? '' : label);
   if (!dry) return html`<div class="format-card__media tone-${product.tone}">${plate}</div>`;

@@ -29,16 +29,17 @@
     window.addEventListener('keydown', endLoader, { once: true });
   }
 
-  /* ---------- OEM: a compact way into the brief once the opening has scrolled away, gone when the form is in view
-     (Codex audit F07.1). A plain link, so it works as an anchor; hidden until it can help. ---------- */
+  /* ---------- OEM: a compact way into the brief once the opening has scrolled away, only while the form is still
+     ahead (Codex audit F07.1; fourth edition F13.4: never over the form, the folded terms or the footer once the
+     brief has been reached or passed). A plain link, so it works as an anchor; hidden until it can help. ---------- */
   var fab = $('[data-brief-fab]');
   var briefSec = $('#brief');
   var oemHero = $('.page-oem .hero');
   if (fab && briefSec && oemHero && 'IntersectionObserver' in window) {
-    var heroIn = true, briefIn = false;
-    var sync = function () { fab.hidden = heroIn || briefIn; };
+    var heroIn = true, briefAhead = true;
+    var sync = function () { fab.hidden = heroIn || !briefAhead; };
     new IntersectionObserver(function (es) { heroIn = es[0].isIntersecting; sync(); }).observe(oemHero);
-    new IntersectionObserver(function (es) { briefIn = es[0].isIntersecting; sync(); }, { rootMargin: '0px 0px -30% 0px' }).observe(briefSec);
+    new IntersectionObserver(function (es) { var e = es[0]; briefAhead = !e.isIntersecting && e.boundingClientRect.top > 0; sync(); }, { rootMargin: '0px 0px -30% 0px' }).observe(briefSec);
   }
 
   /* ---------- public preview strip: dismissible for the session (the footer keeps the note) ---------- */

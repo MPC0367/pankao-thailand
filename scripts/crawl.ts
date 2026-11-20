@@ -39,8 +39,10 @@ async function crawl(dirName: string, mode: 'preview' | 'production' | 'pages') 
       if (mode === 'pages') { if (!html.includes('http-equiv="Content-Security-Policy"')) fails.push(`${p}: no meta CSP on Pages`); if (/review-note|class="fact"|data-review-toggle/.test(html)) fails.push(`${p}: review markup on the public preview`); if (/"@type":"(Organization|Product)"|PostalAddress|ContactPoint/.test(html)) fails.push(`${p}: unapproved business/product facts in structured data (Codex F16.1)`); if (!/<title>[^<]*·/.test(html)) fails.push(`${p}: title lacks the Preview prefix`); }
       else if (!r.headers.get('content-security-policy')) fails.push(`${p}: no CSP header`);
     }
-    for (const m of html.matchAll(/(?:href|src|srcset)="(\/[^"#?]*)/g)) {
-      const link = m[1]!;
+    // A srcset holds "url width, url width" (Codex F17.5): check every candidate's address.
+    const urls = [...html.matchAll(/(?:href|src)="(\/[^"#?]*)/g)].map((m) => m[1]!)
+      .concat([...html.matchAll(/srcset="([^"]*)"/g)].flatMap((m) => m[1]!.split(',').map((c) => c.trim().split(/\s+/)[0]!).filter((u) => u.startsWith('/'))));
+    for (const link of urls) {
       if (link.startsWith('/api/') || seen.has(link)) continue;
       seen.add(link);
       const lr = await get(link);
@@ -69,6 +71,14 @@ async function crawl(dirName: string, mode: 'preview' | 'production' | 'pages') 
   if (mode === 'pages') {
     const r404 = await get('/pankao-thailand/404.html');
     if (r404.status !== 200 || !(await r404.text()).includes('/pankao-thailand/th/products/')) fails.push('Pages 404.html missing or without base-path recovery links');
+    // Unknown paths under every locale get the root 404 (as GitHub Pages serves it) with the matching language inside.
+    for (const l of ['th', 'en', 'vi']) {
+      const r = await get(`/pankao-thailand/${l}/no-such-page/`);
+      const h = await r.text();
+      if (r.status !== 404) fails.push(`/${l}/ unknown: expected 404, got ${r.status}`);
+      if (l !== 'th' && !h.includes(`<template data-404="${l}" data-lang="${l}"`)) fails.push(`/${l}/ unknown: root 404 lacks the ${l} page`);
+      if (!h.includes('/assets/notfound.')) fails.push(`/${l}/ unknown: root 404 lacks notfound.js`);
+    }
     const lone = pages.filter(() => false);
     void lone;
     await close();

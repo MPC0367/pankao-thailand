@@ -158,7 +158,10 @@ export function startServer(opts: Options): Promise<{ server: Server; url: strin
       return res.end(req.method === 'HEAD' ? undefined : readFileSync(file));
     }
     const m = path.match(/^\/(th|en|vi)\//);
-    const nf = m ? join(dir, m[1]!, '404.html') : join(dir, '404.html');
+    // A base-path build (GitHub Pages) has one 404.html at its root, served for every unknown path under it, as GitHub does.
+    const seg = path.match(/^\/([^/]+)\//);
+    const pagesNf = !m && seg && existsSync(join(dir, seg[1]!, '404.html')) ? join(dir, seg[1]!, '404.html') : null;
+    const nf = pagesNf ?? (m ? join(dir, m[1]!, '404.html') : join(dir, '404.html'));
     applyHeaders(path, res);
     res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(existsSync(nf) ? readFileSync(nf) : 'Not found');
