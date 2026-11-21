@@ -2,12 +2,12 @@
 
 ## Current state (read this first)
 
-- **The labelled public preview is online:** https://mpc0367.github.io/pankao-thailand/. It is GitHub Pages `gh-pages` `5077ab8`, built from `69d787f` (the fourth-edition Codex audit's fixes, `docs/CODEX_AUDIT_4_2026-11-20.md`) and published 20 Nov 2026 about 14:25 Bangkok on the owner's "Yes, publish". The way back is `gh-pages` `785148b` (from `3b75089`), then `8c0c623`.
+- **The labelled public preview is online:** https://mpc0367.github.io/pankao-thailand/. It is GitHub Pages `gh-pages` `5c4c0af`, built from `9e4a2ac` (the redesign with the company's real packs, `docs/REDESIGN_2026-11-20.md`) and published 21 Nov 2026 on the owner's "Yes, publish". The way back is `gh-pages` `5077ab8` (from `69d787f`, kept as the local branch `pages-live-before-redesign`), then `785148b`.
   - It is `noindex`, with a preview strip, "Preview ·" titles and Sample tags.
   - Its forms send nothing.
   - After every Pages build, GitHub runs "Post-deploy checks".
 - **History rewritten 20 Nov 2026 (~14:55 Bangkok, the owner's "Yes, rewrite history"):** every commit of every source branch was rewritten so that none holds the unrelated company's name, registration or address, plain or link-encoded, and `rejected-entity.json` left history; the four branches were force-pushed (`gh-pages` untouched: it never held them). Commit ids before that date changed; these docs use the new ids. GitHub still serves the old commits by id until GitHub Support purges them.
-- **A redesign is built and NOT published (20 Nov 2026, evening):** local branch `o2/redesign-2026-11-20`, on the owner's "the website still looks very much AI slob … elevate the UI/UX design" and "look on the internet to find pictures of their product". It brings a new type scale and layout, the current green Mr. Noodles pack and other shop photographs (preview only, captioned with their source), and sharper format close-ups. The owner's palette, gradient ground, glass bar and opening animation are kept. Record: `docs/REDESIGN_2026-11-20.md`. All suites pass. Publishing it is the owner's word.
+- **The redesign is live (21 Nov 2026):** built 20 Nov on the owner's "the website still looks very much AI slob … elevate the UI/UX design" and "look on the internet to find pictures of their product". It brings a new type scale and layout, the current green Mr. Noodles pack and other shop photographs (preview only, captioned with their source, no recorded permission), and sharper format close-ups. The owner's palette, gradient ground, glass bar and opening animation are kept. `o2/pankao-greenfield-build` = `9e4a2ac`. Record: `docs/REDESIGN_2026-11-20.md`.
 - **Production is not launched.** pankaothai.com is untouched, and `npm run gate` blocks a production release until the owner decisions below are made.
 - **Unconfirmed facts:** the company has not confirmed any fact the site shows.
 
